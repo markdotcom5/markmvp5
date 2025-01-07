@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="<%= selectedLang || 'en' %>">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StelTrek</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <script src="/js/menu.js" defer></script>
+</head>
+<body>
+    <!-- Language flags container -->
+    <div id="language-container" class="top-right-container" 
+         style="<%= selectedLang ? 'display: none;' : '' %>">
+        <p>Select your language:</p>
+        <button class="lang-btn" data-lang="en">🇺🇸</button>
+        <button class="lang-btn" data-lang="zh">🇨🇳</button>
+        <button class="lang-btn" data-lang="ko">🇰🇷</button>
+        <button class="lang-btn" data-lang="es">🇪🇸</button>
+    </div>
+
+    <!-- Menu button -->
+    <button id="menu-button" class="menu-icon" 
+            style="<%= selectedLang ? '' : 'display: none;' %>">☰</button>
+
+    <!-- Menu container -->
+    <div id="menu-container" class="menu-container">
+        <nav class="menu-content">
+            <!-- Menu items will be populated by JavaScript -->
+        </nav>
+    </div>
+
+    <!-- Main content area -->
+    <main class="main-content">
+        <h1>Welcome to StelTrek</h1>
+        <p>Select a language to start exploring.</p>
+    </main>
+</body>
+</html>

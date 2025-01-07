@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="StelTrek Academy - Sign Up">
+    <title>Sign Up - StelTrek Academy</title>
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self'; 
+        script-src 'self'; 
+        style-src 'self'; 
+        frame-src 'self' https://www.sora.com; 
+        child-src 'self' https://www.sora.com;
+    ">
+    <link rel="stylesheet" href="/css/main.css">
+</head>
+
+<body>
+    <!-- Skip to Main Content -->
+    <a href="#signup-form" class="skip-link">Skip to sign-up form</a>
+
+    <!-- Header -->
+    <header class="site-header">
+        <nav>
+            <ul>
+                <li><a href="/index.html">Home</a></li>
+                <li><a href="/why-steltrek.html">Why StelTrek</a></li>
+                <li><a href="/about.html">About</a></li>
+                <li><a href="/leaderboard.html">Leaderboard</a></li>
+                <li><a href="/login.html">Login</a></li>
+                <li><a href="/merchandise.html">Retail Store</a></li>
+                <li><a href="/profile.html">Profile</a></li>
+                <li><a href="/signup.html" aria-current="page">Sign Up</a></li>
+                <li><a href="/academy.html">StelTrek Academy</a></li>
+                <li><a href="/welcome.html">Welcome</a></li>
+                <li><a href="/subscribe.html">Subscribe</a></li>
+            </ul>
+
+            <!-- Language Selector -->
+            <div class="language-selector">
+                <button class="language-flag" data-lang="en" aria-label="Select English">🇺🇸 English</button>
+                <button class="language-flag" data-lang="zh" aria-label="Select Simplified Chinese">🇨🇳 简体中文</button>
+                <button class="language-flag" data-lang="ko" aria-label="Select Korean">🇰🇷 한국어</button>
+                <button class="language-flag" data-lang="es" aria-label="Select Spanish">🇪🇸 Español</button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="signup-page" role="main">
+        <section class="signup-container">
+            <h1 id="signup-title">Sign Up for StelTrek Academy</h1>
+            <p id="signup-instructions">Join StelTrek Academy to prepare for your journey to the stars.</p>
+
+            <form id="signup-form" class="signup-form" novalidate>
+                <!-- Full Name -->
+                <div class="form-group">
+                    <label for="signup-name">Full Name: <span class="required">*</span></label>
+                    <input type="text" id="signup-name" name="name" required aria-required="true" autocomplete="name">
+                    <span id="name-error" class="error-message" role="alert"></span>
+                </div>
+
+                <!-- Email -->
+                <div class="form-group">
+                    <label for="signup-email">Email: <span class="required">*</span></label>
+                    <input type="email" id="signup-email" name="email" required aria-required="true" autocomplete="email">
+                    <span id="email-error" class="error-message" role="alert"></span>
+                </div>
+
+                <!-- Password -->
+                <div class="form-group">
+                    <label for="signup-password">Password: <span class="required">*</span></label>
+                    <div class="password-container">
+                        <input type="password" id="signup-password" name="password" required minlength="8" aria-required="true" autocomplete="new-password">
+                        <button type="button" class="toggle-password" aria-label="Toggle password visibility">👁️</button>
+                    </div>
+                    <div id="password-requirements">
+                        Password must contain:
+                        <ul>
+                            <li>At least 8 characters</li>
+                            <li>One uppercase letter</li>
+                            <li>One lowercase letter</li>
+                            <li>One number</li>
+                        </ul>
+                    </div>
+                    <span id="password-error" class="error-message" role="alert"></span>
+                </div>
+
+                <!-- Terms and Conditions -->
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="terms-checkbox" required aria-required="true">
+                        I agree to the <a href="terms.html" target="_blank" rel="noopener noreferrer">Terms and Conditions</a>
+                    </label>
+                    <span id="terms-error" class="error-message" role="alert"></span>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="submit-button" aria-label="Sign up for StelTrek Academy">Sign Up</button>
+                <div id="form-error" class="error-message" role="alert"></div>
+            </form>
+
+            <p class="login-link">
+                Already have an account? <a href="login.html">Log in here</a>
+            </p>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer role="contentinfo">
+        <p>&copy; 2025 StelTrek Academy. All rights reserved.</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('preferredLanguage') || 'en';
+            document.documentElement.lang = savedLang;
+
+            const elements = document.querySelectorAll('.language-flag');
+            elements.forEach(button => {
+                button.addEventListener('click', () => {
+                    const lang = button.dataset.lang;
+                    localStorage.setItem('preferredLanguage', lang);
+                    document.documentElement.lang = lang;
+                    applyTranslations(lang);
+                });
+            });
+        });
+
+        function applyTranslations(lang) {
+            const translations = {
+                en: {
+                    signupTitle: "Sign Up for StelTrek Academy",
+                    signupInstructions: "Join StelTrek Academy to prepare for your journey to the stars."
+                },
+                zh: {
+                    signupTitle: "斯特尔特雷克学院注册",
+                    signupInstructions: "加入斯特尔特雷克学院，准备好您的星际之旅。"
+                },
+                // Add other languages here...
+            };
+
+            document.getElementById('signup-title').textContent = translations[lang]?.signupTitle || translations['en'].signupTitle;
+            document.getElementById('signup-instructions').textContent = translations[lang]?.signupInstructions || translations['en'].signupInstructions;
+        }
+    </script>
+    <script src="/js/menu.js"></script>
+</body>
+</html>

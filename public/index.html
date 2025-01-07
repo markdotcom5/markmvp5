@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Join StelTrek Academy and embark on your journey to space. Train, save, and prepare for the ultimate adventure.">
+    <meta name="keywords" content="space travel, StelTrek, space exploration, training, academy">
+    <meta name="author" content="StelTrek Academy">
+
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="StelTrek - Your Journey to Space">
+    <meta property="og:description" content="Join StelTrek Academy to train, save, and prepare for the ultimate adventure to space.">
+    <meta property="og:image" content="https://yourdomain.com/images/space-preview.jpg">
+    <meta property="og:url" content="https://yourdomain.com">
+    <meta property="og:type" content="website">
+
+    <!-- Twitter Card Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="StelTrek - Your Journey to Space">
+    <meta name="twitter:description" content="Join StelTrek Academy and embark on your journey to space.">
+    <meta name="twitter:image" content="https://yourdomain.com/images/space-preview.jpg">
+
+    <title>StelTrek - Your Journey to Space</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <script src="/js/menu.js" defer></script>
+    <script src="/js/ai-assistant.js" defer></script>
+    <script src="/js/languageSelection.js" defer></script>
+</head>
+<body class="bg-space-gradient">
+    <!-- Language Selection -->
+    <div class="header-container">
+        <!-- Language Selector -->
+        <div class="top-right-container">
+            <button class="lang-btn" data-lang="en" aria-label="Select English">🇺🇸</button>
+            <button class="lang-btn" data-lang="zh" aria-label="Select Chinese">🇨🇳</button>
+            <button class="lang-btn" data-lang="ko" aria-label="Select Korean">🇰🇷</button>
+            <button class="lang-btn" data-lang="es" aria-label="Select Spanish">🇪🇸</button>
+        </div>
+
+        <!-- Menu Button -->
+        <button class="menu-icon" aria-label="Menu">
+            <span class="menu-bar"></span>
+            <span class="menu-bar"></span>
+            <span class="menu-bar"></span>
+        </button>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Keep Dreaming & Start Saving Up for Your Next First to SPACE</h1>
+            
+            <!-- Social Login Buttons -->
+            <div class="social-login">
+                <h2>Or Sign Up with Social Media</h2>
+                <button class="btn-social google" onclick="socialLogin('google')">Sign Up with Google</button>
+                <button class="btn-social facebook" onclick="socialLogin('facebook')">Sign Up with Facebook</button>
+            </div>
+            
+            <a href="/signup" class="cta-button">Join Now</a>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-20 text-white">
+        <h1 class="text-5xl font-bold mb-6">Keep Dreaming & Start Saving Up for Your Next First to SPACE</h1>
+        
+        <!-- Price Countdown -->
+        <div class="mb-8">
+            <div class="text-2xl mb-2">Space Travel Price Dropping:</div>
+            <div class="text-4xl font-bold text-green-400" id="price-counter">$250,000</div>
+            <div class="text-lg opacity-75">
+                <span>Next price drop in:</span> <span id="countdown">Loading...</span>
+            </div>
+        </div>
+        
+        <!-- CTA Buttons -->
+        <div class="flex gap-4">
+            <a href="/signup" class="btn-primary">Join Now</a>
+            <button id="ai-help" class="btn-secondary">Ask AI How to Get to Space Faster</button>
+        </div>
+    </div>
+
+    <!-- Video Background -->
+    <div class="video-container">
+        <iframe class="hero-video" title="Space Exploration Promo Video" src="https://www.sora.com/embed/gen_01jg9ctxtefqe8b5g3qtmb3e6a" frameborder="0" allow="autoplay; fullscreen"></iframe>
+    </div>
+
+    <!-- Timeline Section -->
+    <section class="timeline-section">
+        <h2>Space Travel Price Evolution Timeline</h2>
+        <canvas id="timeline-chart"></canvas>
+    </section>
+
+    <!-- Community Hub -->
+    <section class="community-hub">
+        <h2>Join Our Community</h2>
+        <p>Connect with fellow space enthusiasts and stay updated on the latest news and events.</p>
+        <a href="/community" class="cta-button">Explore Community Hub</a>
+    </section>
+
+    <!-- Proactive AI Assistant -->
+    <div id="ai-assistant" class="ai-assistant">
+        <div class="ai-assistant-content">
+            <h3>AI Space Advisor</h3>
+            <p>Hi there! I'm here to help you achieve your space travel goals faster. Here are a few suggestions:</p>
+            <ul>
+                <li>Complete your training modules regularly to earn more credits.</li>
+                <li>Participate in community events and challenges for bonus rewards.</li>
+                <li>Upgrade to a higher subscription plan for accelerated progress.</li>
+            </ul>
+            <button id="ai-chat" class="btn-secondary">Chat with AI</button>
+        </div>
+    </div>
+
+    <!-- Menu Container -->
+    <div class="menu-container">
+        <div class="menu-content">
+            <a href="/index.html" class="menu-item">Home</a>
+            <a href="/Why-StelTrek.html" class="menu-item">Why StelTrek</a>
+            <a href="/about.html" class="menu-item">About</a>
+            <a href="/leaderboard.html" class="menu-item">Leaderboard</a>
+            <a href="/login.html" class="menu-item">Login</a>
+            <a href="/merchandise.html" class="menu-item">Retail Store</a>
+            <a href="/profile.html" class="menu-item">Profile</a>
+            <a href="/signup.html" class="menu-item">Sign Up</a>
+            <a href="/academy.html" class="menu-item">StelTrek Academy</a>
+            <a href="/welcome.html" class="menu-item">Welcome</a>
+            <a href="/subscribe.html" class="menu-item">Subscribe</a>
+        </div>
+    </div>
+
+    <script>
+        function socialLogin(platform) {
+            window.location.href = `/auth/${platform}`; // Redirect to backend OAuth route
+        }
+    </script>
+</body>
+</html>

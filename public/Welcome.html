@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="StelTrek Academy">
+        <title>StelTrek Academy</title>
+        <meta http-equiv="Content-Security-Policy" content="
+            default-src 'self'; 
+            script-src 'self'; 
+            style-src 'self'; 
+            frame-src 'self' https://www.sora.com; 
+            child-src 'self' https://www.sora.com;
+        ">
+        <link rel="stylesheet" href="/css/main.css">
+    </head>
+    
+<body>
+    <!-- Header -->
+    <header class="site-header">
+        <nav aria-label="Main Navigation">
+            <ul>
+                <li><a href="/index.html" data-i18n="nav.home">Home</a></li>
+                <li><a href="/Why-StelTrek.html" data-i18n="nav.why">Why StelTrek</a></li>
+                <li><a href="/about.html" data-i18n="nav.about" aria-current="page">About</a></li>
+                <li><a href="/leaderboard.html" data-i18n="nav.leaderboard">Leaderboard</a></li>
+                <li><a href="/login.html" data-i18n="nav.login">Login</a></li>
+                <li><a href="/merchandise.html" data-i18n="nav.merchandise">Retail Store</a></li>
+                <li><a href="/profile.html" data-i18n="nav.profile">Profile</a></li>
+                <li><a href="/signup.html" data-i18n="nav.signup">Sign Up</a></li>
+                <li><a href="/academy.html" data-i18n="nav.academy">StelTrek Academy</a></li>
+                <li><a href="/welcome.html" data-i18n="nav.welcome">Welcome</a></li>
+                <li><a href="/subscribe.html" data-i18n="nav.subscribe">Subscribe</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Video Section -->
+        <section class="video-section">
+            <div class="video-container">
+                <iframe 
+                    src="https://www.sora.com/embed/gen_01jg9ctxtefqe8b5g3qtmb3e6a" 
+                    class="hero-video" 
+                    frameborder="0" 
+                    allow="autoplay; fullscreen">
+                </iframe>
+            </div>
+            <p class="video-caption" data-i18n="welcome.videoTagline">
+                Enough dreaming, let’s take a walk to show how we can get you up to space.
+            </p>
+        </section>
+
+        <!-- Call-to-Action Section -->
+        <section class="cta-section">
+            <p id="cta-message" data-i18n="welcome.ctaMessage">
+                Are you ready to begin your space journey?
+            </p>
+            <div class="cta-buttons">
+                <button id="join-now" data-i18n="welcome.joinButton">Join Now</button>
+                <button id="proceed" data-i18n="welcome.proceedButton">Proceed</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p data-i18n="common.footer">© 2024 StelTrek Academy. All rights reserved.</p>
+    </footer>
+
+    <!-- JavaScript -->
+    <script type="module" src="/js/languages.js"></script>
+    <!-- JavaScript -->
+    <script src="/js/menu.js"></script>
+</body>
+</html>

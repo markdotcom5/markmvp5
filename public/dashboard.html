@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - StelTrek Academy</title>
+    <link rel="stylesheet" href="/css/main.css"> <!-- Link your main CSS -->
+</head>
+<body>
+    <header>
+        <h1>Welcome to Your Dashboard</h1>
+        <button id="logout-btn" class="logout-btn">Logout</button>
+    </header>
+    <main>
+        <section id="progress-dashboard">
+            <h2>Your Progress</h2>
+            <div class="progress-bar-container" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+                <div class="progress-fill"></div>
+                <span class="progress-text">0%</span>
+            </div>
+            <ul class="stats-list">
+                <li>Rank: <span id="user-rank">--</span></li>
+                <li>Score: <span id="user-score">0</span></li>
+                <li>Missions Completed: <span id="missions-completed">0</span></li>
+            </ul>
+        </section>
+
+        <section id="achievements">
+            <h2>Your Achievements</h2>
+            <ul id="achievements-list"></ul>
+        </section>
+
+        <section id="next-mission">
+            <h2>Upcoming Mission</h2>
+            <div class="mission-container">
+                <p>Loading next mission...</p>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <p>© 2025 StelTrek Academy. All rights reserved.</p>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Include Chart.js -->
+    <script src="/js/dashboard.js"></script> <!-- Link your dashboard JS -->
+</body>
+</html>

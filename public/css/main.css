@@ -1,0 +1,242 @@
+/* Root Variables for Consistency */
+:root {
+  --primary-text: #ffffff;
+  --primary-bg: #000000;
+  --accent-color: #4299e1;
+  --secondary-bg: #1a237e;
+  --card-bg: #ffffff;
+  --hover-bg: rgba(255, 255, 255, 0.1);
+  --text-secondary: #666666;
+  --glow-color: rgba(66, 153, 225, 0.6);
+  --space-gradient: linear-gradient(45deg, #000000, #1a1a1a);
+}
+
+/* Base Styles */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: var(--space-gradient);
+  color: var(--primary-text);
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: var(--secondary-bg);
+  color: var(--primary-text);
+}
+
+footer {
+  text-align: center;
+  padding: 10px;
+  background: var(--secondary-bg);
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+/* Buttons */
+button, .button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+button:hover, .button:hover {
+  background: var(--accent-color);
+  transform: scale(1.05);
+}
+
+.logout-btn {
+  background: #FF5C5C;
+  color: white;
+}
+
+.logout-btn:hover {
+  background: #ff3333;
+}
+
+/* Progress Bar */
+.progress-bar-container {
+  position: relative;
+  height: 20px;
+  background: #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 0 10px var(--glow-color);
+}
+
+.progress-fill {
+  height: 100%;
+  background: #76c7c0;
+  width: 0%;
+  transition: width 0.5s ease;
+}
+
+.progress-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-weight: bold;
+  color: var(--primary-text);
+}
+
+/* Achievement List */
+.achievement-item {
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
+  background: var(--hover-bg);
+  padding: 10px;
+  border-radius: 5px;
+  transition: transform 0.2s ease, background 0.3s ease;
+}
+
+.achievement-item:hover {
+  background: var(--accent-color);
+  transform: scale(1.05);
+}
+
+.achievement-icon {
+  font-size: 24px;
+  margin-right: 10px;
+  color: var(--accent-color);
+}
+
+/* Mission Container */
+.mission-container {
+  margin-top: 20px;
+}
+
+.mission-title {
+  font-size: 20px;
+  margin-bottom: 10px;
+  color: var(--accent-color);
+}
+
+.mission-button {
+  padding: 10px 20px;
+  background: var(--secondary-bg);
+  color: var(--primary-text);
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  box-shadow: 0 0 10px var(--glow-color);
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.mission-button:hover {
+  background: #1b4f72;
+  transform: scale(1.1);
+}
+
+/* Leaderboard Table */
+.leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.leaderboard-table th,
+.leaderboard-table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.leaderboard-table th {
+  background: var(--secondary-bg);
+  color: var(--primary-text);
+}
+
+.leaderboard-table tr:hover {
+  background: var(--hover-bg);
+}
+
+/* Cards */
+.card {
+  background: var(--card-bg);
+  border-radius: 8px;
+  padding: 20px;
+  margin: 10px 0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+/* Header Styles */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background: var(--secondary-bg);
+  color: var(--primary-text);
+}
+
+/* Hamburger Menu */
+.hamburger-menu {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+}
+
+.hamburger-menu span {
+  display: block;
+  width: 25px;
+  height: 3px;
+  background-color: var(--primary-text);
+  margin: 3px 0;
+  transition: all 0.3s ease;
+}
+
+/* Alignment Fixes */
+header .flags-container {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Adjust spacing between flags */
+}
+
+header .flags-container img {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+}
+
+header .menu-container {
+  display: flex;
+  align-items: center;
+  gap: 20px; /* Adjust spacing between menu and flags */
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .progress-bar-container {
+    height: 15px;
+  }
+
+  button, .button {
+    padding: 8px 16px;
+  }
+
+  .achievement-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

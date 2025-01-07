@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="StelTrek Academy">
+        <title>StelTrek Academy</title>
+        <meta http-equiv="Content-Security-Policy" content="
+            default-src 'self'; 
+            script-src 'self'; 
+            style-src 'self'; 
+            frame-src 'self' https://www.sora.com; 
+            child-src 'self' https://www.sora.com;
+        ">
+        <link rel="stylesheet" href="/css/main.css">
+    </head>
+    
+<body>
+    <!-- Fixed Header -->
+    <header class="site-header">
+        <nav>
+            <ul>
+                <li><a href="/index.html" data-i18n="nav.home">Home</a></li>
+                <li><a href="/Why-StelTrek.html" data-i18n="nav.why">Why StelTrek</a></li>
+                <li><a href="/about.html" data-i18n="nav.about">About</a></li>
+                <li><a href="/leaderboard.html" data-i18n="nav.leaderboard">Leaderboard</a></li>
+                <li><a href="/login.html" data-i18n="nav.login">Login</a></li>
+                <li><a href="/merchandise.html" data-i18n="nav.merchandise">Retail Store</a></li>
+                <li><a href="/profile.html" data-i18n="nav.profile">Profile</a></li>
+                <li><a href="/signup.html" data-i18n="nav.signup">Sign Up</a></li>
+                <li><a href="/academy.html" data-i18n="nav.academy">StelTrek Academy</a></li>
+                <li><a href="/welcome.html" data-i18n="nav.welcome">Welcome</a></li>
+                <li><a href="/subscribe.html" data-i18n="nav.subscribe">Subscribe</a></li>
+                <li><button id="logout-button" class="logout-button" data-i18n="nav.logout">Logout</button></li>
+            </ul>
+            <!-- Language Selector -->
+            <div class="language-selector">
+                <button class="language-flag" data-lang="en">🇺🇸 English</button>
+                <button class="language-flag" data-lang="zh">🇨🇳 简体中文</button>
+                <button class="language-flag" data-lang="ko">🇰🇷 한국어</button>
+                <button class="language-flag" data-lang="es">🇪🇸 Español</button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="profile-page">
+        <div class="profile-container">
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    <img src="/images/default-avatar.png" alt="Profile" id="profile-image">
+                    <button class="upload-button" data-translate="profile.uploadPhoto">Upload Photo</button>
+                </div>
+                <h1 data-translate="profile.pageTitle">Your Profile</h1>
+            </div>
+
+            <form id="profile-form" class="profile-form">
+                <div class="form-group">
+                    <label for="fullname" data-translate="profile.nameLabel">Full Name:</label>
+                    <input type="text" id="fullname" name="fullname" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email" data-translate="profile.emailLabel">Email:</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="location" data-translate="profile.locationLabel">Location:</label>
+                    <input type="text" id="location" name="location">
+                </div>
+
+                <div class="form-group">
+                    <label for="bio" data-translate="profile.bioLabel">Bio:</label>
+                    <textarea id="bio" name="bio" rows="4"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label data-translate="profile.preferencesLabel">Preferences:</label>
+                    <div class="checkbox-group">
+                        <label>
+                            <input type="checkbox" name="emailNotifications">
+                            <span data-translate="profile.emailNotifications">Email Notifications</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" name="publicProfile">
+                            <span data-translate="profile.publicProfile">Public Profile</span>
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="save-button" data-translate="profile.saveButton">Save Changes</button>
+                <p id="profile-message" class="message"></p>
+            </form>
+
+            <div class="profile-stats">
+                <h2 data-translate="profile.statsTitle">Your Stats</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3 data-translate="profile.modulesCompleted">Modules Completed</h3>
+                        <p id="modules-count">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 data-translate="profile.currentRank">Current Rank</h3>
+                        <p id="current-rank">Beginner</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 data-translate="profile.totalPoints">Total Points</h3>
+                        <p id="total-points">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p data-translate="footer">© 2024 StelTrek Academy. All rights reserved.</p>
+    </footer>
+
+    <script type="module" src="/js/languages.js"></script>
+      <script src="/js/menu.js"></script>
+    </body>
+    </html>
+    
