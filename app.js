@@ -15,13 +15,20 @@ const app = express();
 // =======================
 // MongoDB Configuration
 // =======================
+
+mongoose.set('strictQuery', true);
+
+if (process.env.NODE_ENV === 'development') {
+    mongoose.set('debug', true);
+}
+
 const connectDB = async () => {
     try {
         const conn = await mongoose.connect(process.env.MONGO_URI, {
-            serverSelectionTimeoutMS: 5000,
-            autoIndex: true,
-            maxPoolSize: 10,
-            socketTimeoutMS: 45000,
+            serverSelectionTimeoutMS: process.env.MONGO_TIMEOUT || 5000,
+            autoIndex: process.env.MONGO_AUTO_INDEX === 'true',
+            maxPoolSize: process.env.MONGO_POOL_SIZE || 10,
+            socketTimeoutMS: process.env.MONGO_SOCKET_TIMEOUT || 45000,
         });
 
         console.log('✅ MongoDB Connection Established');
@@ -44,6 +51,9 @@ const connectDB = async () => {
         process.exit(1);
     }
 };
+
+module.exports = connectDB;
+
 
 // =======================
 // Middleware Setup
