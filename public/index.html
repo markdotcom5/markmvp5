@@ -27,10 +27,10 @@
     <script src="/js/languageSelection.js" defer></script>
 </head>
 <body class="bg-space-gradient">
-    <!-- Language Selection -->
-    <div class="header-container">
-        <!-- Language Selector -->
+    <!-- Header -->
+    <header class="header-container">
         <div class="top-right-container">
+            <!-- Language Selector -->
             <button class="lang-btn" data-lang="en" aria-label="Select English">🇺🇸</button>
             <button class="lang-btn" data-lang="zh" aria-label="Select Chinese">🇨🇳</button>
             <button class="lang-btn" data-lang="ko" aria-label="Select Korean">🇰🇷</button>
@@ -43,35 +43,66 @@
             <span class="menu-bar"></span>
             <span class="menu-bar"></span>
         </button>
-    </div>
+    </header>
 
     <!-- Hero Section -->
     <section class="hero">
         <div class="hero-content">
-            <h1>Keep Dreaming & Start Saving Up for Your Next First to SPACE</h1>
+            <h1>Your Space Journey Begins Here</h1>
+            <p>Dream big, train hard, and prepare for the ultimate adventure!</p>
             
             <!-- Social Login Buttons -->
             <div class="social-login">
-                <h2>Or Sign Up with Social Media</h2>
-                <button class="btn-social google" onclick="socialLogin('google')">Sign Up with Google</button>
-                <button class="btn-social facebook" onclick="socialLogin('facebook')">Sign Up with Facebook</button>
+                <h2>Sign Up with Social Media</h2>
+                <button class="btn-social google" onclick="socialLogin('google')" aria-label="Sign up with Google">Sign Up with Google</button>
+                <button class="btn-social facebook" onclick="socialLogin('facebook')" aria-label="Sign up with Facebook">Sign Up with Facebook</button>
             </div>
             
             <a href="/signup" class="cta-button">Join Now</a>
         </div>
     </section>
 
-    <!-- Main Content -->
-    <div class="container mx-auto px-4 py-20 text-white">
-        <h1 class="text-5xl font-bold mb-6">Keep Dreaming & Start Saving Up for Your Next First to SPACE</h1>
+    <!-- AI Modes Section -->
+    <section id="ai-modes" class="py-6">
+        <h2 class="text-3xl font-bold mb-4">How Do You Want to Explore?</h2>
+        <div class="flex gap-8">
+            <!-- Manual Mode -->
+            <div class="mode-option border rounded p-4 bg-white text-black shadow hover:shadow-lg">
+                <h3>🚀 Manual Mode</h3>
+                <p>Take control and explore the platform at your own pace.</p>
+                <button class="btn-primary" onclick="selectMode('manual')" aria-label="Choose Manual Mode">Choose Manual Mode</button>
+            </div>
+
+            <!-- Full AI Guidance -->
+            <div class="mode-option border rounded p-4 bg-white text-black shadow hover:shadow-lg">
+                <h3>🤖 Full AI Guidance</h3>
+                <p>Let StelTrek AI optimize your path to space travel success.</p>
+                <button class="btn-primary" onclick="selectMode('guidance')" aria-label="Choose Full AI Guidance">Choose Full AI Guidance</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- AI Dashboard Section -->
+    <section id="ai-dashboard" class="bg-gray-900 text-white p-6 my-8 rounded-lg">
+        <h2>Your AI Dashboard</h2>
+        <div class="dashboard-metrics grid gap-4">
+            <p><strong>Credits Earned:</strong> <span id="ai-credits">0</span></p>
+            <p><strong>Leaderboard Rank:</strong> <span id="ai-rank">Not Ranked</span></p>
+            <p><strong>Next Step:</strong> <span id="ai-next-step">Choose an AI mode to begin!</span></p>
+        </div>
+    </section>
+
+    <!-- Countdown Section -->
+    <section class="container mx-auto px-4 py-20 text-white">
+        <h2 class="text-4xl font-bold mb-6">Space Travel is Getting Affordable</h2>
         
         <!-- Price Countdown -->
         <div class="mb-8">
-            <div class="text-2xl mb-2">Space Travel Price Dropping:</div>
-            <div class="text-4xl font-bold text-green-400" id="price-counter">$250,000</div>
-            <div class="text-lg opacity-75">
+            <p class="text-2xl mb-2">Current Space Travel Price:</p>
+            <p class="text-4xl font-bold text-green-400" id="price-counter">$250,000</p>
+            <p class="text-lg opacity-75">
                 <span>Next price drop in:</span> <span id="countdown">Loading...</span>
-            </div>
+            </p>
         </div>
         
         <!-- CTA Buttons -->
@@ -79,7 +110,7 @@
             <a href="/signup" class="btn-primary">Join Now</a>
             <button id="ai-help" class="btn-secondary">Ask AI How to Get to Space Faster</button>
         </div>
-    </div>
+    </section>
 
     <!-- Video Background -->
     <div class="video-container">
@@ -99,36 +130,19 @@
         <a href="/community" class="cta-button">Explore Community Hub</a>
     </section>
 
-    <!-- Proactive AI Assistant -->
-    <div id="ai-assistant" class="ai-assistant">
-        <div class="ai-assistant-content">
+    <!-- AI Chat Feature -->
+    <div id="chat-window" class="hidden chat-container">
+        <div class="chat-header">
             <h3>AI Space Advisor</h3>
-            <p>Hi there! I'm here to help you achieve your space travel goals faster. Here are a few suggestions:</p>
-            <ul>
-                <li>Complete your training modules regularly to earn more credits.</li>
-                <li>Participate in community events and challenges for bonus rewards.</li>
-                <li>Upgrade to a higher subscription plan for accelerated progress.</li>
-            </ul>
-            <button id="ai-chat" class="btn-secondary">Chat with AI</button>
+            <button onclick="closeChat()" aria-label="Close Chat">X</button>
+        </div>
+        <div class="chat-messages"></div>
+        <div class="chat-input-container">
+            <input type="text" id="user-input" placeholder="Ask me anything..." aria-label="Chat Input">
+            <button onclick="sendMessage()" class="btn-primary">Send</button>
         </div>
     </div>
-
-    <!-- Menu Container -->
-    <div class="menu-container">
-        <div class="menu-content">
-            <a href="/index.html" class="menu-item">Home</a>
-            <a href="/Why-StelTrek.html" class="menu-item">Why StelTrek</a>
-            <a href="/about.html" class="menu-item">About</a>
-            <a href="/leaderboard.html" class="menu-item">Leaderboard</a>
-            <a href="/login.html" class="menu-item">Login</a>
-            <a href="/merchandise.html" class="menu-item">Retail Store</a>
-            <a href="/profile.html" class="menu-item">Profile</a>
-            <a href="/signup.html" class="menu-item">Sign Up</a>
-            <a href="/academy.html" class="menu-item">StelTrek Academy</a>
-            <a href="/welcome.html" class="menu-item">Welcome</a>
-            <a href="/subscribe.html" class="menu-item">Subscribe</a>
-        </div>
-    </div>
+    <button id="ai-chat" class="btn-secondary" onclick="openChat()">Chat with AI</button>
 
     <script>
         function socialLogin(platform) {

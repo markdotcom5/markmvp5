@@ -8,7 +8,6 @@ const rateLimit = require('express-rate-limit');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const { authenticate } = require('./middleware/authenticate');
-const AIWebController = require('./services/AIWebController');
 
 const app = express();
 
@@ -123,8 +122,6 @@ const userRouter = require('./routes/user');
 const videoRouter = require('./routes/video');
 const webhooksRouter = require('./routes/webhooks');
 const testOpenAIRouter = require('./routes/testOpenAI');
-const aiWebController = AIWebController;
-const aiWebControllerRouter = require('./routes/aiWebController');
 
 // Register Routes
 app.use('/api/about', aboutRouter);
@@ -144,7 +141,6 @@ app.use('/api/video', authenticate, videoRouter);
 app.use('/api/webhooks', webhooksRouter);
 app.use('/api/openai', testOpenAIRouter);
 app.use('/', indexRouter);
-app.use('/api/ai-web', aiWebControllerRouter);
 
 // =======================
 // Error Handling

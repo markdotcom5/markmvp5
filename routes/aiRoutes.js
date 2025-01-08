@@ -8,33 +8,40 @@ const { authenticate, validateModuleLevel } = require('../middleware/authenticat
 const User = require('../models/User');
 const Certification = require('../models/Certification');
 const Leaderboard = require('../models/Leaderboard');
+const Joi = require('joi');
+
+// Centralized error handler
+function handleError(res, error, message = 'An error occurred') {
+    console.error(`${message}:`, error.message);
+    res.status(500).json({
+        error: message,
+        message: error.message,
+    });
+}
 
 // =======================
 // FSD Guidance Endpoint
 // =======================
+const guidanceSchema = Joi.object({
+    activityType: Joi.string().required(),
+    currentModule: Joi.string().required(),
+    progress: Joi.number().min(0).max(100).required(),
+});
+
 router.post('/fsd/guidance', authenticate, async (req, res) => {
+    const { error } = guidanceSchema.validate(req.body);
+    if (error) {
+        return res.status(400).json({ error: error.details[0].message });
+    }
+
     try {
-        const { activityType, currentModule, progress } = req.body;
-
-        const guidance = await aiGuidance.processRealTimeAction(
-            req.user._id,
-            {
-                type: activityType,
-                module: currentModule,
-                progress,
-            }
-        );
-
+        const guidance = await aiGuidance.processRealTimeAction(req.user._id, req.body);
         res.json({
             success: true,
-            guidance,
+            data: guidance,
         });
-    } catch (error) {
-        console.error('Real-time Guidance Error:', error.message);
-        res.status(500).json({
-            error: 'Failed to generate real-time guidance',
-            message: error.message,
-        });
+    } catch (err) {
+        handleError(res, err, 'Failed to generate real-time guidance');
     }
 });
 
@@ -53,15 +60,13 @@ router.get('/certification-progress', authenticate, async (req, res) => {
 
         res.json({
             success: true,
-            progress: certificationProgress,
-            recommendedNextSteps,
+            data: {
+                progress: certificationProgress,
+                recommendedNextSteps,
+            },
         });
-    } catch (error) {
-        console.error('Certification Progress Error:', error.message);
-        res.status(500).json({
-            error: 'Failed to retrieve certification progress',
-            message: error.message,
-        });
+    } catch (err) {
+        handleError(res, err, 'Failed to retrieve certification progress');
     }
 });
 
@@ -85,16 +90,14 @@ router.get('/leaderboard-insights', authenticate, async (req, res) => {
 
         res.json({
             success: true,
-            currentRanking: leaderboardData,
-            strategicInsights: insights,
-            recommendedActions,
+            data: {
+                currentRanking: leaderboardData,
+                strategicInsights: insights,
+                recommendedActions,
+            },
         });
-    } catch (error) {
-        console.error('Leaderboard Insights Error:', error.message);
-        res.status(500).json({
-            error: 'Failed to generate leaderboard insights',
-            message: error.message,
-        });
+    } catch (err) {
+        handleError(res, err, 'Failed to generate leaderboard insights');
     }
 });
 
@@ -113,35 +116,36 @@ router.get('/achievement-recommendations', authenticate, async (req, res) => {
 
         res.json({
             success: true,
-            currentAchievements: user.achievements,
-            progressAnalysis: achievementAnalysis,
-            suggestedAchievements,
+            data: {
+                currentAchievements: user.achievements,
+                progressAnalysis: achievementAnalysis,
+                suggestedAchievements,
+            },
         });
-    } catch (error) {
-        console.error('Achievement Recommendations Error:', error.message);
-        res.status(500).json({
-            error: 'Failed to generate achievement recommendations',
-            message: error.message,
-        });
+    } catch (err) {
+        handleError(res, err, 'Failed to generate achievement recommendations');
     }
 });
 
 // =======================
 // Generate Training Content
 // =======================
+const contentSchema = Joi.object({
+    module: Joi.string().required(),
+    level: Joi.number().min(1).required(),
+});
+
 router.post('/generate-content', authenticate, validateModuleLevel, async (req, res) => {
-    const { module, level } = req.body;
+    const { error } = contentSchema.validate(req.body);
+    if (error) {
+        return res.status(400).json({ error: error.details[0].message });
+    }
 
     try {
-        console.log(`Handling /generate-content for module: ${module}, level: ${level}`);
-        const content = await AISpaceCoach.generateTrainingContent(module, level);
-        res.json({ success: true, content });
-    } catch (error) {
-        console.error('Error in /generate-content:', error.message);
-        res.status(500).json({
-            error: 'Failed to generate training content',
-            message: error.message,
-        });
+        const content = await AISpaceCoach.generateTrainingContent(req.body.module, req.body.level);
+        res.json({ success: true, data: content });
+    } catch (err) {
+        handleError(res, err, 'Failed to generate training content');
     }
 });
 
@@ -152,15 +156,10 @@ router.post('/problem-solving', authenticate, validateModuleLevel, async (req, r
     const { module } = req.body;
 
     try {
-        console.log(`Handling /problem-solving for module: ${module}`);
         const scenario = await AISpaceCoach.provideProblemSolvingScenario(module);
-        res.json({ success: true, scenario });
-    } catch (error) {
-        console.error('Error in /problem-solving:', error.message);
-        res.status(500).json({
-            error: 'Failed to generate problem-solving scenario',
-            message: error.message,
-        });
+        res.json({ success: true, data: scenario });
+    } catch (err) {
+        handleError(res, err, 'Failed to generate problem-solving scenario');
     }
 });
 
