@@ -1,32 +1,10 @@
 const express = require('express');
-const { authenticate, requireRole, validateModuleLevel } = require('../middleware/authenticate');
-
 const router = express.Router();
+const { authenticate, requireRole } = require('../middleware/authenticate');
 
-// Test authentication middleware
-router.get('/test-auth', authenticate, (req, res) => {
-    res.json({
-        success: true,
-        message: 'Authentication successful!',
-        user: req.user,
-    });
-});
-
-// Test role-based authorization middleware
+// Test route for role-based access
 router.get('/test-role', authenticate, requireRole(['admin']), (req, res) => {
-    res.json({
-        success: true,
-        message: 'Role-based authorization successful!',
-        user: req.user,
-    });
-});
-
-// Test module and level validation middleware
-router.post('/test-validate', authenticate, validateModuleLevel, (req, res) => {
-    res.json({
-        success: true,
-        message: 'Module and level validated successfully!',
-    });
+    res.status(200).json({ message: 'Welcome, admin!' });
 });
 
 module.exports = router;

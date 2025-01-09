@@ -1,118 +1,189 @@
+require('dotenv').config(); // Load environment variables
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const WebSocket = require('ws');
+const mongoose = require('mongoose');
 
-// =======================
-// Authentication Middleware
-// =======================
+// Middleware: Authenticate Requests
 const authenticate = async (req, res, next) => {
     try {
         const token = req.header('Authorization')?.replace('Bearer ', '').trim();
         if (!token) {
-            return res.status(401).json({
-                error: 'Authentication token is required.',
-                message: 'Please provide a valid token to access this resource.',
-            });
+            return res.status(401).json({ error: 'Authentication token is required.' });
         }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'default-secret-key');
-        const user = await User.findById(decoded._id); // Assuming `_id` is in the payload
-        if (!user) {
-            return res.status(404).json({
-                error: 'User not found.',
-                message: 'No user associated with this token exists.',
-            });
-        }
-
-        req.user = {
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-            role: user.role || 'user', // Default role: 'user'
-        };
-
-        next(); // Proceed to the next middleware or route handler
+        req.user = { _id: decoded._id }; // Adjust this to match your JWT payload structure
+        next();
     } catch (error) {
         if (error.name === 'TokenExpiredError') {
-            return res.status(401).json({
-                error: 'Token expired',
-                message: 'Your session has expired. Please log in again.',
-            });
-        } else if (error.name === 'JsonWebTokenError') {
-            return res.status(401).json({
-                error: 'Invalid authentication token.',
-                message: 'The provided token is invalid or malformed.',
-            });
+            return res.status(401).json({ error: 'Token has expired.' });
         }
-
-        res.status(500).json({
-            error: 'Internal server error',
-            message: 'An unexpected error occurred during authentication.',
-        });
+        res.status(401).json({ error: 'Invalid or expired token.' });
     }
 };
 
-// =======================
-// Role-Based Authorization Middleware
-// =======================
+// Middleware: Check User Role
 const requireRole = (roles = []) => {
     return (req, res, next) => {
-        if (!req.user) {
-            return res.status(401).json({
-                error: 'Authentication required',
-                message: 'Please log in to access this resource.',
-            });
-        }
-
-        if (roles.length && !roles.includes(req.user.role)) {
+        if (!req.user || !roles.includes(req.user.role)) {
             return res.status(403).json({
-                error: 'Forbidden',
-                message: `Access denied. This resource requires one of the following roles: ${roles.join(', ')}.`,
+                error: 'Access denied',
+                message: `This resource requires one of the following roles: ${roles.join(', ')}`,
             });
         }
-
-        next(); // Proceed to the next middleware or route handler
+        next();
     };
 };
 
-// =======================
-// Module and Level Validation Middleware
-// =======================
-const VALID_MODULES = [
-    'physical',
-    'technical',
-    'mental',
-    'spiritual',
-    'social',
-    'simulation',
-    'creative',
-];
-const VALID_LEVELS = ['beginner', 'intermediate', 'advanced'];
+// WebSocket Authentication
+const authenticateWebSocket = (request) => {
+    try {
+        const extractToken = (request) => {
+            const url = new URL(request.url, `http://${request.headers.host}`);
+            return url.searchParams.get('token') || request.headers['authorization']?.split(' ')[1];
+        };
 
-const validateModuleLevel = (req, res, next) => {
-    const { module, level } = req.body;
+        const token = extractToken(request);
 
-    if (!module || !VALID_MODULES.includes(module.toLowerCase())) {
-        return res.status(400).json({
-            error: 'Invalid module.',
-            message: `Valid modules are: ${VALID_MODULES.join(', ')}.`,
-        });
+        if (!token) {
+            console.error('No token provided');
+            return null;
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'default-secret-key');
+        return decoded._id;
+    } catch (error) {
+        console.error('WebSocket Authentication Error:', error.message);
+        return null;
     }
-
-    if (!level || !VALID_LEVELS.includes(level.toLowerCase())) {
-        return res.status(400).json({
-            error: 'Invalid level.',
-            message: `Valid levels are: ${VALID_LEVELS.join(', ')}.`,
-        });
-    }
-
-    next(); // Proceed to the next middleware or route handler
 };
 
-// =======================
-// Export All Middlewares
-// =======================
+// WebSocket Server Setup
+const setupWebSocketServer = (server) => {
+    const wss = new WebSocket.Server({ noServer: true });
+    const clients = new Map();
+
+    wss.on('connection', (ws, req) => {
+        const userId = req.userId;
+        clients.set(userId, ws);
+
+        console.log(`User ${userId} connected via WebSocket.`);
+
+        ws.on('message', (message) => {
+            console.log(`Message from user ${userId}:`, message);
+        });
+
+        ws.on('close', () => {
+            clients.delete(userId);
+            console.log(`WebSocket connection closed for user ${userId}`);
+        });
+
+        ws.on('error', (error) => {
+            console.error(`WebSocket error for user ${userId}:`, error.message);
+        });
+    });
+
+    server.on('upgrade', (request, socket, head) => {
+        const userId = authenticateWebSocket(request);
+
+        if (!userId) {
+            console.error('WebSocket upgrade failed: Authentication failed.');
+            socket.destroy();
+            return;
+        }
+
+        request.userId = userId;
+
+        wss.handleUpgrade(request, socket, head, (ws) => {
+            wss.emit('connection', ws, request);
+        });
+    });
+
+    const broadcastMessage = (userIds, message) => {
+        userIds.forEach((userId) => {
+            const client = clients.get(userId);
+            if (client && client.readyState === WebSocket.OPEN) {
+                client.send(JSON.stringify(message));
+            } else {
+                console.warn(`WebSocket client for user ${userId} is not open.`);
+            }
+        });
+    };
+
+    return { wss, broadcastMessage };
+};
+// Training Module Schema
+const moduleSchema = new mongoose.Schema({
+    name: { type: String, required: true, trim: true },
+    category: {
+        type: String,
+        required: true,
+        enum: ['Physical', 'Mental', 'Psychological', 'Spiritual', 'Technical', 'Social', 'Exploration', 'Creative'],
+    },
+    type: { type: String, enum: ['Training', 'Simulation', 'Assessment'], required: true },
+    difficulty: { type: String, enum: ['Beginner', 'Intermediate', 'Advanced', 'Expert'], required: true },
+    prerequisites: { type: [String], default: [] },
+    description: { type: String, required: true, trim: true },
+    structuredContent: { type: String, default: '' },
+    aiGuidance: { type: String, default: '' },
+    metrics: { type: Object, default: {} },
+    groupFeatures: { type: Object, default: {} },
+    progress: { type: Number, default: 0, min: 0, max: 100 },
+    points: { type: Number, default: 0 },
+    videoLinks: { type: [String], default: [] },
+    userLinks: { type: [String], default: [] },
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now },
+}, {
+    timestamps: true,
+});
+
+// Methods
+moduleSchema.methods.getSummary = function () {
+    return `${this.name} (${this.category}) - ${this.description}`;
+};
+
+moduleSchema.methods.generateAIContent = async function (prompt) {
+    try {
+        const response = await openai.chat.completions.create({
+            model: "text-davinci-003",
+            messages: [{ role: 'user', content: `Generate a detailed explanation for the module: ${prompt}` }],
+        });
+        return response.choices[0].message.content.trim();
+    } catch (error) {
+        console.error("Error generating AI content:", error.message);
+        throw new Error("Failed to generate AI content");
+    }
+};
+
+moduleSchema.methods.calculateRecommendedPath = function () {
+    return `Based on difficulty: ${this.difficulty}, recommended next steps for ${this.name}.`;
+};
+
+moduleSchema.methods.updateGroupFeatures = function (newFeatures) {
+    this.groupFeatures = { ...this.groupFeatures, ...newFeatures };
+    return this.groupFeatures;
+};
+
+moduleSchema.methods.trackCompletion = function (userId) {
+    return `User ${userId} has completed module: ${this.name}`;
+};
+
+moduleSchema.statics.findByCategory = async function (category) {
+    return this.find({ category });
+};
+
+moduleSchema.methods.getDetailedMetrics = function () {
+    return {
+        progress: this.progress,
+        points: this.points,
+        metrics: this.metrics,
+    };
+};
+// Export Middleware and Functions
 module.exports = {
     authenticate,
     requireRole,
-    validateModuleLevel,
+    authenticateWebSocket,
+    setupWebSocketServer,
 };

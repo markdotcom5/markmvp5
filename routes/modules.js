@@ -1,13 +1,15 @@
+// routes/modules.js
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticate } = require('../middleware/authenticate');
 const User = require('../models/User');
+const Module = require('../models/Module');
 const TrainingSession = require('../models/TrainingSession');
 const { generateTrainingContent, provideProblemSolvingScenario } = require('../services/AISpaceCoach');
 
-// Debugging Log: Ensure authenticate is a function
-console.log('Authenticate Middleware:', typeof authenticate); // Should log "function"
+// Debugging Log
+console.log('Authenticate Middleware:', typeof authenticate);
 
 // Middleware for validating ObjectId
 router.param('sessionId', (req, res, next, id) => {
@@ -17,10 +19,45 @@ router.param('sessionId', (req, res, next, id) => {
     next();
 });
 
-// Route: Get All Modules
+// Route: Get All Modules with filtering and sorting
 router.get('/all', authenticate, async (req, res) => {
     try {
-        res.status(200).json({ message: 'Modules retrieved successfully.', modules: [] });
+        const { category, difficulty, type, sort = 'name' } = req.query;
+        
+        // Build query
+        let query = {};
+        if (category) query.category = category;
+        if (difficulty) query.difficulty = difficulty;
+        if (type) query.type = type;
+
+        const modules = await Module.find(query)
+            .sort(sort)
+            .populate('prerequisites.module', 'name category')
+            .populate('content.theory.videoId');
+
+        // Get user progress
+        const userProgress = await TrainingSession.find({ 
+            userId: req.user._id,
+            module: { $in: modules.map(m => m._id) }
+        });
+
+        const enhancedModules = modules.map(module => ({
+            ...module.toObject(),
+            userProgress: {
+                completed: userProgress.some(p => 
+                    p.module.equals(module._id) && p.status === 'completed'
+                ),
+                lastAttempt: userProgress.find(p => 
+                    p.module.equals(module._id)
+                )?.updatedAt
+            }
+        }));
+
+        res.status(200).json({ 
+            success: true,
+            count: enhancedModules.length,
+            modules: enhancedModules 
+        });
     } catch (error) {
         console.error('Error fetching modules:', error.message);
         res.status(500).json({ error: 'Failed to fetch modules.' });
@@ -30,7 +67,8 @@ router.get('/all', authenticate, async (req, res) => {
 // Route: Get All Sessions
 router.get('/sessions', authenticate, async (req, res) => {
     try {
-        const sessions = await TrainingSession.find({ userId: req.user._id }).sort({ dateTime: -1 });
+        const sessions = await TrainingSession.find({ userId: req.user._id })
+            .sort({ dateTime: -1 });
         res.status(200).json(sessions);
     } catch (error) {
         console.error('Error fetching sessions:', error.message);
@@ -86,7 +124,11 @@ router.patch('/sessions/:sessionId', authenticate, async (req, res) => {
 // Route: AI-Generated Session Insights
 router.post('/sessions/:sessionId/insights', authenticate, async (req, res) => {
     try {
-        const session = await TrainingSession.findOne({ _id: req.params.sessionId, userId: req.user._id });
+        const session = await TrainingSession.findOne({ 
+            _id: req.params.sessionId, 
+            userId: req.user._id 
+        });
+        
         if (!session) {
             return res.status(404).json({ error: 'Session not found.' });
         }
@@ -147,6 +189,41 @@ router.get('/upcoming', authenticate, async (req, res) => {
     } catch (error) {
         console.error('Error fetching upcoming sessions:', error.message);
         res.status(500).json({ error: 'Failed to fetch upcoming sessions.' });
+    }
+});
+
+// Route: Get Module Recommendations
+router.get('/recommendations', authenticate, async (req, res) => {
+    try {
+        const completedSessions = await TrainingSession.find({
+            userId: req.user._id,
+            status: 'completed'
+        }).distinct('module');
+
+        const availableModules = await Module.find({
+            _id: { $nin: completedSessions }
+        }).limit(5);
+
+        const recommendations = await Promise.all(
+            availableModules.map(async module => {
+                const content = await generateTrainingContent(
+                    module.name,
+                    req.user.skillLevel || 'beginner'
+                );
+                return {
+                    module,
+                    recommendation: content
+                };
+            })
+        );
+
+        res.status(200).json({
+            success: true,
+            recommendations
+        });
+    } catch (error) {
+        console.error('Error getting recommendations:', error.message);
+        res.status(500).json({ error: 'Failed to get recommendations.' });
     }
 });
 

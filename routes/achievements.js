@@ -1,16 +1,17 @@
 const express = require('express');
-const { authenticate } = require('../middleware/authenticate'); // Correct import
-const User = require('../models/User'); // Import User model
-const Achievement = require('../models/Achievement'); // Import Achievement model
+const { authenticate } = require('../middleware/authenticate'); // Correctly imported middleware
+const User = require('../models/User'); // User model
+const Achievement = require('../models/Achievement'); // Achievement model
 const mongoose = require('mongoose');
 const router = express.Router();
 
-// Debugging Log: Check the type of authenticate middleware
+// Debugging Log: Ensure the `authenticate` middleware is correctly imported
 console.log('Authenticate Middleware Type:', typeof authenticate); // Should log "function"
 
-// Validate `userId` Parameter
+// Middleware: Validate `userId` Parameter
 router.param('userId', (req, res, next, id) => {
     if (!mongoose.Types.ObjectId.isValid(id)) {
+        console.error(`Invalid userId format: ${id}`);
         return res.status(400).json({ error: 'Invalid userId format' });
     }
     next();
@@ -20,12 +21,16 @@ router.param('userId', (req, res, next, id) => {
 router.get('/user-achievements', authenticate, async (req, res) => {
     try {
         const achievements = await Achievement.find({ userId: req.user._id });
+        if (!achievements.length) {
+            return res.status(404).json({ error: 'No achievements found for the authenticated user.' });
+        }
+
         res.status(200).json({
             message: 'Achievements retrieved successfully.',
             achievements,
         });
     } catch (error) {
-        console.error('Error fetching achievements:', error.message);
+        console.error('Error fetching achievements for authenticated user:', error.message);
         res.status(500).json({ error: 'Failed to fetch achievements.' });
     }
 });
@@ -48,6 +53,64 @@ router.get('/:userId', authenticate, async (req, res) => {
     } catch (error) {
         console.error('Error fetching achievements by userId:', error.message);
         res.status(500).json({ error: 'Failed to fetch achievements by userId.' });
+    }
+});
+
+// Route: Create a New Achievement
+router.post('/add', authenticate, async (req, res) => {
+    try {
+        const { title, description, points } = req.body;
+
+        if (!title || !description || typeof points !== 'number') {
+            return res.status(400).json({
+                error: 'Missing required fields: title, description, or points must be provided.',
+            });
+        }
+
+        const newAchievement = new Achievement({
+            userId: req.user._id,
+            title,
+            description,
+            points,
+        });
+
+        const savedAchievement = await newAchievement.save();
+
+        res.status(201).json({
+            message: 'Achievement added successfully.',
+            achievement: savedAchievement,
+        });
+    } catch (error) {
+        console.error('Error adding achievement:', error.message);
+        res.status(500).json({ error: 'Failed to add achievement.' });
+    }
+});
+
+// Route: Delete an Achievement by ID
+router.delete('/:achievementId', authenticate, async (req, res) => {
+    try {
+        const { achievementId } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(achievementId)) {
+            return res.status(400).json({ error: 'Invalid achievementId format.' });
+        }
+
+        const deletedAchievement = await Achievement.findOneAndDelete({
+            _id: achievementId,
+            userId: req.user._id,
+        });
+
+        if (!deletedAchievement) {
+            return res.status(404).json({ error: 'Achievement not found or not authorized.' });
+        }
+
+        res.status(200).json({
+            message: 'Achievement deleted successfully.',
+            achievement: deletedAchievement,
+        });
+    } catch (error) {
+        console.error('Error deleting achievement:', error.message);
+        res.status(500).json({ error: 'Failed to delete achievement.' });
     }
 });
 

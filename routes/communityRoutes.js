@@ -1,16 +1,36 @@
-// routes/communityRoutes.js
 const express = require('express');
 const router = express.Router();
 const WebSocket = require('ws');
-const { authenticate } = require('../middleware/authenticate');
-const CommunityHub = require('../services/CommunityHub');
 const Joi = require('joi');
+const { authenticate } = require('../middleware/authenticate');
+
+// Import necessary models
+const StudyGroup = require('../models/studygroup');
+const Challenge = require('../models/challenge');
+const PeerMatch = require('../models/peermatch');
+const Discussion = require('../models/discussion');
+const User = require('../models/user');
 
 // WebSocket setup
 const wss = new WebSocket.Server({ noServer: true });
 const clients = new Map();
 
-// Handle WebSocket connections
+// Validation Schemas
+const studyGroupSchema = Joi.object({
+    name: Joi.string().required(),
+    description: Joi.string(),
+    type: Joi.string().valid('training', 'certification', 'mission', 'general').required(),
+    capacity: Joi.number().min(2).max(50),
+    module: Joi.string()
+});
+
+const sessionSchema = Joi.object({
+    type: Joi.string().valid('study', 'practice', 'assessment', 'mission').required(),
+    module: Joi.string().required(),
+    scheduledStart: Joi.date().required()
+});
+
+// WebSocket Connection Handling
 wss.on('connection', (ws, req) => {
     const userId = req.userId;
     clients.set(userId, ws);
@@ -20,22 +40,7 @@ wss.on('connection', (ws, req) => {
     });
 });
 
-// Listen for Community Hub events
-CommunityHub.on('groupCreated', ({ groupId, group }) => {
-    notifyGroupMembers(group.members, {
-        type: 'GROUP_CREATED',
-        group
-    });
-});
-
-CommunityHub.on('sessionStarted', ({ sessionId, session }) => {
-    notifySessionParticipants(session.participants, {
-        type: 'SESSION_STARTED',
-        session
-    });
-});
-
-// Helper function to notify users
+// Notification Utility
 function notifyUsers(userIds, data) {
     userIds.forEach(userId => {
         const ws = clients.get(userId.toString());
@@ -45,72 +50,153 @@ function notifyUsers(userIds, data) {
     });
 }
 
-// Validation Schemas
-const studyGroupSchema = Joi.object({
-    name: Joi.string().required(),
-    description: Joi.string(),
-    type: Joi.string().valid('training', 'certification', 'mission', 'general').required(),
-    capacity: Joi.number().min(2).max(50)
+// Community Hub Dashboard
+router.get('/', authenticate, async (req, res) => {
+    try {
+        const userId = req.user._id;
+        
+        const communityData = {
+            studyGroups: await StudyGroup.find({ 
+                'participants.user': userId 
+            }).populate('participants.user'),
+            
+            challenges: await Challenge.find({
+                $or: [
+                    { 'participants.user': userId },
+                    { type: 'global' }
+                ],
+                status: 'active'
+            }),
+            
+            peerMatches: await PeerMatch.findMatchesForUser(userId),
+            
+            discussions: await Discussion.find()
+                .sort({ createdAt: -1 })
+                .limit(10)
+                .populate('author'),
+            
+            userProgress: {
+                badges: req.user.achievements,
+                credits: req.user.credits,
+                currentRank: req.user.leaderboardRank
+            }
+        };
+
+        res.json(communityData);
+    } catch (error) {
+        res.status(500).json({ 
+            message: 'Error fetching community hub data', 
+            error: error.message 
+        });
+    }
 });
 
-const sessionSchema = Joi.object({
-    type: Joi.string().valid('study', 'practice', 'assessment', 'mission').required(),
-    module: Joi.string().required(),
-    scheduledStart: Joi.date().required()
-});
-
-// Study Group Routes
+// Create Study Group
 router.post('/groups', authenticate, async (req, res) => {
     try {
+        // Validate input
         const { error } = studyGroupSchema.validate(req.body);
         if (error) return res.status(400).json({ error: error.details[0].message });
 
-        const group = await CommunityHub.createStudyGroup(req.user._id, req.body);
-        res.json({ success: true, group });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+        // Create study group
+        const newStudyGroup = new StudyGroup({
+            name: req.body.name,
+            description: req.body.description,
+            type: req.body.type,
+            capacity: req.body.capacity,
+            participants: [{
+                user: req.user._id,
+                role: 'creator'
+            }]
+        });
+
+        await newStudyGroup.save();
+
+        // Notify relevant users
+        notifyUsers([req.user._id], {
+            type: 'GROUP_CREATED',
+            group: newStudyGroup
+        });
+
+        res.status(201).json(newStudyGroup);
+    } catch (error) {
+        res.status(500).json({ 
+            message: 'Error creating study group', 
+            error: error.message 
+        });
     }
 });
 
-router.get('/groups/:groupId', authenticate, async (req, res) => {
+// Join Study Group
+router.post('/groups/:groupId/join', authenticate, async (req, res) => {
     try {
-        const group = await StudyGroup.findById(req.params.groupId)
-            .populate('members.user', 'name avatar level');
-        if (!group) return res.status(404).json({ error: 'Group not found' });
-        res.json(group);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
+        const studyGroup = await StudyGroup.findById(req.params.groupId);
+        
+        if (!studyGroup) {
+            return res.status(404).json({ message: 'Study group not found' });
+        }
 
-// Training Session Routes
-router.post('/sessions', authenticate, async (req, res) => {
-    try {
-        const { error } = sessionSchema.validate(req.body);
-        if (error) return res.status(400).json({ error: error.details[0].message });
+        if (studyGroup.participants.length >= studyGroup.capacity) {
+            return res.status(400).json({ message: 'Study group is full' });
+        }
 
-        const session = await CommunityHub.startTrainingSession(req.body.groupId, req.body);
-        res.json({ success: true, session });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
+        studyGroup.participants.push({
+            user: req.user._id,
+            role: 'member'
+        });
 
-// Challenge Routes
-router.post('/challenges', authenticate, async (req, res) => {
-    try {
-        const challenge = await CommunityHub.createChallenge(req.user._id, req.body);
-        res.json({ success: true, challenge });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+        await studyGroup.save();
+
+        // Notify group members
+        notifyUsers(
+            studyGroup.participants.map(p => p.user), 
+            {
+                type: 'NEW_MEMBER_JOINED',
+                group: studyGroup,
+                newMember: req.user
+            }
+        );
+
+        res.json(studyGroup);
+    } catch (error) {
+        res.status(500).json({ 
+            message: 'Error joining study group', 
+            error: error.message 
+        });
     }
 });
 
 // Peer Matching Routes
 router.get('/peers/matches', authenticate, async (req, res) => {
     try {
-        const matches = await CommunityHub.findPeerMatches(req.user._id);
+        const matches = await PeerMatch.findMatchesForUser(req.user._id);
         res.json({ success: true, matches });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Challenges Routes
+router.post('/challenges', authenticate, async (req, res) => {
+    try {
+        const challenge = new Challenge({
+            ...req.body,
+            participants: [{
+                user: req.user._id,
+                progress: 0,
+                role: 'creator'
+            }]
+        });
+
+        await challenge.save();
+
+        // Notify potential participants
+        notifyUsers([req.user._id], {
+            type: 'CHALLENGE_CREATED',
+            challenge
+        });
+
+        res.json({ success: true, challenge });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -119,18 +205,20 @@ router.get('/peers/matches', authenticate, async (req, res) => {
 // Discussion Routes
 router.post('/discussions', authenticate, async (req, res) => {
     try {
-        const discussion = await CommunityHub.createDiscussion(req.user._id, req.body);
-        res.json({ success: true, discussion });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
+        const discussion = new Discussion({
+            ...req.body,
+            author: req.user._id
+        });
 
-// Progress Routes
-router.post('/groups/:groupId/progress', authenticate, async (req, res) => {
-    try {
-        const group = await CommunityHub.updateGroupProgress(req.params.groupId, req.body);
-        res.json({ success: true, group });
+        await discussion.save();
+
+        // Notify community
+        notifyUsers([req.user._id], {
+            type: 'NEW_DISCUSSION',
+            discussion
+        });
+
+        res.json({ success: true, discussion });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -139,6 +227,7 @@ router.post('/groups/:groupId/progress', authenticate, async (req, res) => {
 // WebSocket upgrade handler
 const upgradeConnection = (server) => {
     server.on('upgrade', (request, socket, head) => {
+        // Implement proper WebSocket authentication
         const userId = authenticateWebSocket(request);
         if (!userId) {
             socket.destroy();
@@ -152,4 +241,8 @@ const upgradeConnection = (server) => {
     });
 };
 
-module.exports = { router, upgradeConnection };
+module.exports = { 
+    router, 
+    upgradeConnection,
+    notifyUsers 
+};

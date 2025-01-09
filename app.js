@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config(); // Load environment variables
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -7,7 +7,8 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
-const { authenticate } = require('./middleware/authenticate');
+const http = require('http');
+const { setupWebSocketServer, authenticate } = require('./middleware/authenticate');
 const AIWebController = require('./services/AIWebController');
 
 const app = express();
@@ -15,7 +16,6 @@ const app = express();
 // =======================
 // MongoDB Configuration
 // =======================
-
 mongoose.set('strictQuery', true);
 
 if (process.env.NODE_ENV === 'development') {
@@ -25,10 +25,10 @@ if (process.env.NODE_ENV === 'development') {
 const connectDB = async () => {
     try {
         const conn = await mongoose.connect(process.env.MONGO_URI, {
-            serverSelectionTimeoutMS: process.env.MONGO_TIMEOUT || 5000,
+            serverSelectionTimeoutMS: parseInt(process.env.MONGO_TIMEOUT, 10) || 5000,
             autoIndex: process.env.MONGO_AUTO_INDEX === 'true',
-            maxPoolSize: process.env.MONGO_POOL_SIZE || 10,
-            socketTimeoutMS: process.env.MONGO_SOCKET_TIMEOUT || 45000,
+            maxPoolSize: parseInt(process.env.MONGO_POOL_SIZE, 10) || 10,
+            socketTimeoutMS: parseInt(process.env.MONGO_SOCKET_TIMEOUT, 10) || 45000,
         });
 
         console.log('✅ MongoDB Connection Established');
@@ -52,14 +52,13 @@ const connectDB = async () => {
     }
 };
 
-module.exports = connectDB;
-
 // =======================
 // Middleware Setup
 // =======================
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cors());
+app.use(cookieParser());
 
 const MongoStore = require('connect-mongo');
 app.use(session({
@@ -68,13 +67,13 @@ app.use(session({
     saveUninitialized: false,
     store: MongoStore.create({
         mongoUrl: process.env.MONGO_URI,
-        ttl: 14 * 24 * 60 * 60,
+        ttl: 14 * 24 * 60 * 60, // 14 days
         autoRemove: 'native',
     }),
     cookie: {
-        secure: process.env.NODE_ENV === 'production',
+        secure: process.env.NODE_ENV === 'production', // Secure cookies in production
         httpOnly: true,
-        maxAge: 14 * 24 * 60 * 60 * 1000,
+        maxAge: 14 * 24 * 60 * 60 * 1000, // 14 days in milliseconds
     },
 }));
 
@@ -94,14 +93,14 @@ app.use(helmet({
 }));
 
 const aiLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 100,
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests
     message: { error: 'AI service rate limit exceeded. Please try again later.' },
 });
 
 const fsdLimiter = rateLimit({
-    windowMs: 60 * 1000,
-    max: 30,
+    windowMs: 60 * 1000, // 1 minute
+    max: 30, // Limit each IP to 30 requests
     message: { error: 'FSD service rate limit exceeded. Please try again later.' },
 });
 
@@ -111,7 +110,6 @@ app.use('/api/ai/fsd', fsdLimiter);
 // =======================
 // Import and Register Routes
 // =======================
-
 const routers = {
     aboutRouter: require('./routes/about'),
     achievementsRouter: require('./routes/achievements'),
@@ -133,30 +131,28 @@ const routers = {
     aiWebControllerRouter: require('./routes/aiWebController'),
 };
 
-// Debug logs to validate routes and middleware
+// Dynamic Route Registration
 for (const [name, router] of Object.entries(routers)) {
-    
+    const routePath = `/api/${name.replace('Router', '').toLowerCase()}`;
+    app.use(routePath, router);
+    console.log(`Registered route: ${routePath}`);
 }
 
-// Register Routes
+// Specific Routes for Middleware
 app.use('/api/about', routers.aboutRouter);
 app.use('/api/achievements', authenticate, routers.achievementsRouter);
-app.use('/api/ai', routers.aiRouter);
-app.use('/api/auth', routers.authRouter);
 app.use('/api/dashboard', authenticate, routers.dashboardRouter);
-app.use('/api/leaderboard', authenticate, routers.leaderboardRouter);
-app.use('/api/main', authenticate, routers.mainRouter);
-app.use('/api/modules', authenticate, routers.modulesRouter);
-app.use('/api/payment', authenticate, routers.paymentRouter);
-app.use('/api/signup', routers.signupRouter);
-app.use('/api/test', routers.testRouter);
-app.use('/api/training', authenticate, routers.trainingRouter);
-app.use('/api/user', authenticate, routers.userRouter);
-app.use('/api/video', authenticate, routers.videoRouter);
-app.use('/api/webhooks', routers.webhooksRouter);
-app.use('/api/openai', routers.testOpenAIRouter);
-app.use('/api/ai-web', routers.aiWebControllerRouter);
-app.use('/', routers.indexRouter);
+
+// =======================
+// WebSocket Integration
+// =======================
+const server = http.createServer(app); // Create HTTP server
+const { wss, broadcastMessage } = setupWebSocketServer(server);
+
+// Example: Notify users via WebSocket
+function notifyUsers(userIds, message) {
+    broadcastMessage(userIds, { type: 'NOTIFICATION', message });
+}
 
 // =======================
 // Error Handling
@@ -204,7 +200,7 @@ const startServer = async () => {
     try {
         await connectDB();
         const PORT = process.env.PORT || 3000;
-        app.listen(PORT, () => {
+        server.listen(PORT, () => {
             console.log(`🚀 Server running on http://localhost:${PORT}`);
             console.log(`🌍 Environment: ${process.env.NODE_ENV}`);
         });
