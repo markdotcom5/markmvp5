@@ -54,16 +54,13 @@ const connectDB = async () => {
 
 module.exports = connectDB;
 
-
 // =======================
 // Middleware Setup
 // =======================
 
-// Body parsing middleware should come first
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Session configuration with MongoDB store
 const MongoStore = require('connect-mongo');
 app.use(session({
     secret: process.env.JWT_SECRET || 'your_secret_key',
@@ -71,17 +68,16 @@ app.use(session({
     saveUninitialized: false,
     store: MongoStore.create({
         mongoUrl: process.env.MONGO_URI,
-        ttl: 14 * 24 * 60 * 60, // 14 days
+        ttl: 14 * 24 * 60 * 60,
         autoRemove: 'native',
     }),
     cookie: {
         secure: process.env.NODE_ENV === 'production',
         httpOnly: true,
-        maxAge: 14 * 24 * 60 * 60 * 1000, // 14 days
+        maxAge: 14 * 24 * 60 * 60 * 1000,
     },
 }));
 
-// Security middleware (Helmet)
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
@@ -97,15 +93,14 @@ app.use(helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" },
 }));
 
-// Rate limiting middleware
 const aiLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
+    windowMs: 15 * 60 * 1000,
     max: 100,
     message: { error: 'AI service rate limit exceeded. Please try again later.' },
 });
 
 const fsdLimiter = rateLimit({
-    windowMs: 60 * 1000, // 1 minute
+    windowMs: 60 * 1000,
     max: 30,
     message: { error: 'FSD service rate limit exceeded. Please try again later.' },
 });
@@ -116,51 +111,56 @@ app.use('/api/ai/fsd', fsdLimiter);
 // =======================
 // Import and Register Routes
 // =======================
-const aboutRouter = require('./routes/about');
-const achievementsRouter = require('./routes/achievements');
-const aiRouter = require('./routes/aiRoutes');
-const authRouter = require('./routes/auth');
-const dashboardRouter = require('./routes/dashboard');
-const indexRouter = require('./routes/index');
-const leaderboardRouter = require('./routes/leaderboard');
-const mainRouter = require('./routes/main');
-const modulesRouter = require('./routes/modules');
-const paymentRouter = require('./routes/payment');
-const signupRouter = require('./routes/signup');
-const testRouter = require('./routes/testRoutes');
-const trainingRouter = require('./routes/training');
-const userRouter = require('./routes/user');
-const videoRouter = require('./routes/video');
-const webhooksRouter = require('./routes/webhooks');
-const testOpenAIRouter = require('./routes/testOpenAI');
-const aiWebController = AIWebController;
-const aiWebControllerRouter = require('./routes/aiWebController');
+
+const routers = {
+    aboutRouter: require('./routes/about'),
+    achievementsRouter: require('./routes/achievements'),
+    aiRouter: require('./routes/aiRoutes'),
+    authRouter: require('./routes/auth'),
+    dashboardRouter: require('./routes/dashboard'),
+    indexRouter: require('./routes/index'),
+    leaderboardRouter: require('./routes/leaderboard'),
+    mainRouter: require('./routes/main'),
+    modulesRouter: require('./routes/modules'),
+    paymentRouter: require('./routes/payment'),
+    signupRouter: require('./routes/signup'),
+    testRouter: require('./routes/testRoutes'),
+    trainingRouter: require('./routes/training'),
+    userRouter: require('./routes/user'),
+    videoRouter: require('./routes/video'),
+    webhooksRouter: require('./routes/webhooks'),
+    testOpenAIRouter: require('./routes/testOpenAI'),
+    aiWebControllerRouter: require('./routes/aiWebController'),
+};
+
+// Debug logs to validate routes and middleware
+for (const [name, router] of Object.entries(routers)) {
+    
+}
 
 // Register Routes
-app.use('/api/about', aboutRouter);
-app.use('/api/achievements', authenticate, achievementsRouter);
-app.use('/api/ai', aiRouter);
-app.use('/api/auth', authRouter);
-app.use('/api/dashboard', authenticate, dashboardRouter);
-app.use('/api/leaderboard', authenticate, leaderboardRouter);
-app.use('/api/main', authenticate, mainRouter);
-app.use('/api/modules', authenticate, modulesRouter);
-app.use('/api/payment', authenticate, paymentRouter);
-app.use('/api/signup', signupRouter);
-app.use('/api/test', testRouter);
-app.use('/api/training', authenticate, trainingRouter);
-app.use('/api/user', authenticate, userRouter);
-app.use('/api/video', authenticate, videoRouter);
-app.use('/api/webhooks', webhooksRouter);
-app.use('/api/openai', testOpenAIRouter);
-app.use('/', indexRouter);
-app.use('/api/ai-web', aiWebControllerRouter);
+app.use('/api/about', routers.aboutRouter);
+app.use('/api/achievements', authenticate, routers.achievementsRouter);
+app.use('/api/ai', routers.aiRouter);
+app.use('/api/auth', routers.authRouter);
+app.use('/api/dashboard', authenticate, routers.dashboardRouter);
+app.use('/api/leaderboard', authenticate, routers.leaderboardRouter);
+app.use('/api/main', authenticate, routers.mainRouter);
+app.use('/api/modules', authenticate, routers.modulesRouter);
+app.use('/api/payment', authenticate, routers.paymentRouter);
+app.use('/api/signup', routers.signupRouter);
+app.use('/api/test', routers.testRouter);
+app.use('/api/training', authenticate, routers.trainingRouter);
+app.use('/api/user', authenticate, routers.userRouter);
+app.use('/api/video', authenticate, routers.videoRouter);
+app.use('/api/webhooks', routers.webhooksRouter);
+app.use('/api/openai', routers.testOpenAIRouter);
+app.use('/api/ai-web', routers.aiWebControllerRouter);
+app.use('/', routers.indexRouter);
 
 // =======================
 // Error Handling
 // =======================
-
-// 404 Handler
 app.use((req, res) => {
     res.status(404).json({
         error: 'Not Found',
@@ -169,7 +169,6 @@ app.use((req, res) => {
     });
 });
 
-// Global Error Handler
 app.use((err, req, res, next) => {
     console.error('Global Error:', {
         message: err.message,
