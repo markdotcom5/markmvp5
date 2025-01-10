@@ -14,6 +14,15 @@ const AIWebController = require('./services/AIWebController');
 const app = express();
 
 // =======================
+// Serve Static Files BEFORE Other Configurations
+// =======================
+// Serve static files from the root directory
+app.use(express.static(path.join(__dirname)));
+
+// Serve static files from the public directory
+app.use(express.static(path.join(__dirname, 'public')));
+
+// =======================
 // MongoDB Configuration
 // =======================
 mongoose.set('strictQuery', true);
@@ -142,6 +151,11 @@ for (const [name, router] of Object.entries(routers)) {
 app.use('/api/about', routers.aboutRouter);
 app.use('/api/achievements', authenticate, routers.achievementsRouter);
 app.use('/api/dashboard', authenticate, routers.dashboardRouter);
+
+// Serve index.html for the root route and catch-all for SPA
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
 
 // =======================
 // WebSocket Integration

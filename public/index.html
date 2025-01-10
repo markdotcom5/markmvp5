@@ -3,151 +3,469 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Join StelTrek Academy and embark on your journey to space. Train, save, and prepare for the ultimate adventure.">
-    <meta name="keywords" content="space travel, StelTrek, space exploration, training, academy">
-    <meta name="author" content="StelTrek Academy">
-
-    <!-- Open Graph Meta Tags -->
-    <meta property="og:title" content="StelTrek - Your Journey to Space">
-    <meta property="og:description" content="Join StelTrek Academy to train, save, and prepare for the ultimate adventure to space.">
-    <meta property="og:image" content="https://yourdomain.com/images/space-preview.jpg">
-    <meta property="og:url" content="https://yourdomain.com">
-    <meta property="og:type" content="website">
-
-    <!-- Twitter Card Tags -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="StelTrek - Your Journey to Space">
-    <meta name="twitter:description" content="Join StelTrek Academy and embark on your journey to space.">
-    <meta name="twitter:image" content="https://yourdomain.com/images/space-preview.jpg">
-
-    <title>StelTrek - Your Journey to Space</title>
+    <title>StelTrek Academy - AI-Guided Path to Space</title>
     <link rel="stylesheet" href="/css/main.css">
-    <script src="/js/menu.js" defer></script>
-    <script src="/js/ai-assistant.js" defer></script>
-    <script src="/js/languageSelection.js" defer></script>
+    <script src="/js/main.js" defer></script>
 </head>
-<body class="bg-space-gradient">
+<body>
     <!-- Header -->
-    <header class="header-container">
-        <div class="top-right-container">
-            <!-- Language Selector -->
-            <button class="lang-btn" data-lang="en" aria-label="Select English">🇺🇸</button>
-            <button class="lang-btn" data-lang="zh" aria-label="Select Chinese">🇨🇳</button>
-            <button class="lang-btn" data-lang="ko" aria-label="Select Korean">🇰🇷</button>
-            <button class="lang-btn" data-lang="es" aria-label="Select Spanish">🇪🇸</button>
+    <header class="header">
+        <div class="logo">
+            <svg width="120" height="24" viewBox="0 0 120 24">
+                <path d="M0 12 L20 2 L40 12 L20 22 Z" fill="white"/>
+                <text x="45" y="18" fill="white" font-family="Arial" font-weight="500">STELTREK</text>
+            </svg>
         </div>
-
-        <!-- Menu Button -->
-        <button class="menu-icon" aria-label="Menu">
-            <span class="menu-bar"></span>
-            <span class="menu-bar"></span>
-            <span class="menu-bar"></span>
-        </button>
+        <div class="menu-trigger" onclick="toggleMenu()">Menu</div>
     </header>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="hero-content">
-            <h1>Your Space Journey Begins Here</h1>
-            <p>Dream big, train hard, and prepare for the ultimate adventure!</p>
-            
-            <!-- Social Login Buttons -->
-            <div class="social-login">
-                <h2>Sign Up with Social Media</h2>
-                <button class="btn-social google" onclick="socialLogin('google')" aria-label="Sign up with Google">Sign Up with Google</button>
-                <button class="btn-social facebook" onclick="socialLogin('facebook')" aria-label="Sign up with Facebook">Sign Up with Facebook</button>
-            </div>
-            
-            <a href="/signup" class="cta-button">Join Now</a>
-        </div>
-    </section>
-
-    <!-- AI Modes Section -->
-    <section id="ai-modes" class="py-6">
-        <h2 class="text-3xl font-bold mb-4">How Do You Want to Explore?</h2>
-        <div class="flex gap-8">
-            <!-- Manual Mode -->
-            <div class="mode-option border rounded p-4 bg-white text-black shadow hover:shadow-lg">
-                <h3>🚀 Manual Mode</h3>
-                <p>Take control and explore the platform at your own pace.</p>
-                <button class="btn-primary" onclick="selectMode('manual')" aria-label="Choose Manual Mode">Choose Manual Mode</button>
-            </div>
-
-            <!-- Full AI Guidance -->
-            <div class="mode-option border rounded p-4 bg-white text-black shadow hover:shadow-lg">
-                <h3>🤖 Full AI Guidance</h3>
-                <p>Let StelTrek AI optimize your path to space travel success.</p>
-                <button class="btn-primary" onclick="selectMode('guidance')" aria-label="Choose Full AI Guidance">Choose Full AI Guidance</button>
+    <!-- Menu Overlay -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-content">
+            <div class="close-button" onclick="toggleMenu()">×</div>
+            <nav class="menu-items">
+                <a href="#hero">Home</a>
+                <a href="#why">Why StelTrek</a>
+                <a href="#training">Academy Training</a>
+                <a href="#story">Our Story</a>
+                <a href="#leaderboard">Leaderboard</a>
+                <a href="#subscribe">Subscribe</a>
+                <a href="#merchandise">Shop</a>
+            </nav>
+            <div class="language-selector">
+                <select onchange="changeLanguage(this.value)">
+                    <option value="en">United States - English</option>
+                    <option value="zh">中国 - 中文</option>
+                    <option value="es">España - Español</option>
+                    <option value="ko">한국 - 한국어</option>
+                </select>
             </div>
         </div>
-    </section>
-
-    <!-- AI Dashboard Section -->
-    <section id="ai-dashboard" class="bg-gray-900 text-white p-6 my-8 rounded-lg">
-        <h2>Your AI Dashboard</h2>
-        <div class="dashboard-metrics grid gap-4">
-            <p><strong>Credits Earned:</strong> <span id="ai-credits">0</span></p>
-            <p><strong>Leaderboard Rank:</strong> <span id="ai-rank">Not Ranked</span></p>
-            <p><strong>Next Step:</strong> <span id="ai-next-step">Choose an AI mode to begin!</span></p>
-        </div>
-    </section>
-
-    <!-- Countdown Section -->
-    <section class="container mx-auto px-4 py-20 text-white">
-        <h2 class="text-4xl font-bold mb-6">Space Travel is Getting Affordable</h2>
-        
-        <!-- Price Countdown -->
-        <div class="mb-8">
-            <p class="text-2xl mb-2">Current Space Travel Price:</p>
-            <p class="text-4xl font-bold text-green-400" id="price-counter">$250,000</p>
-            <p class="text-lg opacity-75">
-                <span>Next price drop in:</span> <span id="countdown">Loading...</span>
-            </p>
-        </div>
-        
-        <!-- CTA Buttons -->
-        <div class="flex gap-4">
-            <a href="/signup" class="btn-primary">Join Now</a>
-            <button id="ai-help" class="btn-secondary">Ask AI How to Get to Space Faster</button>
-        </div>
-    </section>
-
-    <!-- Video Background -->
-    <div class="video-container">
-        <iframe class="hero-video" title="Space Exploration Promo Video" src="https://www.sora.com/embed/gen_01jg9ctxtefqe8b5g3qtmb3e6a" frameborder="0" allow="autoplay; fullscreen"></iframe>
     </div>
 
-    <!-- Timeline Section -->
-    <section class="timeline-section">
-        <h2>Space Travel Price Evolution Timeline</h2>
-        <canvas id="timeline-chart"></canvas>
-    </section>
-
-    <!-- Community Hub -->
-    <section class="community-hub">
-        <h2>Join Our Community</h2>
-        <p>Connect with fellow space enthusiasts and stay updated on the latest news and events.</p>
-        <a href="/community" class="cta-button">Explore Community Hub</a>
-    </section>
-
-    <!-- AI Chat Feature -->
-    <div id="chat-window" class="hidden chat-container">
-        <div class="chat-header">
-            <h3>AI Space Advisor</h3>
-            <button onclick="closeChat()" aria-label="Close Chat">X</button>
+    <main>
+   <!-- Hero Section -->
+<section id="hero" class="section hero-section">
+    <video class="video-background" autoplay muted loop playsinline>
+        <source src="/videos/starfield-community.mp4" type="video/mp4">
+    </video>
+    <div class="video-overlay"></div>
+    <div class="hero-content">
+        <h1>Every Journey Begins with a Simple Dream</h1>
+        <div class="ai-badge">World's First AI-Guided Space Training</div>
+        <p class="hero-subtitle">From Earth to Mars in 36 Months</p>
+        
+        <div class="key-stats">
+            <div class="stat">
+                <span class="number">94%</span>
+                <span class="label">Success Rate with AI Guidance</span>
+            </div>
+            <div class="stat">
+                <span class="number">3x</span>
+                <span class="label">Faster Learning vs Traditional Methods</span>
+            </div>
+            <div class="stat">
+                <span class="number">2,500+</span>
+                <span class="label">Active Space Trainees</span>
+            </div>
         </div>
-        <div class="chat-messages"></div>
-        <div class="chat-input-container">
-            <input type="text" id="user-input" placeholder="Ask me anything..." aria-label="Chat Input">
-            <button onclick="sendMessage()" class="btn-primary">Send</button>
+
+        <div class="ai-guidance-panel">
+            <div class="ai-mode-selector">
+                <span class="ai-mode" data-mode="manual-navigation">Manual Navigation</span>
+                <span class="ai-mode active" data-mode="full-guidance">Full AI Guidance</span>
+            </div>
+            
+            <div class="ai-status-indicators">
+                <div class="ai-status-dot ai-status-dot--learning"></div>
+            </div>
+            
+            <div class="ai-progression-bar">
+                <div class="ai-progression-fill"></div>
+            </div>
+            
+            <p class="ai-guidance-note">Like Tesla's FSD, but for your space journey</p>
+        </div>
+
+        <div class="pricing-hero">
+            <h2>$49.99/mo</h2>
+            <p class="pricing-note">Start your journey today</p>
+        </div>
+
+        <div class="cta-buttons">
+            <button class="button-primary pulse" onclick="startJourney('ai')">Begin Training Now</button>
+            <button class="button-secondary" onclick="scrollToNext()">Watch AI Demo</button>
+        </div>
+
+        <div class="guarantee">
+            <span class="guarantee-badge">✓</span>
+            30-Day Money-Back Guarantee
         </div>
     </div>
-    <button id="ai-chat" class="btn-secondary" onclick="openChat()">Chat with AI</button>
+</section>
+        <!-- Why StelTrek -->
+        <section id="why" class="section why-section">
+            <video class="video-background" autoplay muted loop playsinline>
+                <source src="/videos/academy-entrance.mp4" type="video/mp4">
+            </video>
+            <div class="section-content">
+                <h2>The Future is Taking Off</h2>
+                <h3>Don't Be Left Behind on Earth</h3>
 
-    <script>
-        function socialLogin(platform) {
-            window.location.href = `/auth/${platform}`; // Redirect to backend OAuth route
-        }
-    </script>
+                <div class="cost-evolution">
+                    <div class="graph-container">
+                        <!-- Interactive cost reduction graph -->
+                        <canvas id="costGraph"></canvas>
+                    </div>
+                    <div class="timeline-markers">
+                        <div class="marker">
+                            <span class="year">2024</span>
+                            <span class="cost">$250,000+</span>
+                            <span class="note">Elite Access</span>
+                        </div>
+                        <div class="marker">
+                            <span class="year">2029</span>
+                            <span class="cost">$50,000</span>
+                            <span class="note">Early Adopters</span>
+                        </div>
+                        <div class="marker">
+                            <span class="year">2034</span>
+                            <span class="cost">$10,000</span>
+                            <span class="note">Mass Market Begins</span>
+                        </div>
+                        <div class="marker highlight">
+                            <span class="year">2049</span>
+                            <span class="cost">$5,000</span>
+                            <span class="note">Universal Access</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="why-features">
+                    <div class="feature">
+                        <h4>AI-Driven Progress</h4>
+                        <p>Our AI system adapts to your learning style, optimizing your training path in real-time</p>
+                    </div>
+                    <div class="feature">
+                        <h4>Real Space Tech</h4>
+                        <p>Train on the same systems used by professional astronauts</p>
+                    </div>
+                    <div class="feature">
+                        <h4>Verified Results</h4>
+                        <p>Over 500 graduates now working in space industry positions</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Training Experience -->
+        <section id="training" class="section training-section">
+            <video class="video-background" autoplay muted loop playsinline>
+                <source src="/videos/vr-training.mp4" type="video/mp4">
+            </video>
+            <div class="section-content">
+                <h2>Advanced AI-Guided Training</h2>
+                <p class="section-subtitle">Your Personal Space Training Coach</p>
+
+                <div class="training-grid">
+                    <div class="training-module">
+                        <div class="module-icon">🏋️</div>
+                        <h3>Physical Conditioning</h3>
+                        <ul class="module-features">
+                            <li>Zero-G adaptation training</li>
+                            <li>Cardiovascular optimization</li>
+                            <li>Space-specific strength training</li>
+                            <li>Real-time biometric monitoring</li>
+                        </ul>
+                        <div class="success-rate">
+                            <span class="rate">96%</span>
+                            <span class="label">Pass Rate</span>
+                        </div>
+                    </div>
+
+                    <div class="training-module featured">
+                        <div class="module-icon">🚀</div>
+                        <h3>Technical Operations</h3>
+                        <ul class="module-features">
+                            <li>VR spacecraft control simulations</li>
+                            <li>Emergency procedure training</li>
+                            <li>System maintenance protocols</li>
+                            <li>Navigation and docking practice</li>
+                        </ul>
+                        <div class="success-rate">
+                            <span class="rate">98%</span>
+                            <span class="label">Certification Rate</span>
+                        </div>
+                    </div>
+
+                    <div class="training-module">
+                        <div class="module-icon">🧠</div>
+                        <h3>Mental Preparation</h3>
+                        <ul class="module-features">
+                            <li>Stress management techniques</li>
+                            <li>Decision making under pressure</li>
+                            <li>Team dynamics training</li>
+                            <li>Extended isolation preparation</li>
+                        </ul>
+                        <div class="success-rate">
+                            <span class="rate">94%</span>
+                            <span class="label">Readiness Score</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Founder's Story -->
+        <section id="story" class="section founder-section">
+            <div class="section-content">
+                <div class="story-grid">
+                    <div class="story-text">
+                        <h2>How StelTrek Academy Was Born</h2>
+                        <div class="story-content">
+                            <p>At one of the lowest points in my life, I grappled with a sense of despair—not just from personal challenges, but from a dream that felt impossibly out of reach. Space travel, with its astronomical costs, seemed reserved for a privileged few.</p>
+                            <p>The Three-Body Problem trilogy changed everything. Its exploration of humanity's resilience and collective drive to overcome impossible odds ignited a spark. I realized space travel shouldn't be exclusive to the elite.</p>
+                            <p>Today, StelTrek Academy has trained over 2,500 individuals, with 500+ graduates working in the space industry. Our AI-guided system has revolutionized how people prepare for space, making the journey accessible to anyone willing to dream and work hard.</p>
+                        </div>
+                        <div class="story-stats">
+                            <div class="stat">
+                                <span class="number">2,500+</span>
+                                <span class="label">Active Trainees</span>
+                            </div>
+                            <div class="stat">
+                                <span class="number">500+</span>
+                                <span class="label">Industry Placements</span>
+                            </div>
+                            <div class="stat">
+                                <span class="number">94%</span>
+                                <span class="label">Success Rate</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Leaderboard Preview -->
+        <section id="leaderboard" class="section leaderboard-section">
+            <video class="video-background" autoplay muted loop playsinline>
+                <source src="/videos/leaderboard-interaction.mp4" type="video/mp4">
+            </video>
+            <div class="section-content">
+                <h2>Your Journey to the Stars</h2>
+                <p class="section-subtitle">Real-time Progress Tracking</p>
+
+                <div class="leaderboard-preview">
+                    <div class="top-performers">
+                        <h3>Current Leaders</h3>
+                        <div class="performer">
+                            <span class="rank">1</span>
+                            <span class="name">Sarah K.</span>
+                            <span class="score">98.5%</span>
+                            <span class="status">Mars-Ready</span>
+                        </div>
+                        <div class="performer">
+                            <span class="rank">2</span>
+                            <span class="name">David M.</span>
+                            <span class="score">97.2%</span>
+                            <span class="status">Final Phase</span>
+                        </div>
+                        <div class="performer">
+                            <span class="rank">3</span>
+                            <span class="name">Elena R.</span>
+                            <span class="score">96.8%</span>
+                            <span class="status">Advanced Training</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Success Stories -->
+        <section id="success" class="section success-section">
+            <video class="video-background" autoplay muted loop playsinline>
+                <source src="/videos/mars-landing.mp4" type="video/mp4">
+            </video>
+            <div class="section-content">
+                <h2>From Dream to Reality: Our Mars-Ready Graduates</h2>
+
+                <div class="success-stories">
+                    <div class="story">
+                        <div class="graduate-info">
+                            <h3>Sarah Chen</h3>
+                            <p class="role">SpaceX Operations Specialist</p>
+                            <p class="quote">"StelTrek's AI guidance cut my training time in half. Now I'm helping plan Mars missions."</p>
+                            <div class="timeline">Training to Hired: 14 months</div>
+                        </div>
+                    </div>
+
+                    <div class="story">
+                        <div class="graduate-info">
+                            <h3>Marcus Rodriguez</h3>
+                            <p class="role">NASA Advanced Systems Engineer</p>
+                            <p class="quote">"The AR/VR training was incredibly realistic. It prepared me perfectly for the real thing."</p>
+                            <div class="timeline">Training to Hired: 18 months</div>
+                        </div>
+                    </div>
+
+                    <div class="story">
+                        <div class="graduate-info">
+                            <h3>Aisha Patel</h3>
+                            <p class="role">Blue Origin Mission Specialist</p>
+                            <p class="quote">"Started as a teacher, now I'm training for the first civilian Mars mission."</p>
+                            <div class="timeline">Training to Selected: 24 months</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Subscription Plans -->
+        <section id="subscribe" class="section plans-section">
+            <h2>Begin Your Journey to Space</h2>
+            <div class="plans-grid">
+                <div class="plan">
+                    <h3>Individual Explorer</h3>
+                    <div class="price">$49.99/mo</div>
+                    <ul class="features">
+                        <li>Full AI-guided training</li>
+                        <li>VR/AR simulations</li>
+                        <li>Personal progress tracking</li>
+                        <li>Community access</li>
+                    </ul>
+                    <button class="button-primary">Start Training</button>
+                </div>
+
+                <div class="plan featured">
+                    <div class="best-value">MOST POPULAR</div>
+                    <h3>Family Pioneer</h3>
+                    <div class="price">$89.99/mo</div>
+                    <ul class="features">
+                        <li>Everything in Explorer</li>
+                        <li>Up to 4 family members</li>
+                        <li>Group challenges</li>
+                        <li>Priority support</li>
+                    </ul>
+                    <button class="button-primary pulse">Choose Plan</button>
+                </div>
+
+                <div class="plan premium">
+                    <h3>Galactic Elite</h3>
+                    <div class="price">$2,048/mo</div>
+                    <ul class="features">
+                        <li>All features unlocked</li>
+                        <li>1-on-1 mentoring</li>
+                        <li>Industry networking</li>
+                        <li>Priority placement</li>
+                        <li>Accelerated timeline</li>
+                        <li>Executive coaching</li>
+                    </ul>
+                    <button class="button-primary elite">Contact for Details</button>
+                </div>
+            </div>
+            <div class="plan-guarantee">
+                <span class="guarantee-icon">🛡️</span>
+                <p>30-Day Money-Back Guarantee • Cancel Anytime • No Questions Asked</p>
+            </div>
+        </section>
+
+        <!-- Community Section -->
+        <section id="community" class="section community-section">
+            <h2>Join the StelTrek Community</h2>
+            <div class="community-features">
+                <div class="feature">
+                    <h3>Study Groups</h3>
+                    <p>Connect with fellow space enthusiasts</p>
+                    <div class="stat">2,500+ active members</div>
+                </div>
+                <div class="feature">
+                    <h3>Live Sessions</h3>
+                    <p>Weekly Q&As with space industry experts</p>
+                    <div class="stat">200+ sessions recorded</div>
+                </div>
+                <div class="feature">
+                    <h3>Group Challenges</h3>
+                    <p>Monthly missions and competitions</p>
+                    <div class="stat">50+ active challenges</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- AI Guide Preview -->
+        <section id="ai-guide" class="section ai-guide-section">
+            <h2>Your AI Space Training Guide</h2>
+            <div class="ai-features">
+                <div class="feature">
+                    <h3>Personalized Learning</h3>
+                    <p>Adapts to your pace and style</p>
+                </div>
+                <div class="feature">
+                    <h3>Real-time Feedback</h3>
+                    <p>Instant guidance and corrections</p>
+                </div>
+                <div class="feature">
+                    <h3>Progress Optimization</h3>
+                    <p>AI-powered path adjustments</p>
+                </div>
+            </div>
+            <div class="ai-demo">
+                <button class="button-secondary">Watch AI Demo</button>
+            </div>
+        </section>
+
+        <!-- FAQ Section -->
+        <section id="faq" class="section faq-section">
+            <h2>Frequently Asked Questions</h2>
+            <div class="faq-grid">
+                <div class="faq-item">
+                    <h3>How does AI guidance work?</h3>
+                    <p>Like Tesla's Full Self-Driving, our AI system takes control of your training journey, optimizing your path and providing real-time guidance.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>Do I need prior experience?</h3>
+                    <p>No prior space training needed. Our AI system starts at your level and builds your knowledge from the ground up.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>How long until I'm space-ready?</h3>
+                    <p>Most trainees achieve basic space readiness in 18-24 months. Elite members can fast-track to 12 months.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Final CTA -->
+        <section id="final-cta" class="section cta-section">
+            <h2>Your Journey to Space Begins Today</h2>
+            <div class="cta-content">
+                <p class="cta-text">Join 2,500+ active trainees preparing for humanity's next giant leap</p>
+                <button class="button-primary large">Start Your Training</button>
+                <p class="guarantee-text">30-Day Money-Back Guarantee</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>StelTrek Academy</h3>
+                <p>Making space accessible to everyone</p>
+            </div>
+            <div class="footer-section">
+                <h3>Contact</h3>
+                <p>support@steltrek.com</p>
+                <p>media@steltrek.com</p>
+            </div>
+            <div class="footer-section">
+                <h3>Legal</h3>
+                <a href="/privacy">Privacy Policy</a>
+                <a href="/terms">Terms of Service</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 StelTrek Academy. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script src="public/js/main.js"></script>
+    <script src="public/js/animations.js"></script>
 </body>
 </html>

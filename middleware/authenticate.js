@@ -1,7 +1,7 @@
 require('dotenv').config(); // Load environment variables
 const jwt = require('jsonwebtoken');
 const WebSocket = require('ws');
-const mongoose = require('mongoose');
+const mongoose = require('mongoose'); // Mongoose for schema creation
 
 // Middleware: Authenticate Requests
 const authenticate = async (req, res, next) => {
@@ -46,14 +46,12 @@ const authenticateWebSocket = (request) => {
         const token = extractToken(request);
 
         if (!token) {
-            console.error('No token provided');
             return null;
         }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'default-secret-key');
         return decoded._id;
-    } catch (error) {
-        console.error('WebSocket Authentication Error:', error.message);
+    } catch {
         return null;
     }
 };
@@ -67,19 +65,17 @@ const setupWebSocketServer = (server) => {
         const userId = req.userId;
         clients.set(userId, ws);
 
-        console.log(`User ${userId} connected via WebSocket.`);
-
+        // Handle incoming messages from the client
         ws.on('message', (message) => {
-            console.log(`Message from user ${userId}:`, message);
+            // Optionally process messages from the client
         });
 
         ws.on('close', () => {
             clients.delete(userId);
-            console.log(`WebSocket connection closed for user ${userId}`);
         });
 
-        ws.on('error', (error) => {
-            console.error(`WebSocket error for user ${userId}:`, error.message);
+        ws.on('error', () => {
+            // Optionally handle WebSocket errors
         });
     });
 
@@ -87,7 +83,6 @@ const setupWebSocketServer = (server) => {
         const userId = authenticateWebSocket(request);
 
         if (!userId) {
-            console.error('WebSocket upgrade failed: Authentication failed.');
             socket.destroy();
             return;
         }
@@ -104,39 +99,39 @@ const setupWebSocketServer = (server) => {
             const client = clients.get(userId);
             if (client && client.readyState === WebSocket.OPEN) {
                 client.send(JSON.stringify(message));
-            } else {
-                console.warn(`WebSocket client for user ${userId} is not open.`);
             }
         });
     };
 
     return { wss, broadcastMessage };
 };
+
 // Training Module Schema
-const moduleSchema = new mongoose.Schema({
-    name: { type: String, required: true, trim: true },
-    category: {
-        type: String,
-        required: true,
-        enum: ['Physical', 'Mental', 'Psychological', 'Spiritual', 'Technical', 'Social', 'Exploration', 'Creative'],
+const moduleSchema = new mongoose.Schema(
+    {
+        name: { type: String, required: true, trim: true },
+        category: {
+            type: String,
+            required: true,
+            enum: ['Physical', 'Mental', 'Psychological', 'Spiritual', 'Technical', 'Social', 'Exploration', 'Creative'],
+        },
+        type: { type: String, enum: ['Training', 'Simulation', 'Assessment'], required: true },
+        difficulty: { type: String, enum: ['Beginner', 'Intermediate', 'Advanced', 'Expert'], required: true },
+        prerequisites: { type: [String], default: [] },
+        description: { type: String, required: true, trim: true },
+        structuredContent: { type: String, default: '' },
+        aiGuidance: { type: String, default: '' },
+        metrics: { type: Object, default: {} },
+        groupFeatures: { type: Object, default: {} },
+        progress: { type: Number, default: 0, min: 0, max: 100 },
+        points: { type: Number, default: 0 },
+        videoLinks: { type: [String], default: [] },
+        userLinks: { type: [String], default: [] },
     },
-    type: { type: String, enum: ['Training', 'Simulation', 'Assessment'], required: true },
-    difficulty: { type: String, enum: ['Beginner', 'Intermediate', 'Advanced', 'Expert'], required: true },
-    prerequisites: { type: [String], default: [] },
-    description: { type: String, required: true, trim: true },
-    structuredContent: { type: String, default: '' },
-    aiGuidance: { type: String, default: '' },
-    metrics: { type: Object, default: {} },
-    groupFeatures: { type: Object, default: {} },
-    progress: { type: Number, default: 0, min: 0, max: 100 },
-    points: { type: Number, default: 0 },
-    videoLinks: { type: [String], default: [] },
-    userLinks: { type: [String], default: [] },
-    createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: Date.now },
-}, {
-    timestamps: true,
-});
+    {
+        timestamps: true,
+    }
+);
 
 // Methods
 moduleSchema.methods.getSummary = function () {
@@ -146,40 +141,15 @@ moduleSchema.methods.getSummary = function () {
 moduleSchema.methods.generateAIContent = async function (prompt) {
     try {
         const response = await openai.chat.completions.create({
-            model: "text-davinci-003",
+            model: 'text-davinci-003',
             messages: [{ role: 'user', content: `Generate a detailed explanation for the module: ${prompt}` }],
         });
         return response.choices[0].message.content.trim();
-    } catch (error) {
-        console.error("Error generating AI content:", error.message);
-        throw new Error("Failed to generate AI content");
+    } catch {
+        throw new Error('Failed to generate AI content');
     }
 };
 
-moduleSchema.methods.calculateRecommendedPath = function () {
-    return `Based on difficulty: ${this.difficulty}, recommended next steps for ${this.name}.`;
-};
-
-moduleSchema.methods.updateGroupFeatures = function (newFeatures) {
-    this.groupFeatures = { ...this.groupFeatures, ...newFeatures };
-    return this.groupFeatures;
-};
-
-moduleSchema.methods.trackCompletion = function (userId) {
-    return `User ${userId} has completed module: ${this.name}`;
-};
-
-moduleSchema.statics.findByCategory = async function (category) {
-    return this.find({ category });
-};
-
-moduleSchema.methods.getDetailedMetrics = function () {
-    return {
-        progress: this.progress,
-        points: this.points,
-        metrics: this.metrics,
-    };
-};
 // Export Middleware and Functions
 module.exports = {
     authenticate,

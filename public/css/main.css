@@ -1,320 +1,366 @@
-/* Root Variables for Consistency */
-:root {
-  --primary-text: #ffffff;
-  --primary-bg: #000000;
-  --accent-color: #4299e1;
-  --secondary-bg: #1a237e;
-  --card-bg: #ffffff;
-  --hover-bg: rgba(255, 255, 255, 0.1);
-  --text-secondary: #666666;
-  --glow-color: rgba(66, 153, 225, 0.6);
-  --space-gradient: linear-gradient(45deg, #000000, #1a1a1a);
+/* ======================
+   Root Variables & Base
+   ====================== */
+   :root {
+    --primary-text: #ffffff;
+    --primary-bg: #000000;
+    --accent-color: #4299e1;
+    --secondary-bg: #1a237e;
+    --card-bg: rgba(255, 255, 255, 0.05);
+    --hover-bg: rgba(255, 255, 255, 0.1);
+    --text-secondary: #666666;
+    --glow-color: rgba(66, 153, 225, 0.6);
+    --space-gradient: linear-gradient(45deg, #000000, #1a1a1a);
+    
+    /* AI Specific Colors */
+    --ai-primary-color: #00ffff;  /* Cyberpunk-style cyan */
+    --ai-secondary-color: #4299e1;
+    --ai-background-dark: rgba(0,0,0,0.8);
+    --ai-glow-effect: rgba(0,255,255,0.3);
+    
+    /* Animation Timings */
+    --animation-slow: 1.2s;
+    --animation-medium: 0.8s;
+    --animation-fast: 0.5s;
+    --transition-speed: 0.3s;
 }
 
 /* Base Styles */
 body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 0;
-  background: var(--space-gradient);
-  color: var(--primary-text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: var(--space-gradient);
+    color: var(--primary-text);
+    overflow-x: hidden;
 }
 
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px;
-  background: var(--secondary-bg);
-  color: var(--primary-text);
+/* ======================
+   Layout & Navigation
+   ====================== */
+.header {
+    position: fixed;
+    width: 100%;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: transparent;
+    z-index: 1000;
+    transition: background-color 0.3s ease;
 }
 
-footer {
-  text-align: center;
-  padding: 10px;
-  background: var(--secondary-bg);
-  color: var(--text-secondary);
-  font-size: 14px;
+.header.scrolled {
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(10px);
 }
 
-/* Buttons */
-button, .button {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background 0.3s ease, transform 0.2s ease;
+/* Tesla-style menu */
+.menu-overlay {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    background: white;
+    transform: translateX(100%);
+    transition: transform 0.5s ease;
+    z-index: 2000;
 }
 
-button:hover, .button:hover {
-  background: var(--accent-color);
-  transform: scale(1.05);
+.menu-overlay.active {
+    transform: translateX(0);
 }
 
-.logout-btn {
-  background: #FF5C5C;
-  color: white;
+/* ======================
+   AI Guidance Interface
+   ====================== */
+.ai-guidance-panel {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 600px;
+    background: var(--ai-background-dark);
+    border: 2px solid var(--ai-primary-color);
+    border-radius: 15px;
+    padding: 15px;
+    box-shadow: 
+        0 0 20px var(--ai-glow-effect),
+        0 0 40px rgba(66,153,225,0.2);
+    display: flex;
+    align-items: center;
+    z-index: 1000;
+    transition: all var(--transition-speed) ease;
 }
 
-.logout-btn:hover {
-  background: #ff3333;
+.ai-mode-selector {
+    display: flex;
+    background: rgba(255,255,255,0.1);
+    border-radius: 30px;
+    padding: 5px;
+    margin-right: 15px;
+    position: relative;
 }
 
-/* Progress Bar */
-.progress-bar-container {
-  position: relative;
-  height: 20px;
-  background: #e0e0e0;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 0 10px var(--glow-color);
+.ai-mode {
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 25px;
+    position: relative;
+    transition: all var(--transition-speed) ease;
+    color: var(--primary-text);
 }
 
-.progress-fill {
-  height: 100%;
-  background: #76c7c0;
-  width: 0%;
-  transition: width 0.5s ease;
+.ai-mode.active {
+    background: var(--ai-primary-color);
+    color: black;
+    box-shadow: 
+        0 0 10px var(--ai-primary-color),
+        0 0 20px var(--ai-glow-effect);
 }
 
-.progress-text {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-weight: bold;
-  color: var(--primary-text);
-}
-.mode {
-  border: 2px solid #005b96;
-  padding: 1.5em;
-  width: 40%;
-  text-align: center;
-  cursor: pointer;
-  margin: 1em auto;
-  border-radius: 10px;
-  background-color: #f0f8ff;
-  transition: transform 0.3s;
+/* Progression Visualization */
+.ai-progression-bar {
+    width: 100%;
+    height: 5px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 10px;
 }
 
-.mode:hover {
-  transform: scale(1.05);
-  background-color: #e6f7ff;
+.ai-progression-fill {
+    height: 100%;
+    background: var(--ai-primary-color);
+    width: 0;
+    transition: width var(--transition-speed) ease;
 }
 
-#ai-modes {
-  text-align: center;
-  padding: 2em;
-}
-.chat-container {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  width: 300px;
-  max-height: 400px;
-  background: white;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  border-radius: 8px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  z-index: 1000;
+/* AI Status Indicators */
+.ai-status-indicators {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
 }
 
-.chat-header {
-  background: #005b96;
-  color: white;
-  padding: 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.ai-status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin: 0 5px;
+    transition: all var(--transition-speed) ease;
 }
 
-.chat-messages {
-  flex: 1;
-  overflow-y: auto;
-  padding: 10px;
-  background: #f0f0f0;
+.ai-status-dot--learning {
+    background: var(--ai-primary-color);
+    animation: pulse 1.5s infinite;
 }
 
-.chat-input-container {
-  display: flex;
-  border-top: 1px solid #ddd;
-  padding: 5px;
+.ai-status-dot--warning {
+    background: orange;
+    animation: warning-pulse 1s infinite;
 }
 
-.chat-input-container input {
-  flex: 1;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  margin-right: 5px;
+.ai-status-dot--error {
+    background: red;
 }
 
-.chat-input-container button {
-  padding: 8px 12px;
-  background: #005b96;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+/* Contextual Hint Tooltip */
+.ai-context-hint {
+    position: absolute;
+    top: -50px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--ai-background-dark);
+    border: 1px solid var(--ai-secondary-color);
+    border-radius: 10px;
+    padding: 10px;
+    max-width: 250px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--transition-speed) ease;
+    box-shadow: 0 0 20px var(--ai-glow-effect);
 }
 
-.hidden {
-  display: none;
+.ai-mode:hover .ai-context-hint {
+    opacity: 1;
+    visibility: visible;
+    top: -60px;
 }
 
-/* Achievement List */
-.achievement-item {
-  display: flex;
-  align-items: center;
-  margin: 10px 0;
-  background: var(--hover-bg);
-  padding: 10px;
-  border-radius: 5px;
-  transition: transform 0.2s ease, background 0.3s ease;
+/* ======================
+   Video Backgrounds
+   ====================== */
+.video-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;
 }
 
-.achievement-item:hover {
-  background: var(--accent-color);
-  transform: scale(1.05);
+.video-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: -1;
 }
 
-.achievement-icon {
-  font-size: 24px;
-  margin-right: 10px;
-  color: var(--accent-color);
+/* ======================
+   Section Styles
+   ====================== */
+.section {
+    min-height: 100vh;
+    padding: 80px 20px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
 }
 
-/* Mission Container */
-.mission-container {
-  margin-top: 20px;
+/* Hero Section */
+.hero-section {
+    text-align: center;
 }
 
-.mission-title {
-  font-size: 20px;
-  margin-bottom: 10px;
-  color: var(--accent-color);
+.hero-content {
+    max-width: 800px;
+    opacity: 0;
+    transform: translateY(30px);
+    animation: fadeInUp 1s ease forwards;
 }
 
-.mission-button {
-  padding: 10px 20px;
-  background: var(--secondary-bg);
-  color: var(--primary-text);
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  box-shadow: 0 0 10px var(--glow-color);
-  transition: background 0.3s ease, transform 0.2s ease;
+/* Training Section */
+.training-section {
+    background: var(--space-gradient);
 }
 
-.mission-button:hover {
-  background: #1b4f72;
-  transform: scale(1.1);
+.training-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    padding: 40px;
 }
 
-/* Leaderboard Table */
-.leaderboard-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
+/* Founder Story Section */
+.founder-story {
+    background: var(--space-gradient);
+    padding: 100px 50px;
 }
 
-.leaderboard-table th,
-.leaderboard-table td {
-  padding: 10px;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
+/* Success Stories */
+.success-stories {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+    padding: 40px;
 }
 
-.leaderboard-table th {
-  background: var(--secondary-bg);
-  color: var(--primary-text);
+/* ======================
+   Animations
+   ====================== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.leaderboard-table tr:hover {
-  background: var(--hover-bg);
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
-/* Cards */
-.card {
-  background: var(--card-bg);
-  border-radius: 8px;
-  padding: 20px;
-  margin: 10px 0;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 0.7; }
+    50% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(1); opacity: 0.7; }
 }
 
-.card:hover {
-  transform: translateY(-5px);
-}
-/* Header Styles */
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 20px;
-  background: var(--secondary-bg);
-  color: var(--primary-text);
+@keyframes warning-pulse {
+    0% { transform: scale(1); background: orange; }
+    50% { transform: scale(1.1); background: darkorange; }
+    100% { transform: scale(1); background: orange; }
 }
 
-/* Hamburger Menu */
-.hamburger-menu {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  width: 30px;
-  height: 30px;
-  cursor: pointer;
+/* ======================
+   Components
+   ====================== */
+.button {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
-.hamburger-menu span {
-  display: block;
-  width: 25px;
-  height: 3px;
-  background-color: var(--primary-text);
-  margin: 3px 0;
-  transition: all 0.3s ease;
+.button-primary {
+    background: var(--primary-text);
+    color: var(--primary-bg);
 }
 
-/* Alignment Fixes */
-header .flags-container {
-  display: flex;
-  align-items: center;
-  gap: 10px; /* Adjust spacing between flags */
+.button-secondary {
+    background: transparent;
+    border: 2px solid var(--primary-text);
+    color: var(--primary-text);
 }
 
-header .flags-container img {
-  width: 24px;
-  height: 24px;
-  cursor: pointer;
-}
-
-header .menu-container {
-  display: flex;
-  align-items: center;
-  gap: 20px; /* Adjust spacing between menu and flags */
-}
-
-/* Responsive Styles */
+/* ======================
+   Responsive Design
+   ====================== */
 @media (max-width: 768px) {
-  header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+    .section {
+        padding: 60px 15px;
+    }
 
-  .progress-bar-container {
-    height: 15px;
-  }
+    .training-grid,
+    .success-stories {
+        grid-template-columns: 1fr;
+    }
 
-  button, .button {
-    padding: 8px 16px;
-  }
+    .hero-content {
+        padding: 0 20px;
+    }
 
-  .achievement-item {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+    .button {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+
+    /* AI Guidance Panel Responsive Adjustments */
+    .ai-guidance-panel {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .ai-mode-selector {
+        flex-direction: column;
+        margin-bottom: 15px;
+    }
+
+    .ai-mode {
+        margin-bottom: 10px;
+        text-align: center;
+    }
 }
