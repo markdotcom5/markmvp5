@@ -1,4 +1,4 @@
-require('dotenv').config(); // Load environment variables
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -7,6 +7,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
+const fs = require('fs');
 const http = require('http');
 const { setupWebSocketServer, authenticate } = require('./middleware/authenticate');
 const AIWebController = require('./services/AIWebController');
@@ -14,13 +15,37 @@ const AIWebController = require('./services/AIWebController');
 const app = express();
 
 // =======================
-// Serve Static Files BEFORE Other Configurations
+// Enhanced Static File Serving
 // =======================
-// Serve static files from the root directory
-app.use(express.static(path.join(__dirname)));
 
-// Serve static files from the public directory
+// Serve specific directories with explicit paths
+app.use('/css', express.static(path.join(__dirname, 'public', 'css')));
+app.use('/js', express.static(path.join(__dirname, 'public', 'js')));
+app.use('/video', express.static(path.join(__dirname, 'public', 'video'))); // Changed from videos to video
+app.use('/images', express.static(path.join(__dirname, 'public', 'images')));
+
+// Serve other static files from the public directory
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Add debug logging for development
+if (process.env.NODE_ENV === 'development') {
+    console.log('Static directory paths:');
+    console.log('CSS:', path.join(__dirname, 'public', 'css'));
+    console.log('JS:', path.join(__dirname, 'public', 'js'));
+    console.log('Video:', path.join(__dirname, 'public', 'video'));
+    console.log('Images:', path.join(__dirname, 'public', 'images'));
+}
+// Add test route to validate CSS file existence
+app.get('/test-css', (req, res) => {
+    const cssPath = path.join(__dirname, 'public', 'css', 'main.css');
+    fs.access(cssPath, fs.constants.F_OK, (err) => {
+        if (err) {
+            res.json({ error: 'CSS file not found', path: cssPath });
+        } else {
+            res.json({ success: 'CSS file exists', path: cssPath });
+        }
+    });
+});
 
 // =======================
 // MongoDB Configuration
@@ -69,6 +94,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use(cookieParser());
 
+// Session Configuration
 const MongoStore = require('connect-mongo');
 app.use(session({
     secret: process.env.JWT_SECRET || 'your_secret_key',
@@ -76,40 +102,44 @@ app.use(session({
     saveUninitialized: false,
     store: MongoStore.create({
         mongoUrl: process.env.MONGO_URI,
-        ttl: 14 * 24 * 60 * 60, // 14 days
+        ttl: 14 * 24 * 60 * 60,
         autoRemove: 'native',
     }),
     cookie: {
-        secure: process.env.NODE_ENV === 'production', // Secure cookies in production
+        secure: process.env.NODE_ENV === 'production',
         httpOnly: true,
-        maxAge: 14 * 24 * 60 * 60 * 1000, // 14 days in milliseconds
+        maxAge: 14 * 24 * 60 * 60 * 1000,
     },
 }));
 
+// Security Configuration
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
             scriptSrc: ["'self'", "'unsafe-inline'", "https:", "https://cdnjs.cloudflare.com"],
             styleSrc: ["'self'", "'unsafe-inline'", "https:"],
-            imgSrc: ["'self'", "data:", "https:"],
+            imgSrc: ["'self'", "data:", "https:", "/api/placeholder"],
             frameSrc: ["'self'", "https://www.sora.com"],
             connectSrc: ["'self'", "https://api.openai.com"],
+            fontSrc: ["'self'", "https:", "data:"],
+            mediaSrc: ["'self'", "blob:", "data:"],
         },
     },
     crossOriginEmbedderPolicy: false,
     crossOriginResourcePolicy: { policy: "cross-origin" },
 }));
 
+// Rate Limiting
 const aiLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests
+    windowMs: 15 * 60 * 1000,
+    max: 100,
     message: { error: 'AI service rate limit exceeded. Please try again later.' },
 });
 
 const fsdLimiter = rateLimit({
-    windowMs: 60 * 1000, // 1 minute
-    max: 30, // Limit each IP to 30 requests
+    windowMs: 60 * 1000,
+    max: 30,
     message: { error: 'FSD service rate limit exceeded. Please try again later.' },
 });
 
@@ -117,7 +147,7 @@ app.use('/api/ai', aiLimiter);
 app.use('/api/ai/fsd', fsdLimiter);
 
 // =======================
-// Import and Register Routes
+// Register Routes
 // =======================
 const routers = {
     aboutRouter: require('./routes/about'),
@@ -147,26 +177,11 @@ for (const [name, router] of Object.entries(routers)) {
     console.log(`Registered route: ${routePath}`);
 }
 
-// Specific Routes for Middleware
-app.use('/api/about', routers.aboutRouter);
-app.use('/api/achievements', authenticate, routers.achievementsRouter);
-app.use('/api/dashboard', authenticate, routers.dashboardRouter);
-
-// Serve index.html for the root route and catch-all for SPA
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
-
 // =======================
 // WebSocket Integration
 // =======================
-const server = http.createServer(app); // Create HTTP server
+const server = http.createServer(app);
 const { wss, broadcastMessage } = setupWebSocketServer(server);
-
-// Example: Notify users via WebSocket
-function notifyUsers(userIds, message) {
-    broadcastMessage(userIds, { type: 'NOTIFICATION', message });
-}
 
 // =======================
 // Error Handling
@@ -180,27 +195,22 @@ app.use((req, res) => {
 });
 
 app.use((err, req, res, next) => {
+    if (err.code === 'ENOENT') {
+        console.warn(`File not found: ${req.path}`);
+        res.status(404).send('File not found');
+        return;
+    }
+    if (err.message.includes('Range Not Satisfiable')) {
+        console.warn(`Range error for file: ${req.path}`);
+        res.status(416).send('Range Not Satisfiable');
+        return;
+    }
     console.error('Global Error:', {
         message: err.message,
         stack: err.stack,
         path: req.path,
         method: req.method,
     });
-
-    if (err.name === 'ValidationError') {
-        return res.status(400).json({
-            error: 'Validation Error',
-            details: err.message,
-        });
-    }
-
-    if (err.name === 'UnauthorizedError') {
-        return res.status(401).json({
-            error: 'Authentication Error',
-            message: 'Invalid or expired token',
-        });
-    }
-
     res.status(err.status || 500).json({
         error: 'Server Error',
         message: process.env.NODE_ENV === 'development' ? err.message : 'An unexpected error occurred',
@@ -208,7 +218,7 @@ app.use((err, req, res, next) => {
 });
 
 // =======================
-// Initialize Server
+// Start the Server
 // =======================
 const startServer = async () => {
     try {

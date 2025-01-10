@@ -5,17 +5,34 @@ document.addEventListener("DOMContentLoaded", () => {
     const menuList = document.querySelector("#dropdown-menu");
 
     // Menu Toggle
-    menuButton.addEventListener("click", () => {
+    menuButton?.addEventListener("click", () => {
         const isExpanded = menuButton.getAttribute("aria-expanded") === "true";
         menuButton.setAttribute("aria-expanded", !isExpanded);
-        menuList.classList.toggle("show");
+        menuList?.classList.toggle("show");
     });
+
+    // Menu Overlay Toggle
+    function toggleMenu() {
+        console.log("Menu toggle triggered");
+        const menuOverlay = document.getElementById('menuOverlay');
+        menuOverlay?.classList.toggle('active');
+    }
+    
+    // Video Loading Handler
+    const video = document.querySelector('.video-background');
+    if (video) {
+        video.addEventListener('loadeddata', function() {
+            video.setAttribute('loaded', '');
+        });
+    }
 
     // Countdown Timer
     const countdownElement = document.getElementById("countdown-timer");
     const targetDate = new Date("2025-12-31T23:59:59");
 
     function updateCountdown() {
+        if (!countdownElement) return;
+        
         const now = new Date();
         const diff = targetDate - now;
 
@@ -33,7 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     setInterval(updateCountdown, 1000);
-
+});
     // Timeline Chart
     const ctx = document.getElementById("timeline-chart").getContext("2d");
     new Chart(ctx, {

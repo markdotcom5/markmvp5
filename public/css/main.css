@@ -15,8 +15,8 @@
     /* AI Specific Colors */
     --ai-primary-color: #00ffff;  /* Cyberpunk-style cyan */
     --ai-secondary-color: #4299e1;
-    --ai-background-dark: rgba(0,0,0,0.8);
-    --ai-glow-effect: rgba(0,255,255,0.3);
+    --ai-background-dark: rgba(0, 0, 0, 0.8);
+    --ai-glow-effect: rgba(0, 255, 255, 0.3);
     
     /* Animation Timings */
     --animation-slow: 1.2s;
@@ -25,7 +25,9 @@
     --transition-speed: 0.3s;
 }
 
-/* Base Styles */
+/* ======================
+   Base Styles
+   ====================== */
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     margin: 0;
@@ -33,6 +35,12 @@ body {
     background: var(--space-gradient);
     color: var(--primary-text);
     overflow-x: hidden;
+}
+
+.logo svg {
+    height: 40px;
+    width: auto;
+    display: block;
 }
 
 /* ======================
@@ -55,25 +63,182 @@ body {
     backdrop-filter: blur(10px);
 }
 
-/* Tesla-style menu */
+.menu-trigger {
+    color: white;
+    font-size: 16px;
+    padding: 8px 16px;
+    cursor: pointer;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    z-index: 1000;
+    transition: background-color var(--transition-speed) ease;
+}
+
+.menu-trigger:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
 .menu-overlay {
     position: fixed;
     top: 0;
-    right: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     background: white;
+    color: black;
     transform: translateX(100%);
-    transition: transform 0.5s ease;
+    transition: transform var(--transition-speed) ease-in-out;
     z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 .menu-overlay.active {
     transform: translateX(0);
 }
 
+.menu-items a {
+    text-decoration: none;
+    font-size: 18px;
+    color: black;
+    margin: 15px 0;
+    text-transform: uppercase;
+    transition: color var(--transition-speed) ease;
+}
+
+.menu-items a:hover {
+    color: var(--accent-color);
+}
+
+.language-selector {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+}
+
+.language-selector select {
+    font-size: 14px;
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    outline: none;
+}
+
 /* ======================
    AI Guidance Interface
+   ====================== */
+.ai-guidance-panel {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 600px;
+    background: var(--ai-background-dark);
+    border: 2px solid var(--ai-primary-color);
+    border-radius: 15px;
+    padding: 15px;
+    box-shadow: 
+        0 0 20px var(--ai-glow-effect),
+        0 0 40px rgba(66, 153, 225, 0.2);
+    display: flex;
+    align-items: center;
+    z-index: 1000;
+    transition: all var(--transition-speed) ease;
+}
+
+.ai-mode-selector {
+    display: flex;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 30px;
+    padding: 5px;
+    margin-right: 15px;
+    position: relative;
+}
+
+.ai-mode {
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 25px;
+    position: relative;
+    transition: all var(--transition-speed) ease;
+    color: var(--primary-text);
+}
+
+.ai-mode.active {
+    background: var(--ai-primary-color);
+    color: black;
+    box-shadow: 
+        0 0 10px var(--ai-primary-color),
+        0 0 20px var(--ai-glow-effect);
+}
+
+/* Progression Visualization */
+.ai-progression-bar {
+    width: 100%;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+.ai-progression-fill {
+    height: 100%;
+    background: var(--ai-primary-color);
+    width: 0;
+    transition: width var(--transition-speed) ease;
+}
+
+/* AI Status Indicators */
+.ai-status-indicators {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+}
+
+.ai-status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin: 0 5px;
+    transition: all var(--transition-speed) ease;
+}
+
+.ai-status-dot--learning {
+    background: var(--ai-primary-color);
+    animation: pulse 1.5s infinite;
+}
+
+.ai-status-dot--warning {
+    background: orange;
+    animation: warning-pulse 1s infinite;
+}
+
+.ai-status-dot--error {
+    background: red;
+}
+
+/* ======================
+   Animations
+   ====================== */
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 0.7; }
+    50% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(1); opacity: 0.7; }
+}
+
+@keyframes warning-pulse {
+    0% { transform: scale(1); background: orange; }
+    50% { transform: scale(1.1); background: darkorange; }
+    100% { transform: scale(1); background: orange; }
+}
+
    ====================== */
 .ai-guidance-panel {
     position: fixed;
@@ -189,10 +354,7 @@ body {
     visibility: visible;
     top: -60px;
 }
-
-/* ======================
-   Video Backgrounds
-   ====================== */
+/* Video Backgrounds */
 .video-background {
     position: absolute;
     top: 0;
@@ -201,6 +363,7 @@ body {
     height: 100%;
     object-fit: cover;
     z-index: -1;
+    transform: scale(1.02); /* Prevents white edges during video loop */
 }
 
 .video-overlay {
@@ -209,35 +372,22 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.4);
+    background: linear-gradient(
+        rgba(0, 0, 0, 0.5),
+        rgba(0, 0, 0, 0.3)
+    );
     z-index: -1;
 }
 
-/* ======================
-   Section Styles
-   ====================== */
-.section {
-    min-height: 100vh;
-    padding: 80px 20px;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
+/* Add loading state */
+.video-background:not([loaded]) {
+    filter: blur(10px);
+    transition: filter 0.3s;
 }
 
-/* Hero Section */
-.hero-section {
-    text-align: center;
+.video-background[loaded] {
+    filter: blur(0);
 }
-
-.hero-content {
-    max-width: 800px;
-    opacity: 0;
-    transform: translateY(30px);
-    animation: fadeInUp 1s ease forwards;
-}
-
 /* Training Section */
 .training-section {
     background: var(--space-gradient);
