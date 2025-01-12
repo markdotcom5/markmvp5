@@ -1,16 +1,15 @@
-cat > .eslintrc.js << EOF
 module.exports = {
   env: {
     browser: true,
     commonjs: true,
     es2021: true,
-    node: true
+    node: true,
   },
   extends: [
-    'eslint:recommended'
+    'eslint:recommended',
   ],
   parserOptions: {
-    ecmaVersion: 'latest'
+    ecmaVersion: 'latest',
   },
   rules: {
     'indent': ['error', 2],
@@ -18,7 +17,6 @@ module.exports = {
     'quotes': ['error', 'single'],
     'semi': ['error', 'always'],
     'no-unused-vars': 'warn',
-    'no-console': 'off'
-  }
+    'no-console': 'off',
+  },
 };
-EOF

@@ -1,272 +1,348 @@
+// Initialize when document is ready
 document.addEventListener("DOMContentLoaded", () => {
-    // Existing Functionality
-    const languageFlags = document.querySelectorAll(".language-flag");
-    const menuButton = document.querySelector(".menu-icon");
-    const menuList = document.querySelector("#dropdown-menu");
+    try {
+        // Initialize AI Guidance System
+        const aiSystem = new AIGuidanceSystem();
 
-    // Menu Toggle
-    menuButton?.addEventListener("click", () => {
-        const isExpanded = menuButton.getAttribute("aria-expanded") === "true";
-        menuButton.setAttribute("aria-expanded", !isExpanded);
-        menuList?.classList.toggle("show");
-    });
+        // Menu and Navigation
+        initializeNavigation();
 
-    // Menu Overlay Toggle
-    function toggleMenu() {
-        console.log("Menu toggle triggered");
-        const menuOverlay = document.getElementById('menuOverlay');
-        menuOverlay?.classList.toggle('active');
+        // Video Background Handler
+        initializeVideoBackground();
+
+        // Initialize Timeline
+        initializeTimeline();
+
+        // Start countdown timer
+        initializeCountdown();
+    } catch (error) {
+        console.error("Error initializing application:", error);
     }
-    
-    // Video Loading Handler
-    const video = document.querySelector('.video-background');
-    if (video) {
-        video.addEventListener('loadeddata', function() {
-            video.setAttribute('loaded', '');
-        });
-    }
-
-    // Countdown Timer
-    const countdownElement = document.getElementById("countdown-timer");
-    const targetDate = new Date("2025-12-31T23:59:59");
-
-    function updateCountdown() {
-        if (!countdownElement) return;
-        
-        const now = new Date();
-        const diff = targetDate - now;
-
-        if (diff <= 0) {
-            countdownElement.textContent = "The event has started!";
-            return;
-        }
-
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-        const minutes = Math.floor((diff / (1000 * 60)) % 60);
-        const seconds = Math.floor((diff / 1000) % 60);
-
-        countdownElement.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
-    }
-
-    setInterval(updateCountdown, 1000);
 });
-    // Timeline Chart
-    const ctx = document.getElementById("timeline-chart").getContext("2d");
-    new Chart(ctx, {
-        type: "line",
-        data: {
-            labels: ["2024", "2029", "2034", "2049"],
-            datasets: [
-                {
-                    label: "Max Price ($)",
-                    data: [250000, 100000, 25000, 5000],
-                    borderColor: "#ff6384",
-                    fill: false
-                },
-                {
-                    label: "Min Price ($)",
-                    data: [250000, 50000, 10000, 1000],
-                    borderColor: "#36a2eb",
-                    fill: false
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    display: true
-                },
-                title: {
-                    display: true,
-                    text: "Price Evolution Timeline"
-                }
-            },
-            scales: {
-                x: {
-                    title: {
-                        display: true,
-                        text: "Year"
-                    }
-                },
-                y: {
-                    title: {
-                        display: true,
-                        text: "Price ($)"
-                    },
-                    beginAtZero: false
-                }
-            }
-        }
+document.addEventListener("DOMContentLoaded", () => {
+    const aiModes = document.querySelectorAll(".ai-mode");
+
+    aiModes.forEach((mode) => {
+        mode.addEventListener("click", () => {
+            aiModes.forEach((m) => m.classList.remove("active")); // Remove active from others
+            mode.classList.add("active"); // Activate clicked mode
+            console.log(`AI Mode Switched: ${mode.dataset.mode}`); // Log selected mode
+        });
     });
+});
+// In your main.js
+document.addEventListener('DOMContentLoaded', function() {
+    // Menu Toggle
+    window.toggleMenu = function() {
+        document.querySelector('.menu-overlay')?.classList.toggle('active');
+    };
 
-    // AI Guidance System
-    class AIGuidanceSystem {
-        constructor() {
-            // Core AI Guidance Configuration
-            this.currentMode = 'full-guidance';
-            this.learningProgress = 0;
-            this.systemStatus = 'initializing';
-            this.personalizedSkills = {};
+    // AI Toggle
+    const toggleOptions = document.querySelectorAll('.toggle-option');
+    toggleOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            toggleOptions.forEach(opt => opt.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+});
+// AI Guidance System Class
+class AIGuidanceSystem {
+    constructor() {
+        this.currentMode = 'full-guidance';
+        this.learningProgress = 0;
+        this.systemStatus = 'initializing';
 
-            // DOM Element References
-            this.modeSelector = document.querySelector('.ai-mode-selector');
-            this.progressionBar = document.querySelector('.ai-progression-fill');
-            this.statusIndicators = document.querySelector('.ai-status-indicators');
+        // Initialize UI Elements
+        this.initializeUI();
+        this.initializeEventListeners();
+    }
 
-            // Initialize Event Listeners
-            this.initEventListeners();
+    initializeUI() {
+        try {
+            this.elements = {
+                modeSelector: document.querySelector('.ai-mode-selector'),
+                progressionBar: document.querySelector('.ai-progression-fill'),
+                statusIndicators: document.querySelector('.ai-status-indicators')
+            };
+
+            // Add glowing effect
+            this.addGlowingEffects();
+        } catch (error) {
+            console.error("Error initializing AI UI elements:", error);
         }
+    }
 
-        initEventListeners() {
-            // Mode Selection Handler
-            if (this.modeSelector) {
-                this.modeSelector.addEventListener('click', (event) => {
-                    const selectedMode = event.target.closest('.ai-mode');
-                    if (selectedMode && !selectedMode.classList.contains('active')) {
-                        this.switchAIMode(selectedMode.dataset.mode);
+    initializeEventListeners() {
+        try {
+            if (this.elements.modeSelector) {
+                this.elements.modeSelector.addEventListener('click', (e) => {
+                    const mode = e.target.closest('.ai-mode');
+                    if (mode && !mode.classList.contains('active')) {
+                        this.switchMode(mode.dataset.mode);
                     }
                 });
             }
+        } catch (error) {
+            console.error("Error setting up AI event listeners:", error);
         }
+    }
 
-        switchAIMode(newMode) {
-            // Remove active state from all modes
-            document.querySelectorAll('.ai-mode').forEach(mode => {
-                mode.classList.remove('active');
-            });
+    switchMode(mode) {
+        try {
+            const modes = document.querySelectorAll('.ai-mode');
+            modes.forEach(m => m.classList.remove('active'));
 
-            // Activate selected mode
-            const selectedModeElement = document.querySelector(`.ai-mode[data-mode="${newMode}"]`);
-            if (selectedModeElement) {
-                selectedModeElement.classList.add('active');
-
-                // Update current mode
-                this.currentMode = newMode;
-
-                // Trigger mode-specific behaviors
-                this.updateSystemStatus(newMode);
-                this.createContextualHint(newMode);
-            }
-        }
-
-        updateSystemStatus(mode) {
-            let status = 'learning';
-            let progressPercentage = 0;
-
-            switch(mode) {
-                case 'full-guidance':
-                    status = 'learning';
-                    progressPercentage = 75;
-                    break;
-                case 'manual-navigation':
-                    status = 'warning';
-                    progressPercentage = 30;
-                    break;
-                default:
-                    status = 'learning';
-                    progressPercentage = 50;
-            }
-
-            // Update status dot
-            this.updateStatusIndicator(status);
-
-            // Update progression bar
-            this.updateProgressionBar(progressPercentage);
-        }
-
-        updateStatusIndicator(status) {
-            if (this.statusIndicators) {
-                // Clear previous status classes
-                const statusDot = this.statusIndicators.querySelector('.ai-status-dot');
-                if (statusDot) {
-                    statusDot.className = 'ai-status-dot';
-                    // Add current status class
-                    statusDot.classList.add(`ai-status-dot--${status}`);
-                }
-            }
-        }
-
-        updateProgressionBar(percentage) {
-            if (this.progressionBar) {
-                this.progressionBar.style.width = `${percentage}%`;
-            }
-        }
-
-        createContextualHint(mode) {
-            // Remove existing hints
-            const existingHints = document.querySelectorAll('.ai-context-hint');
-            existingHints.forEach(hint => hint.remove());
-
-            // Create new hint based on mode
-            const hintContent = {
-                'full-guidance': 'AI is optimizing your entire learning path',
-                'manual-navigation': 'You have more control, but less AI optimization',
-                'hybrid': 'Balanced approach between AI guidance and manual control'
-            };
-
-            const hintElement = document.createElement('div');
-            hintElement.classList.add('ai-context-hint');
-            hintElement.textContent = hintContent[mode] || 'Select your AI interaction mode';
-
-            // Attach to the selected mode
             const selectedMode = document.querySelector(`.ai-mode[data-mode="${mode}"]`);
             if (selectedMode) {
-                selectedMode.appendChild(hintElement);
+                selectedMode.classList.add('active');
+                this.currentMode = mode;
+                this.updateStatus(mode);
             }
-        }
-
-        // Advanced AI Tracking Methods
-        trackPersonalizedSkill(skillName, proficiencyLevel) {
-            this.personalizedSkills[skillName] = proficiencyLevel;
-            this.updateSkillVisualization();
-        }
-
-        updateSkillVisualization() {
-            // Future enhancement: Create a visualization of skill progression
-            console.log('Personalized Skills:', this.personalizedSkills);
-        }
-
-        // Potential future method for more complex AI interactions
-        generateNextTrainingRecommendation() {
-            // Logic to suggest next training steps based on current progress
-            const recommendations = [
-                'Focus on zero-gravity adaptation',
-                'Improve spacecraft systems knowledge',
-                'Practice emergency procedure simulations'
-            ];
-
-            return recommendations[Math.floor(Math.random() * recommendations.length)];
+        } catch (error) {
+            console.error("Error switching AI mode:", error);
         }
     }
 
-    // Header Scroll Effect
-    function handleHeaderScroll() {
-        const header = document.querySelector('.header');
-        if (window.scrollY > 50) {
-            header.classList.add('scrolled');
-        } else {
-            header.classList.remove('scrolled');
+    updateStatus(mode) {
+        try {
+            const statusConfigs = {
+                'full-guidance': { status: 'learning', progress: 75 },
+                'manual-navigation': { status: 'active', progress: 30 }
+            };
+
+            const config = statusConfigs[mode] || { status: 'learning', progress: 50 };
+            this.updateStatusIndicator(config.status);
+            this.updateProgress(config.progress);
+        } catch (error) {
+            console.error("Error updating AI status:", error);
         }
     }
 
-    // Scroll Event Listener for Header
-    window.addEventListener('scroll', handleHeaderScroll);
+    updateStatusIndicator(status) {
+        try {
+            const dot = this.elements.statusIndicators?.querySelector('.ai-status-dot');
+            if (dot) {
+                dot.className = `ai-status-dot ai-status-dot--${status}`;
+            }
+        } catch (error) {
+            console.error("Error updating AI status indicator:", error);
+        }
+    }
 
-    // Menu Toggle Function
-    window.toggleMenu = () => {
+    updateProgress(percentage) {
+        try {
+            if (this.elements.progressionBar) {
+                this.elements.progressionBar.style.width = `${percentage}%`;
+            }
+        } catch (error) {
+            console.error("Error updating AI progression bar:", error);
+        }
+    }
+
+    addGlowingEffects() {
+        try {
+            const aiPanel = document.querySelector('.ai-panel');
+            if (aiPanel) {
+                aiPanel.classList.add('glowing');
+            }
+        } catch (error) {
+            console.error("Error adding glowing effects:", error);
+        }
+    }
+}
+
+// Video Background Handler
+function initializeVideoBackground() {
+    const video = document.querySelector('.video-background');
+    if (!video) return;
+
+    video.onerror = () => {
+        console.error("Video failed to load. Using fallback image.");
+        const container = document.querySelector('.video-container');
+        container.style.backgroundImage = 'url(/images/fallback-hero-bg.jpg)';
+    };
+}
+
+
+function handleVideoFallback() {
+    const videoContainer = document.querySelector('.video-container');
+    if (videoContainer) {
+        videoContainer.style.backgroundImage = 'url(/images/fallback-hero-bg.jpg)';
+        videoContainer.classList.add('fallback');
+    }
+}
+
+
+// Navigation Functions
+function initializeNavigation() {
+    try {
+        const menuTrigger = document.querySelector('.menu-trigger');
         const menuOverlay = document.getElementById('menuOverlay');
-        menuOverlay.classList.toggle('active');
-    };
 
-    // Language Change Function
-    window.changeLanguage = (lang) => {
-        // Placeholder for language change logic
-        console.log(`Changing language to: ${lang}`);
-        // Implement actual language switching mechanism
-    };
+        if (menuTrigger && menuOverlay) {
+            menuTrigger.addEventListener('click', toggleMenu);
+        }
 
-    // Initialize the AI Guidance System
-    window.aiGuidanceSystem = new AIGuidanceSystem();
+        // Header scroll effect
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('.header');
+            if (header) {
+                header.classList.toggle('scrolled', window.scrollY > 50);
+            }
+        });
+    } catch (error) {
+        console.error("Error initializing navigation:", error);
+    }
+}
+
+// Toggle menu functionality
+function toggleMenu() {
+    const menuOverlay = document.getElementById('menuOverlay');
+    if (!menuOverlay) {
+        console.error("Menu overlay element not found!");
+        return;
+    }
+
+    const isActive = menuOverlay.classList.toggle('active');
+    console.log(`Menu toggled: ${isActive}`);
+}
+
+  // Language switching
+  function changeLanguage(lang) {
+    fetch('/api/setLanguage', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ language: lang }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          window.location.reload();
+        }
+      });
+  }
+ // Stats Counter Animation
+function animateStats() {
+    try {
+        const stats = document.querySelectorAll('.stat .number');
+
+        stats.forEach(stat => {
+            const target = parseInt(stat.getAttribute('data-target'), 10); // Use data-target for dynamic values
+            let current = 0;
+
+            const increment = target / 50; // Adjust for animation speed
+            const updateInterval = 30; // Interval duration in milliseconds
+
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    clearInterval(timer);
+                    current = target;
+                }
+                stat.textContent = Math.round(current);
+            }, updateInterval);
+        });
+    } catch (error) {
+        console.error("Error animating stats:", error);
+    }
+}
+
+// Timeline Chart
+function initializeTimeline() {
+    try {
+        const canvas = document.getElementById("timeline-chart");
+        if (!canvas) return;
+
+        const ctx = canvas.getContext("2d");
+        new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: ["2024", "2029", "2034", "2049"],
+                datasets: [
+                    {
+                        label: "Space Travel Cost ($)",
+                        data: [250000, 50000, 10000, 5000],
+                        borderColor: "#00ffff",
+                        backgroundColor: "rgba(0, 255, 255, 0.1)",
+                        tension: 0.4, // Smooth line curve
+                        pointRadius: 5, // Highlight data points
+                        pointBackgroundColor: "#00ffff",
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false, // Better fit for smaller containers
+                plugins: {
+                    legend: { display: true, labels: { color: "#ffffff" } },
+                    title: {
+                        display: true,
+                        text: "Cost Evolution Timeline",
+                        color: "#ffffff",
+                        font: { size: 18 }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        grid: {
+                            color: "rgba(255, 255, 255, 0.1)"
+                        },
+                        ticks: { color: "#ffffff" }
+                    },
+                    x: {
+                        grid: {
+                            color: "rgba(255, 255, 255, 0.1)"
+                        },
+                        ticks: { color: "#ffffff" }
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.error("Error initializing timeline:", error);
+    }
+}
+
+// Countdown Timer
+function initializeCountdown() {
+    try {
+        const countdownElement = document.getElementById("countdown-timer");
+        if (!countdownElement) return;
+
+        const targetDate = new Date("2025-12-31T23:59:59");
+
+        function updateCountdown() {
+            const now = new Date();
+            const diff = targetDate - now;
+
+            if (diff <= 0) {
+                countdownElement.textContent = "Launch commenced!";
+                return;
+            }
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            const minutes = Math.floor((diff / 1000 / 60) % 60);
+            const seconds = Math.floor((diff / 1000) % 60);
+
+            countdownElement.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+        }
+
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+    } catch (error) {
+        console.error("Error initializing countdown timer:", error);
+    }
+}
+
+// Event Listeners to Initialize All Functions
+document.addEventListener("DOMContentLoaded", () => {
+    animateStats();
+    initializeTimeline();
+    initializeCountdown();
 });

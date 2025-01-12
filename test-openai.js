@@ -1,19 +1,23 @@
-const { OpenAI } = require('openai');
+const { Configuration, OpenAIApi } = require('openai');
+require('dotenv').config(); // Load environment variables from .env
 
-// Initialize OpenAI Client with your API Key
-const openai = new OpenAI({
-    apiKey: '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',
+// Configure OpenAI Client
+const configuration = new Configuration({
+    apiKey: process.env.OPENAI_API_KEY, // Load API key from .env
 });
+const openai = new OpenAIApi(configuration);
 
 (async () => {
     try {
-        const response = await openai.chat.completions.create({
-            model: 'gpt-4', // Replace with your desired model
+        const response = await openai.createChatCompletion({
+            model: 'gpt-4', // Specify the desired model
             messages: [{ role: 'user', content: 'Hello, OpenAI!' }],
         });
-        console.log('OpenAI Response:', response.choices[0].message.content);
+        console.log('✅ OpenAI Response:', response.data.choices[0].message.content);
     } catch (error) {
-        console.error('OpenAI Test Error:', error.message);
+        console.error('❌ OpenAI Error:', error.response?.data || error.message);
     }
 })();
+
+
 

@@ -34,6 +34,7 @@ if (process.env.NODE_ENV === 'development') {
     console.log('JS:', path.join(__dirname, 'public', 'js'));
     console.log('Video:', path.join(__dirname, 'public', 'video'));
     console.log('Images:', path.join(__dirname, 'public', 'images'));
+    console.log(`Using API Key: ${process.env.OPENAI_API_KEY}`);
 }
 // Add test route to validate CSS file existence
 app.get('/test-css', (req, res) => {
@@ -46,7 +47,14 @@ app.get('/test-css', (req, res) => {
         }
     });
 });
+// Serve static files from the public directory
+app.use(express.static(path.join(__dirname, 'public')));
 
+// Example route for testing
+app.get('/test-video', (req, res) => {
+    const videoPath = path.join(__dirname, 'public', 'videos', 'steltrek-homepagetop.mp4');
+    res.sendFile(videoPath);
+});
 // =======================
 // MongoDB Configuration
 // =======================
