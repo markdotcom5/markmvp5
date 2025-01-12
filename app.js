@@ -15,48 +15,76 @@ const AIWebController = require('./services/AIWebController');
 const app = express();
 
 // =======================
-// Enhanced Static File Serving
-// =======================
-
-// Serve specific directories with explicit paths
+// ======== Static File Serving ========
+// Explicitly serve specific directories 
 app.use('/css', express.static(path.join(__dirname, 'public', 'css')));
 app.use('/js', express.static(path.join(__dirname, 'public', 'js')));
-app.use('/video', express.static(path.join(__dirname, 'public', 'video'))); // Changed from videos to video
+app.use('/videos', express.static(path.join(__dirname, 'public', 'video'))); // Changed to '/videos'
 app.use('/images', express.static(path.join(__dirname, 'public', 'images')));
 
-// Serve other static files from the public directory
+// Serve the entire public directory as a fallback
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Add debug logging for development
+// ======== Debug Logging (Development Mode) ========
 if (process.env.NODE_ENV === 'development') {
-    console.log('Static directory paths:');
-    console.log('CSS:', path.join(__dirname, 'public', 'css'));
-    console.log('JS:', path.join(__dirname, 'public', 'js'));
-    console.log('Video:', path.join(__dirname, 'public', 'video'));
-    console.log('Images:', path.join(__dirname, 'public', 'images'));
-    console.log(`Using API Key: ${process.env.OPENAI_API_KEY}`);
+   console.log('Static directory paths:');
+   console.log('CSS Path:', path.join(__dirname, 'public', 'css'));
+   console.log('JS Path:', path.join(__dirname, 'public', 'js'));
+   console.log('Video Path:', path.join(__dirname, 'public', 'video'));
+   console.log('Images Path:', path.join(__dirname, 'public', 'images'));
+   console.log('Public Directory:', path.join(__dirname, 'public'));
+   console.log(`Using OpenAI API Key: ${process.env.OPENAI_API_KEY || 'Not Set'}`);
+
+   // Add video request logging
+   app.use((req, res, next) => {
+       if (req.url.includes('/videos/')) {
+           console.log('Video request:', {
+               url: req.url,
+               method: req.method,
+               path: path.join(__dirname, 'public', 'video', path.basename(req.url))
+           });
+       }
+       next();
+   });
 }
-// Add test route to validate CSS file existence
+
+// ======== Test Routes for Static File Validation ========
 app.get('/test-css', (req, res) => {
-    const cssPath = path.join(__dirname, 'public', 'css', 'main.css');
-    fs.access(cssPath, fs.constants.F_OK, (err) => {
+   const cssPath = path.join(__dirname, 'public', 'css', 'main.css');
+   fs.access(cssPath, fs.constants.F_OK, (err) => {
+       if (err) {
+           res.status(404).json({ error: 'CSS file not found', path: cssPath });
+       } else {
+           res.status(200).json({ success: 'CSS file exists', path: cssPath });
+       }
+   });
+});
+
+app.get('/test-video', (req, res) => {
+   const videoPath = path.join(__dirname, 'public', 'video', 'stelacktop.mp4'); // Changed to .mp4
+   fs.access(videoPath, fs.constants.F_OK, (err) => {
+       if (err) {
+           res.status(404).json({ error: 'Video file not found', path: videoPath });
+       } else {
+           res.status(200).json({ success: 'Video file exists', path: videoPath });
+       }
+   });
+});
+// Serve a specific video file for testing purposes
+app.get('/video-test', (req, res) => {
+    const videoPath = path.join(__dirname, 'public', 'video', 'stelacktop.mov');
+    res.sendFile(videoPath, (err) => {
         if (err) {
-            res.json({ error: 'CSS file not found', path: cssPath });
-        } else {
-            res.json({ success: 'CSS file exists', path: cssPath });
+            console.error('Error serving video:', err);
+            res.status(500).send('Failed to load video');
         }
     });
 });
-// Serve static files from the public directory
-app.use(express.static(path.join(__dirname, 'public')));
 
-// Example route for testing
-app.get('/test-video', (req, res) => {
-    const videoPath = path.join(__dirname, 'public', 'videos', 'steltrek-homepagetop.mp4');
-    res.sendFile(videoPath);
+// ======== Catch-All Static Fallback ========
+app.use((req, res) => {
+    res.status(404).send('Resource not found');
 });
-// =======================
-// MongoDB Configuration
 // =======================
 mongoose.set('strictQuery', true);
 
