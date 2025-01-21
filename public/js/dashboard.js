@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     // Initialize dashboard
     initializeDashboard();
-    
+
     // Set up event listeners
     setupEventListeners();
 });
@@ -145,7 +145,7 @@ async function startMission(missionId) {
 
 function setupEventListeners() {
     // Logout button
-    const logoutBtn = document.getElementById('logout-btn');
+    const logoutBtn = document.getElementById('logout-button');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', handleLogout);
     }
@@ -197,4 +197,15 @@ function setupWebSocket() {
 }
 
 function handleRealtimeUpdate(data) {
-    switch
+    if (data.type === 'achievement') {
+        updateAchievements([data.achievement]);
+    } else if (data.type === 'mission-update') {
+        updateNextMission(data.mission);
+    } else if (data.type === 'stats-update') {
+        updateStats(data.stats);
+    }
+}
+
+function getWebSocketUrl() {
+    return `ws://${window.location.host}/api/ws`;  // Modify as needed for your WebSocket setup
+}

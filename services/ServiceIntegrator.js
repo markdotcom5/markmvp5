@@ -4,6 +4,7 @@ const AISpaceCoach = require('./AISpaceCoach');
 const AIGuidanceSystem = require('./AIGuidanceSystem');
 const aiGuidance = require('./aiGuidance');
 const aiAssistant = require('./aiAssistant');
+const User = require('../models/User');  // Add this as the first new line after your existing requires
 
 class ServiceIntegrator extends EventEmitter {
     constructor() {
@@ -23,6 +24,9 @@ class ServiceIntegrator extends EventEmitter {
 
         // Track active guidance sessions
         this.activeSessions = new Map();
+
+        // Engagement metrics
+        this.engagementMetrics = new Map();
     }
 
     async initializeSession(userId) {
@@ -45,6 +49,14 @@ class ServiceIntegrator extends EventEmitter {
             };
 
             this.activeSessions.set(userId, sessionState);
+
+            // Initialize engagement metrics
+            this.engagementMetrics.set(userId, {
+                totalTimeInFSD: 0,
+                totalActionsCompleted: 0,
+                fsdEngagements: 0
+            });
+
             return sessionState;
         } catch (error) {
             console.error('Session Initialization Error:', error);
@@ -68,8 +80,11 @@ class ServiceIntegrator extends EventEmitter {
                 'aiGuidance.lastModeChange': new Date()
             });
 
-            // If entering FSD mode, start active guidance
+            // Track FSD engagement
             if (newMode === this.MODES.FSD) {
+                const metrics = this.engagementMetrics.get(userId);
+                metrics.fsdEngagements += 1;
+
                 const guidance = await this.calculateNextAction(userId);
                 session.nextAction = guidance.nextAction;
                 session.confidence = guidance.confidence;
@@ -97,6 +112,10 @@ class ServiceIntegrator extends EventEmitter {
             const session = this.activeSessions.get(userId);
             if (!session) throw new Error('No active session found');
 
+            // Track action completion in metrics
+            const metrics = this.engagementMetrics.get(userId);
+            metrics.totalActionsCompleted += 1;
+
             // Handle based on mode
             if (session.mode === this.MODES.FSD) {
                 // Full FSD mode - AI takes control
@@ -107,7 +126,7 @@ class ServiceIntegrator extends EventEmitter {
 
                 // Calculate next actions and confidence
                 const nextAction = await this.calculateNextAction(userId);
-                
+
                 // Update session state
                 session.nextAction = nextAction.action;
                 session.confidence = nextAction.confidence;
@@ -176,29 +195,39 @@ class ServiceIntegrator extends EventEmitter {
     }
 
     calculateConfidence(guidance, certProgress, achievements) {
-        // Implement confidence scoring logic here
-        return 95; // Example return
+        // Weighted scoring for confidence
+        const certWeight = certProgress.completed / certProgress.total * 50; // 50% weight
+        const progressWeight = guidance.progress / 100 * 30; // 30% weight
+        const achievementWeight = achievements.length * 20; // 20% weight
+
+        return Math.min(certWeight + progressWeight + achievementWeight, 100); // Cap at 100%
     }
 
     startMonitoring(userId) {
         const session = this.activeSessions.get(userId);
         if (!session) return;
 
+        const startTime = Date.now();
+
         // Update every 3 seconds in FSD mode
         const interval = setInterval(async () => {
             if (session.mode === this.MODES.FSD) {
                 const nextAction = await this.calculateNextAction(userId);
-                
+
                 // Emit update if action changed
                 if (nextAction.action !== session.nextAction) {
                     session.nextAction = nextAction.action;
                     session.confidence = nextAction.confidence;
-                    
+
                     this.emit('actionUpdate', {
                         userId,
                         nextAction
                     });
                 }
+
+                // Update total time spent in FSD mode
+                const metrics = this.engagementMetrics.get(userId);
+                metrics.totalTimeInFSD += (Date.now() - startTime) / 1000; // In seconds
             }
         }, 3000);
 
@@ -213,18 +242,51 @@ class ServiceIntegrator extends EventEmitter {
         }
     }
 
-    // Keep your existing methods
+    getUserState(userId) {
+        const session = this.activeSessions.get(userId);
+        if (!session) return null;
+
+        return {
+            mode: session.mode,
+            nextAction: session.nextAction,
+            confidence: session.confidence,
+            lastUpdate: session.lastUpdate
+        };
+    }
+
+    getEngagementMetrics(userId) {
+        return this.engagementMetrics.get(userId) || null;
+    }
+
     async generateTrainingPlan(userId) {
-        // Your existing implementation
+        const user = await User.findById(userId);
+        if (!user) throw new Error('User not found');
+
+        return {
+            plan: [
+                { step: 'Complete Module 1', dueDate: '2025-02-01' },
+                { step: 'Earn Badge 2', dueDate: '2025-02-15' }
+            ],
+            confidence: 90
+        };
     }
 
     async updateUserProgress(userId, progressData) {
-        // Your existing implementation
+        // Update user progress
     }
 
     async getDailyRecommendations(userId) {
-        // Your existing implementation
+        // Return daily recommendations
     }
-}
+}module.exports.initializeSession = async (userId) => {
+    try {
+        // Simulate session initialization
+        console.log(`Initializing session for user ${userId}`);
+        return { sessionId: `session_${userId}`, initialized: true };
+    } catch (error) {
+        console.error("Error initializing session:", error);
+        throw error;
+    }
+};
 
 module.exports = new ServiceIntegrator();

@@ -241,8 +241,4 @@ const upgradeConnection = (server) => {
     });
 };
 
-module.exports = { 
-    router, 
-    upgradeConnection,
-    notifyUsers 
-};
+module.exports = router;

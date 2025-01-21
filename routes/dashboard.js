@@ -1,39 +1,38 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { authenticate } = require('../middleware/authenticate'); // Middleware for authentication
-const User = require('../models/User'); // Import User model for database queries
+const { authenticate } = require("../middleware/authenticate");
+const User = require("../models/User"); // User model
+const Dashboard = require("../models/Dashboard"); // Optional Dashboard model (if applicable)
 
-// GET /api/dashboard (Protected)
-router.get('/', authenticate, async (req, res) => {
+// Route for rendering the dynamically generated dashboard
+router.get("/", authenticate, async (req, res) => {
     try {
-        console.log('Authenticated User:', req.user); // Log the authenticated user data
+        // Fetch user data from the database
+        const user = await User.findById(req.user.id).lean();
 
-        // Fetch additional user data from the database (if needed)
-        const user = await User.findById(req.user._id).select('-password'); // Exclude password field
         if (!user) {
-            return res.status(404).json({
-                error: 'User not found.',
-                message: 'The authenticated user does not exist in the database.',
-            });
+            return res.status(404).send("User not found");
         }
 
-        // Respond with dashboard data
-        res.status(200).json({
-            message: 'Welcome to the dashboard!',
-            user: {
-                id: user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role || 'user', // Default role
-                createdAt: user.createdAt,
-            },
-        });
-    } catch (error) {
-        console.error('Error fetching dashboard data:', error.message);
+        // Prepare data to render in the view
+        const dashboardData = {
+            name: user.name || "Explorer",
+            rank: user.rank || "Unranked",
+            score: user.score || 0,
+            missions: user.missionsCompleted || 0,
+            achievements: user.achievements || [],
+            nextMission: user.nextMission || "No mission assigned",
+        };
 
-        res.status(500).json({
-            error: 'Internal Server Error',
-            message: 'An unexpected error occurred while fetching dashboard data.',
+        // Render the dashboard view and pass the user data
+        res.render("dashboard", dashboardData);
+    } catch (error) {
+        console.error("Error fetching dashboard data:", error.message);
+
+        // Return a detailed error page or message to the user
+        res.status(500).render("error", {
+            message: "An error occurred while loading your dashboard. Please try again later.",
+            error: error.message,
         });
     }
 });

@@ -31,7 +31,7 @@ router.get('/user-achievements', authenticate, async (req, res) => {
         });
     } catch (error) {
         console.error('Error fetching achievements for authenticated user:', error.message);
-        res.status(500).json({ error: 'Failed to fetch achievements.' });
+        res.status(500).json({ error: 'Failed to fetch achievements.', details: error.message });
     }
 });
 
@@ -52,7 +52,7 @@ router.get('/:userId', authenticate, async (req, res) => {
         });
     } catch (error) {
         console.error('Error fetching achievements by userId:', error.message);
-        res.status(500).json({ error: 'Failed to fetch achievements by userId.' });
+        res.status(500).json({ error: 'Failed to fetch achievements by userId.', details: error.message });
     }
 });
 
@@ -61,7 +61,7 @@ router.post('/add', authenticate, async (req, res) => {
     try {
         const { title, description, points } = req.body;
 
-        if (!title || !description || typeof points !== 'number') {
+        if (!title || !description || isNaN(points)) {
             return res.status(400).json({
                 error: 'Missing required fields: title, description, or points must be provided.',
             });
@@ -71,7 +71,7 @@ router.post('/add', authenticate, async (req, res) => {
             userId: req.user._id,
             title,
             description,
-            points,
+            points: Number(points), // Ensure `points` is saved as a number
         });
 
         const savedAchievement = await newAchievement.save();
@@ -82,7 +82,7 @@ router.post('/add', authenticate, async (req, res) => {
         });
     } catch (error) {
         console.error('Error adding achievement:', error.message);
-        res.status(500).json({ error: 'Failed to add achievement.' });
+        res.status(500).json({ error: 'Failed to add achievement.', details: error.message });
     }
 });
 
@@ -110,7 +110,7 @@ router.delete('/:achievementId', authenticate, async (req, res) => {
         });
     } catch (error) {
         console.error('Error deleting achievement:', error.message);
-        res.status(500).json({ error: 'Failed to delete achievement.' });
+        res.status(500).json({ error: 'Failed to delete achievement.', details: error.message });
     }
 });
 

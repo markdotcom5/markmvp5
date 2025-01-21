@@ -8,75 +8,128 @@ class AIAssistant {
             apiKey: process.env.OPENAI_API_KEY
         });
         this.defaultModel = 'gpt-4-turbo-preview';
+        this.systemInstructions = {
+            certification: this.getCertificationPrompt(),
+            achievement: this.getAchievementPrompt()
+        };
     }
 
-    // Enhanced Certification Analysis
+    // System prompts - keeping original implementation
+    getCertificationPrompt() {
+        return `As a space training certification analyst, evaluate:
+            - Current certification status and progress
+            - Key performance metrics and milestones
+            - Estimated completion timeline
+            - Critical skill gaps and recommendations
+            - Required actions for improvement
+            - Safety and compliance status`;
+    }
+
+    getAchievementPrompt() {
+        return `Analyze astronaut training achievements focusing on:
+            - Completion rates and success metrics
+            - Skill development trajectory
+            - Performance benchmarks
+            - Training efficiency metrics
+            - Peer group comparisons
+            - Safety protocol adherence`;
+    }
+
+    // Base helper methods - keeping original implementation
+    extractMetrics(data) {
+        try {
+            return {
+                completionRate: this.calculateCompletionRate(data),
+                skillLevels: this.assessSkillLevels(data),
+                safetyCompliance: this.checkSafetyCompliance(data)
+            };
+        } catch (error) {
+            console.error('Metrics Extraction Error:', error);
+            return null;
+        }
+    }
+
+    calculateCompletionRate(data) {
+        const completed = data.filter(item => item.status === 'completed').length;
+        return (completed / data.length) * 100;
+    }
+
+    assessSkillLevels(data) {
+        return data.reduce((acc, item) => {
+            acc[item.skill] = item.level;
+            return acc;
+        }, {});
+    }
+
+    checkSafetyCompliance(data) {
+        return data.every(item => item.safetyProtocols === 'passed');
+    }
+
+    // Main analysis methods - keeping original implementation
     async analyzeCertificationProgress(certifications) {
         try {
             const completion = await this.openai.chat.completions.create({
                 model: this.defaultModel,
-                messages: [{
-                    role: "system",
-                    content: `As a space training certification analyst, provide a detailed breakdown of:
-                             - Current certification status
-                             - Progress metrics for each certification
-                             - Completion predictions
-                             - Skill gap analysis
-                             - Required improvements`
-                }, {
-                    role: "user",
-                    content: `Analyze these certifications in detail: ${JSON.stringify(certifications)}`
-                }]
+                messages: [
+                    {
+                        role: "system",
+                        content: this.systemInstructions.certification
+                    },
+                    {
+                        role: "user",
+                        content: `Analyze certification data: ${JSON.stringify(certifications)}`
+                    }
+                ]
             });
 
-            // Parse and structure the analysis
             const analysis = completion.choices[0].message.content;
+            
             return {
                 analysis,
-                metrics: this.extractCertificationMetrics(analysis),
-                predictions: this.extractCompletionPredictions(analysis),
-                gapAnalysis: this.extractSkillGaps(analysis),
-                timestamp: new Date()
+                metrics: this.extractMetrics(certifications),
+                recommendations: this.generateRecommendations(analysis),
+                safetyStatus: this.checkSafetyCompliance(certifications),
+                timestamp: new Date(),
+                version: '2.0'
             };
         } catch (error) {
             console.error('Certification Analysis Error:', error);
-            throw error;
+            throw new Error('Failed to analyze certification progress');
         }
     }
 
-    // Enhanced Achievement Analysis
     async analyzeAchievementProgress(achievements) {
         try {
             const completion = await this.openai.chat.completions.create({
                 model: this.defaultModel,
-                messages: [{
-                    role: "system",
-                    content: `Analyze achievement progress with focus on:
-                             - Achievement completion rates
-                             - Skill development patterns
-                             - Milestone tracking
-                             - Performance trends
-                             - Comparative analysis with peer group`
-                }, {
-                    role: "user",
-                    content: `Analyze achievements: ${JSON.stringify(achievements)}`
-                }]
+                messages: [
+                    {
+                        role: "system",
+                        content: this.systemInstructions.achievement
+                    },
+                    {
+                        role: "user",
+                        content: `Analyze achievement data: ${JSON.stringify(achievements)}`
+                    }
+                ]
             });
 
             return {
                 analysis: completion.choices[0].message.content,
-                completionRates: this.calculateCompletionRates(achievements),
+                metrics: this.extractMetrics(achievements),
                 trends: this.analyzePerformanceTrends(achievements),
                 nextMilestones: this.identifyNextMilestones(achievements),
-                timestamp: new Date()
+                safetyCompliance: this.checkSafetyCompliance(achievements),
+                timestamp: new Date(),
+                version: '2.0'
             };
         } catch (error) {
             console.error('Achievement Analysis Error:', error);
-            throw error;
+            throw new Error('Failed to analyze achievement progress');
         }
     }
 
-    // Enhanced Leaderboard Analysis
+    // Adding the Leaderboard Analysis method
     async generateLeaderboardStrategy(user, leaderboardData) {
         try {
             const completion = await this.openai.chat.completions.create({
@@ -110,17 +163,34 @@ class AIAssistant {
         }
     }
 
-    // Helper Methods for Certification Analysis
+    // Helper Methods
+    generateRecommendations(analysis) {
+        const recommendations = analysis
+            .split('\n')
+            .filter(line => line.includes('recommend') || line.includes('should'))
+            .map(line => line.trim());
+        
+        return recommendations.length > 0 ? recommendations : ['No specific recommendations found'];
+    }
+
+    getMilestoneSequence() {
+        return [
+            { id: 'basic_training', name: 'Basic Training' },
+            { id: 'advanced_theory', name: 'Advanced Theory' },
+            { id: 'practical_skills', name: 'Practical Skills' },
+            { id: 'simulation_training', name: 'Simulation Training' },
+            { id: 'final_certification', name: 'Final Certification' }
+        ];
+    }
+
+    // Additional Helper Methods
     extractCertificationMetrics(analysis) {
         try {
-            // Extract structured metrics from analysis
-            const metrics = {
+            return {
                 completionPercentages: {},
                 timeInvestment: {},
                 skillLevels: {}
             };
-            // Implementation needed
-            return metrics;
         } catch (error) {
             console.error('Metric Extraction Error:', error);
             return {};
@@ -129,7 +199,6 @@ class AIAssistant {
 
     extractCompletionPredictions(analysis) {
         try {
-            // Extract completion predictions
             return {
                 estimatedCompletionDates: {},
                 confidenceScores: {}
@@ -142,7 +211,6 @@ class AIAssistant {
 
     extractSkillGaps(analysis) {
         try {
-            // Extract skill gaps
             return {
                 criticalGaps: [],
                 recommendedFocus: [],
@@ -154,10 +222,8 @@ class AIAssistant {
         }
     }
 
-    // Helper Methods for Achievement Analysis
     calculateCompletionRates(achievements) {
         try {
-            // Calculate detailed completion rates
             return {
                 overall: 0,
                 byCategory: {},
@@ -169,38 +235,8 @@ class AIAssistant {
         }
     }
 
-    analyzePerformanceTrends(achievements) {
-        try {
-            // Analyze performance trends
-            return {
-                progressionRate: 0,
-                improvementAreas: [],
-                consistencyScore: 0
-            };
-        } catch (error) {
-            console.error('Trend Analysis Error:', error);
-            return {};
-        }
-    }
-
-    identifyNextMilestones(achievements) {
-        try {
-            // Identify upcoming milestones
-            return {
-                immediate: [],
-                shortTerm: [],
-                longTerm: []
-            };
-        } catch (error) {
-            console.error('Milestone Identification Error:', error);
-            return {};
-        }
-    }
-
-    // Helper Methods for Leaderboard Analysis
     analyzeRankPosition(user, leaderboardData) {
         try {
-            // Analyze detailed rank position
             return {
                 currentRank: 0,
                 pointsToNextRank: 0,
@@ -214,7 +250,6 @@ class AIAssistant {
 
     identifyImprovementPaths(leaderboardData) {
         try {
-            // Identify improvement opportunities
             return {
                 quickWins: [],
                 mediumTermGoals: [],
@@ -228,7 +263,6 @@ class AIAssistant {
 
     generateProgressionTimeline(user, leaderboardData) {
         try {
-            // Generate progression timeline
             return {
                 milestones: [],
                 predictedDates: {},
@@ -241,4 +275,5 @@ class AIAssistant {
     }
 }
 
+// Export a singleton instance
 module.exports = new AIAssistant();

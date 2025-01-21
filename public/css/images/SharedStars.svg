@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 40">
+    <style>
+    .logo-text {
+        font-family: Arial, sans-serif;
+        font-size: 32px;
+        font-weight: bold;
+        letter-spacing: 1px;
+        fill: #2563EB; /* A rich, darker blue */
+        filter: drop-shadow(0 0 3px rgba(37, 99, 235, 0.3)); /* Subtle glow */
+    }
+    </style>
+    <text x="10" y="28" class="logo-text">SharedStars</text>
+</svg>

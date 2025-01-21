@@ -1,180 +1,264 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Subscribe - StelTrek Academy</title>
-    <link rel="stylesheet" href="/css/main.css">
-</head>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Subscribe - StelTrek Academy</title>
+        <link rel="stylesheet" href="/css/main.css">
+        <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Chart.js -->
+        <script src="/js/subscribe.js"></script> <!-- Main JS file -->
+    </head>
 <body>
-    <!-- Fixed Header -->
-    <div class="top-bar">
-        <div class="language-selector">
-            <a href="#" class="language-flag" data-lang="en">🇺🇸</a>
-            <a href="#" class="language-flag" data-lang="zh">🇨🇳</a>
-            <a href="#" class="language-flag" data-lang="ko">🇰🇷</a>
-            <a href="#" class="language-flag" data-lang="es">🇪🇸</a>
+    <!-- Top Logo -->
+    <header class="header">
+        <div class="container flex justify-between items-center px-4 py-4 bg-gray-100 shadow">
+            <div class="logo">
+                <a href="/" aria-label="SharedStars Homepage">
+                    <img src="/css/images/SharedStars.svg" alt="SharedStars" class="logo-image" width="150" height="40">
+                </a>
+            </div>
+            <button class="menu-icon p-2 rounded-lg hover:bg-gray-300">
+                <div class="w-6 h-0.5 bg-black mb-1"></div>
+                <div class="w-6 h-0.5 bg-black mb-1"></div>
+                <div class="w-6 h-0.5 bg-black"></div>
+            </button>
         </div>
-        <div class="menu-icon" tabindex="0">
-            <div></div>
-            <div></div>
-            <div></div>
+    </header>  
+
+    <main class="bg-gray-100 min-h-screen py-12 pt-20">
+        <div class="container mx-auto px-4">
+            <header class="text-center mb-12 pt-24">
+                <h1 class="text-4xl font-bold text-gray-900 mb-6">SUBSCRIPTION PLANS: Chart a Course</h1>
+                <p class="text-xl text-gray-600 max-w-4xl mx-auto mb-8">
+                    Choose your plan and start your journey today. Secure your place in the future of space travel.
+                </p>
+
+                <!-- Urgency Banner -->
+                <div class="bg-yellow-100 text-yellow-800 text-center py-2 rounded shadow-md mb-6">
+                    <p><strong>Don't get left behind!</strong> Secure your future in space today—spaces are filling fast.</p>
+                </div>
+
+                <!-- Key Benefits -->
+                <div class="bg-white rounded-xl shadow-xl p-8 max-w-4xl mx-auto">
+                    <ul class="space-y-4 text-gray-700">
+                        <li class="flex items-start">
+                            <svg class="w-4 h-4 text-green-500 mt-1 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>Access to the Academy complete with AI-assisted training and VR modules</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-4 h-4 text-green-500 mt-1 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>Track fitness, tokens, leaderboard rankings, and preparedness</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-4 h-4 text-green-500 mt-1 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>Earn credits towards your dream of space travel</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-4 h-4 text-green-500 mt-1 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>Exclusive speaker events and community involvement</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-4 h-4 text-green-500 mt-1 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>Certification of skills and education</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Price Trend Chart -->
+                <div class="chart-container" style="position: relative; width: 100%; max-width: 800px; height: 400px; margin: 0 auto;">
+                    <p class="text-center text-gray-600 mb-4 italic">Select a plan to see your personalized journey to space</p>
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h2 class="text-2xl font-bold mb-6 text-center">Your Path to Space</h2>
+                        <canvas id="priceEvolutionChart"></canvas>
+                        <p class="text-sm text-gray-500 mt-4 text-center">*Based on your subscription plan and market projections</p>
+                    </div>
+                </div>
+            </header>
+            <!-- Subscription Plans -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+    <!-- Individual Explorer Plan -->
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden transform hover:scale-105 transition-transform duration-300">
+        <div class="bg-blue-600 p-6 relative overflow-hidden">
+            <div class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2">
+                <div class="bg-blue-500 text-white text-xs px-3 py-1 rounded-full transform rotate-45">
+                    Starter
+                </div>
+            </div>
+            <h2 class="text-2xl font-bold text-white text-center">Individual Explorer</h2>
+            <div class="text-center mt-4">
+                <span class="text-white text-4xl font-bold">$49.99</span>
+                <span class="text-white text-xl">/month</span>
+            </div>
+            <p class="text-white text-center mt-2 text-sm">Perfect for solo space enthusiasts</p>
         </div>
-        <ul class="dropdown-menu">
-            <li><a href="/index.html" data-i18n="nav.home">Home</a></li>
-            <li><a href="/about.html" data-i18n="nav.about">About</a></li>
-            <li><a href="/steltrekacademy.html" data-i18n="nav.academy">StelTrek Academy</a></li>
-            <li><a href="/leaderboard.html" data-i18n="nav.leaderboard">Leaderboard</a></li>
-            <li><a href="/dashboard.html" data-i18n="nav.dashboard">Dashboard</a></li>
-            <li><a href="/signup.html" data-i18n="nav.signup">Sign Up</a></li>
-            <li><a href="/why-steltrek.html" data-i18n="nav.why">Why StelTrek</a></li>
-            <li><a href="/merchandise.html" data-i18n="nav.merchandise">Retail Store</a></li>
-            <li><a href="/profile.html" data-i18n="nav.profile">Profile</a></li>
-            <li><a href="/subscribe.html" data-i18n="nav.subscribe">Subscribe</a></li>
-        </ul>
+        <div class="p-6">
+            <ul class="space-y-4">
+                <li class="flex items-center">
+                    <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span class="text-gray-700">Basic training modules</span>
+                </li>
+                <li class="flex items-center">
+                    <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span class="text-gray-700">2 hours/month VR training</span>
+                </li>
+                <li class="flex items-center">
+                    <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span class="text-gray-700">Community forum access</span>
+                </li>
+                <li class="flex items-center">
+                    <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span class="text-gray-700">Monthly webinars</span>
+                </li>
+            </ul>
+            <div class="mt-8">
+                <button class="w-full bg-blue-600 text-white rounded-lg py-4 font-semibold hover:bg-blue-700 transition-colors duration-300 shadow-lg hover:shadow-xl"
+                    data-plan="individual"
+                    data-price="49.99">
+                    Start Your Journey
+                </button>
+                <p class="text-center text-sm text-gray-500 mt-3">No long-term commitment required</p>
+            </div>
+        </div>
     </div>
 
-    <main class="bg-gray-100 min-h-screen py-12">
-        <div class="container mx-auto px-4">
-            <header class="text-center mb-12">
-                <h1 class="text-4xl font-bold text-gray-900 mb-4" data-i18n="subscribe.pageTitle">Chart a Course</h1>
-                <p class="text-xl text-gray-600 max-w-3xl mx-auto" data-i18n="subscribe.introText">
-                    All plans permit exclusive access to the Academy and earn credits towards a real space flight.
-                </p>
-            </header>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
-                <!-- Individual Explorer Plan -->
-                <div class="bg-white rounded-2xl shadow-xl overflow-hidden transform hover:scale-105 transition-transform duration-300">
-                    <div class="bg-blue-600 p-6">
-                        <h2 class="text-2xl font-bold text-white text-center" data-i18n="subscribe.individual.title">Individual Explorer</h2>
-                        <div class="text-center mt-4">
-                            <span class="text-white text-4xl font-bold">$49.99</span>
-                            <span class="text-white text-xl">/month</span>
-                        </div>
-                    </div>
-                    <div class="p-6">
-                        <ul class="space-y-4">
-                            <li class="flex items-center">
-                                <svg class="w-6 h-6 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span data-i18n="subscribe.individual.feature1">Basic modules</span>
-                            </li>
-                            <li class="flex items-center">
-                                <svg class="w-6 h-6 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span data-i18n="subscribe.individual.feature2">Limited VR access</span>
-                            </li>
-                            <li class="flex items-center">
-                                <svg class="w-6 h-6 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span data-i18n="subscribe.individual.feature3">Community features</span>
-                            </li>
-                        </ul>
-                        <button class="w-full bg-blue-600 text-white rounded-lg py-3 mt-6 hover:bg-blue-700 transition-colors" data-i18n="subscribe.selectPlan">Select Plan</button>
-                    </div>
-                </div>
-
-                <!-- Family Pioneer Plan -->
-                <div class="bg-white rounded-2xl shadow-xl overflow-hidden transform hover:scale-105 transition-transform duration-300">
-                    <div class="bg-purple-600 p-6">
-                        <h2 class="text-2xl font-bold text-white text-center" data-i18n="subscribe.family.title">Family Pioneer</h2>
-                        <div class="text-center mt-4">
-                            <span class="text-white text-4xl font-bold">$89.99</span>
-                            <span class="text-white text-xl">/month</span>
-                        </div>
-                    </div>
-                    <div class="p-6">
-                        <ul class="space-y-4">
-                            <li class="flex items-center">
-                                <svg class="w-6 h-6 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span data-i18n="subscribe.family.feature1">4 member access</span>
-                            </li>
-                            <li class="flex items-center">
-                                <svg class="w-6 h-6 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span data-i18n="subscribe.family.feature2">Full training</span>
-                            </li>
-                            <li class="flex items-center">
-                                <svg class="w-6 h-6 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span data-i18n="subscribe.family.feature3">Priority support</span>
-                            </li>
-                        </ul>
-                        <button class="w-full bg-purple-600 text-white rounded-lg py-3 mt-6 hover:bg-purple-700 transition-colors" data-i18n="subscribe.selectPlan">Select Plan</button>
-                    </div>
-                </div>
-
-                <!-- Galactic Elite Plan -->
-                <div class="bg-white rounded-2xl shadow-xl overflow-hidden transform hover:scale-105 transition-transform duration-300">
-                    <div class="bg-gold-600 p-6" style="background-color: #FFD700;">
-                        <h2 class="text-2xl font-bold text-gray-900 text-center" data-i18n="subscribe.elite.title">Galactic Elite</h2>
-                        <div class="text-center mt-4">
-                            <span class="text-gray-900 text-4xl font-bold">$2,048</span>
-                            <span class="text-gray-900 text-xl">/month</span>
-                        </div>
-                    </div>
-                    <div class="p-6">
-                        <ul class="space-y-4">
-                            <li class="flex items-center">
-                                <svg class="w-6 h-6 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span data-i18n="subscribe.elite.feature1">All features</span>
-                            </li>
-                            <li class="flex items-center">
-                                <svg class="w-6 h-6 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span data-i18n="subscribe.elite.feature2">Private mentoring</span>
-                            </li>
-                            <li class="flex items-center">
-                                <svg class="w-6 h-6 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span data-i18n="subscribe.elite.feature3">Special events</span>
-                            </li>
-                        </ul>
-                        <button class="w-full bg-yellow-500 text-gray-900 rounded-lg py-3 mt-6 hover:bg-yellow-600 transition-colors font-bold" data-i18n="subscribe.selectPlan">Select Plan</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mt-16 text-center">
-                <h3 class="text-2xl font-bold text-gray-900 mb-6" data-i18n="subscribe.benefitsTitle">All Plans Include</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-5xl mx-auto">
-                    <div class="p-6 bg-white rounded-lg shadow">
-                        <div class="text-xl font-semibold mb-2" data-i18n="subscribe.benefit1">AI-assisted Training</div>
-                    </div>
-                    <div class="p-6 bg-white rounded-lg shadow">
-                        <div class="text-xl font-semibold mb-2" data-i18n="subscribe.benefit2">Progress Tracking</div>
-                    </div>
-                    <div class="p-6 bg-white rounded-lg shadow">
-                        <div class="text-xl font-semibold mb-2" data-i18n="subscribe.benefit3">Space Flight Credits</div>
-                    </div>
-                    <div class="p-6 bg-white rounded-lg shadow">
-                        <div class="text-xl font-semibold mb-2" data-i18n="subscribe.benefit4">Community Access</div>
-                    </div>
-                </div>
+    <!-- Family Pioneer Plan -->
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden transform hover:scale-105 transition-transform duration-300 relative z-10 scale-105">
+        <div class="absolute top-0 left-0 right-0 -translate-y-1/2">
+            <div class="bg-purple-500 text-white text-sm px-4 py-1 rounded-full mx-auto w-max">
+                Most Popular
             </div>
         </div>
+        <div class="bg-purple-600 p-6">
+            <h2 class="text-2xl font-bold text-white text-center">Family Pioneer</h2>
+            <div class="text-center mt-4">
+                <span class="text-white text-4xl font-bold">$89.99</span>
+                <span class="text-white text-xl">/month</span>
+            </div>
+            <p class="text-white text-center mt-2 text-sm">Perfect for families & small groups</p>
+        </div>
+        <div class="p-6">
+            <ul class="space-y-4">
+                <li class="flex items-center">
+                    <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span class="text-gray-700">Access for up to 4 members</span>
+                </li>
+                <li class="flex items-center">
+                    <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span class="text-gray-700">Unlimited VR training</span>
+                </li>
+                <li class="flex items-center">
+                    <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span class="text-gray-700">Priority support 24/7</span>
+                </li>
+                <li class="flex items-center">
+                    <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span class="text-gray-700">Quarterly virtual missions</span>
+                </li>
+            </ul>
+            <div class="mt-8">
+                <button class="w-full bg-purple-600 text-white rounded-lg py-4 font-semibold hover:bg-purple-700 transition-colors duration-300 shadow-lg hover:shadow-xl"
+                    data-plan="family"
+                    data-price="89.99">
+                    Join as Family
+                </button>
+                <p class="text-center text-sm text-gray-500 mt-3">14-day money-back guarantee</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Galactic Elite Plan -->
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden transform hover:scale-105 transition-transform duration-300">
+        <div class="p-6" style="background: linear-gradient(135deg, #FFD700, #FFA500)">
+            <div class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2">
+                <div class="bg-yellow-500 text-gray-900 text-xs px-3 py-1 rounded-full transform rotate-45">
+                    Premium
+                </div>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900 text-center">Galactic Elite</h2>
+            <div class="text-center mt-4">
+                <span class="text-gray-900 text-4xl font-bold">$2,048</span>
+                <span class="text-gray-900 text-xl">/month</span>
+            </div>
+            <p class="text-gray-900 text-center mt-2 text-sm">For serious space pioneers</p>
+        </div>
+        <div class="p-6">
+            <ul class="space-y-4">
+                <li class="flex items-center">
+                    <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span class="text-gray-700">All premium features included</span>
+                </li>
+                <li class="flex items-center">
+                    <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span class="text-gray-700">1-on-1 expert mentoring</span>
+                </li>
+                <li class="flex items-center">
+                    <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span class="text-gray-700">Private VR facility access</span>
+                </li>
+                <li class="flex items-center">
+                    <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span class="text-gray-700">Priority space seat reservation</span>
+                </li>
+            </ul>
+            <div class="mt-8">
+                <button class="w-full bg-gradient-to-r from-yellow-400 to-yellow-600 text-gray-900 rounded-lg py-4 font-bold hover:from-yellow-500 hover:to-yellow-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+                    data-plan="elite"
+                    data-price="2048">
+                    Secure Elite Access
+                </button>
+                <p class="text-center text-sm text-gray-500 mt-3">VIP concierge service included</p>
+            </div>
+        </div>
+    </div>
+</div>
     </main>
 
-    <footer class="bg-gray-800 text-white py-8">
-        <div class="container mx-auto px-4 text-center">
-            <p data-i18n="footer.copyright">© 2024 StelTrek Academy. All rights reserved.</p>
+    <footer class="bg-gray-900 text-white py-12 mt-16">
+        <div class="container mx-auto px-4 max-w-6xl">
+            <div class="text-center mb-8">
+                <h3 class="text-2xl font-bold mb-2">Making space travel accessible for everyone</h3>
+                <div class="flex justify-center gap-4 mb-8">
+                    <a href="#" class="hover:text-blue-400">𝕏 Twitter</a>
+                    <a href="#" class="hover:text-blue-400">LinkedIn</a>
+                    <a href="#" class="hover:text-blue-400">📸 Instagram</a>
+                </div>
+            </div>
         </div>
     </footer>
-
-    <script type="module" src="/js/languages.js"></script>
-    <script src="/js/subscribe.js"></script>
-
 </body>
 </html>

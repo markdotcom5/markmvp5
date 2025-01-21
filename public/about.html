@@ -3,67 +3,187 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="StelTrek Academy">
-    <title data-i18n="about.pageTitle">About StelTrek Academy</title>
-    <meta http-equiv="Content-Security-Policy" content="
-        default-src 'self'; 
-        script-src 'self'; 
-        style-src 'self'; 
-        frame-src 'self' https://www.sora.com; 
-        child-src 'self' https://www.sora.com;
-    ">
+    <title>About - SharedStars</title>
     <link rel="stylesheet" href="/css/main.css">
+    <link rel="icon" href="/favicon.png" type="image/png">
 </head>
 <body>
     <!-- Header -->
-    <header class="site-header">
-        <nav aria-label="Main Navigation">
-            <!-- Language Selector -->
-            <div class="language-selector">
-                <button class="language-flag" data-lang="en" aria-label="English">🇺🇸</button>
-                <button class="language-flag" data-lang="zh" aria-label="Chinese">🇨🇳</button>
-                <button class="language-flag" data-lang="ko" aria-label="Korean">🇰🇷</button>
-                <button class="language-flag" data-lang="es" aria-label="Spanish">🇪🇸</button>
-            </div>
-
-            <!-- Navigation Menu -->
-            <ul>
-                <li><a href="/index.html" data-i18n="nav.home">Home</a></li>
-                <li><a href="/Why-StelTrek.html" data-i18n="nav.why">Why StelTrek</a></li>
-                <li><a href="/about.html" data-i18n="nav.about" aria-current="page">About</a></li>
-                <li><a href="/leaderboard.html" data-i18n="nav.leaderboard">Leaderboard</a></li>
-                <li><a href="/login.html" data-i18n="nav.login">Login</a></li>
-                <li><a href="/merchandise.html" data-i18n="nav.merchandise">Retail Store</a></li>
-                <li><a href="/profile.html" data-i18n="nav.profile">Profile</a></li>
-                <li><a href="/signup.html" data-i18n="nav.signup">Sign Up</a></li>
-                <li><a href="/academy.html" data-i18n="nav.academy">StelTrek Academy</a></li>
-                <li><a href="/welcome.html" data-i18n="nav.welcome">Welcome</a></li>
-                <li><a href="/subscribe.html" data-i18n="nav.subscribe">Subscribe</a></li>
-            </ul>
-        </nav>
+    <header class="header">
+        <div class="logo">
+            <a href="/" aria-label="SharedStars Homepage">
+                <img src="/css/images/Sharedstars.svg" alt="SharedStars Logo" class="logo-image">
+            </a>
+        </div>
+        <button class="menu-trigger" aria-label="Open Menu">Menu</button>
     </header>
 
-    <!-- Main Content -->
-    <main>
-        <h1 data-i18n="about.title">About StelTrek Academy</h1>
-        <p data-i18n="about.description">
-            StelTrek Academy is your gateway to the stars, offering certifications, immersive training, and a vibrant community.
-        </p>
-        <section>
-            <h2 data-i18n="about.missionTitle">Our Mission</h2>
-            <p data-i18n="about.missionDescription">
-                To make space exploration accessible to everyone through innovative training, community support, and cutting-edge certifications.
-            </p>
-        </section>
-    </main>
+    <!-- Hero Section with Video -->
+    <section id="about-hero" class="hero-section">
+        <div class="video-container">
+            <video id="aboutVideo" class="video-background" autoplay muted loop playsinline>
+                <source src="/videos/stelacktop.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        <div class="hero-content">
+            <h1 class="hero-title">About SharedStars</h1>
+            <p class="subtitle">Making Space Accessible for Everyone</p>
+        </div>
+    </section>
+    
+    
+    <!-- Mission Section -->
+    <section class="about-section mission">
+        <div class="container">
+            <h2>Our Mission</h2>
+            <p>Our mission is to democratize space travel by equipping individuals with the knowledge, certifications, AR/VR experiences, classroom training, and our comprehensive 10-module program. Through leaderboards that foster friendly competition and immersive experiences, SharedStars prepares aspiring space travelers to confidently step into the final frontier.</p>
+            <p>SharedStars transforms space travel dreams into reality by creating an inclusive and vibrant community of Subscribing Space Travelers (SSTs) who are united in shaping the future of space exploration.</p>
+            <p>With over 1.17 billion space enthusiasts worldwide, we aim to bridge the gap between aspiration and accessibility, providing tools, resources, and programs that prepare our members for the opportunities awaiting beyond Earth. A certification from SharedStars serves as your ticket to participate in the fast-growing space travel industry, setting a benchmark much like OSHA and ISO standards in occupational and aerospace industries.</p>
+        </div>
+    </section>
 
-    <!-- Footer -->
-    <footer>
-        <p data-i18n="common.footer">© 2024 StelTrek Academy. All rights reserved.</p>
-    </footer>
+    <!-- Vision Section -->
+    <section class="about-section vision">
+        <div class="container">
+            <h2>Our Vision</h2>
+            <p>To create a world where space travel is inclusive and attainable for all, fostering a global community united by the shared aspiration to explore beyond Earth.</p>
+        </div>
+    </section>
 
-    <!-- JavaScript -->
-    <script type="module" src="/js/language-switcher.js"></script>
-    <script src="/js/menu.js"></script>
+    <!-- Founder’s Story Section -->
+    <section class="about-section origin-story">
+        <div class="container">
+            <h2>How SharedStars Was Born</h2>
+            <div class="story-content">
+                <p>At one of the lowest points in my life, I grappled with a profound sense of despair—not just from personal challenges but also from a dream that felt impossibly out of reach. Space travel, with its astronomical costs ranging from hundreds of thousands to millions of dollars, seemed like a privilege reserved for only the wealthiest.</p>
+                <p>During this time, I discovered <em>The Three-Body Problem</em> trilogy by Liu Cixin. Its exploration of humanity’s resilience, ingenuity, and collective drive to overcome impossible odds ignited a spark within me. The story reminded me that innovation and collective effort can achieve what once seemed unattainable.</p>
+                <p>I realized space travel doesn’t have to remain an exclusive pursuit for the elite. From that moment of inspiration, SharedStars was born. It’s not just a platform; it’s a movement. SharedStars is dedicated to democratizing space travel by providing education, community, and opportunities for anyone willing to dream big and prepare for the next frontier.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Board of Advisors (BOA) Section -->
+    <section id="board-preview" class="board-preview-section">
+        <div class="section-content">
+            <span class="board-label">BOARD OF ADVISORS</span>
+            <h2>Backed by Industry Leaders</h2>
+            <p class="section-subtitle">Our mission is supported by experts from NASA, SpaceX, and leading space organizations.</p>
+    
+            <p>Our Board of Advisors (BOA) is a collection of highly accomplished leaders who bring decades of experience from top space organizations. They are instrumental in guiding SharedStars towards success, ensuring we stay at the forefront of space travel innovation and excellence. Each advisor plays a vital role in shaping our vision, from space medicine and propulsion systems to space tech and innovation.</p>
+            <p>We are proud to work with a group that not only provides guidance but also influences the development of space travel opportunities for everyone.</p>
+    
+            <!-- Featured Advisors Grid -->
+            <div class="featured-advisors">
+                <!-- Advisor Card 1 -->
+                <div class="advisor-card">
+                    <div class="advisor-header">
+                        <div class="advisor-company">NASA Armstrong</div>
+                        <img src="/css/images/dr-mark.png" alt="Dr. Mark R. Prele" class="advisor-image">
+                    </div>
+                    <div class="advisor-content">
+                        <h3>Dr. Mark R. Prele</h3>
+                        <p class="title">Chief Medical Officer & Flight Surgeon</p>
+                        <div class="expertise-tags">
+                            <span>Space Medicine</span>
+                            <span>Flight Safety</span>
+                        </div>
+                    </div>
+                </div>
+            
+                <!-- Advisor Card 2 -->
+                <div class="advisor-card">
+                    <div class="advisor-header">
+                        <div class="advisor-company">Former SpaceX</div>
+                        <img src="/css/images/travis.png" alt="Travis Talbot" class="advisor-image">
+                    </div>
+                    <div class="advisor-content">
+                        <h3>Travis Talbot</h3>
+                        <p class="title">Senior Manufacturing Engineer</p>
+                        <div class="expertise-tags">
+                            <span>Propulsion Systems</span>
+                            <span>Spacecraft Design</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Advisor Card 3 -->
+                <div class="advisor-card">
+                    <div class="advisor-header">
+                        <div class="advisor-company">NASA Datanaut</div>
+                        <img src="/css/images/laura.png" alt="Laura Anne Edwards" class="advisor-image">
+                    </div>
+                    <div class="advisor-content">
+                        <h3>Laura Anne Edwards</h3>
+                        <p class="title">Global Innovation Executive</p>
+                        <p class="description">
+                            Laura Anne Edwards is a NASA Datanaut and global innovation leader, advancing space tech solutions. She ensures SharedStars stays at the forefront of innovation in the fast-evolving space industry.
+                        </p>
+                    </div>
+                </div>
+            
+                <!-- Advisor Card 4 -->
+                <div class="advisor-card">
+                    <div class="advisor-header">
+                        <div class="advisor-company">SpaceTech Innovations</div>
+                        <img src="/css/images/edward.png" alt="Edward Moleam" class="advisor-image">
+                    </div>
+                    <div class="advisor-content">
+                        <h3>Edward Moleam</h3>
+                        <p class="title">Founder & CEO</p>
+                        <p class="description">
+                            Edward Moleam is the founder of SpaceTech Innovations, driving next-generation technologies for space exploration. His leadership ensures SharedStars leverages cutting-edge aerospace systems.
+                        </p>
+                    </div>
+                </div>
+            
+                <!-- Advisor Card 5 -->
+                <div class="advisor-card">
+                    <div class="advisor-header">
+                        <div class="advisor-company">RocketPropulsion Solutions</div>
+                        <img src="/css/images/erich.png" alt="Erich Spangenberg" class="advisor-image">
+                    </div>
+                    <div class="advisor-content">
+                        <h3>Erich Spangenberg</h3>
+                        <p class="title">Chief Innovation Officer</p>
+                        <p class="description">
+                            Erich Spangenberg is a pioneer in rocket propulsion technologies. His expertise in developing advanced systems plays a pivotal role in shaping SharedStars’ training modules and mission readiness programs.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+    <!-- What We Offer Section -->
+    <section class="about-section offerings">
+        <div class="container">
+            <h2>What We Offer</h2>
+            <ul>
+                <li><strong>Savings Toward Space Travel:</strong> Start saving for your future space seat with our unique subscription plans designed to make space travel financially attainable.</li>
+                <li><strong>AI-Driven Space Training:</strong> Tailored onboarding, goal setting, and advanced AI coaching to prepare you for your journey.</li>
+                <li><strong>Immersive Learning Modules:</strong> Engage with training that replicates the challenges of space missions.</li>
+                <li><strong>Community and Connection:</strong> Join a global network of space travelers, enthusiasts, and pioneers.</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- Subscription Plans Section -->
+    <section class="about-section subscription">
+        <div class="container">
+            <h2>Subscription Plans</h2>
+            <ul>
+                <li><strong>Individual Plan:</strong> Perfect for solo dreamers ready to take their first step.</li>
+                <li><strong>Family Plan:</strong> Engage the entire family in the journey of a lifetime.</li>
+                <li><strong>Galactic Travelers Plan:</strong> Designed for those ready to fully commit to their space travel dreams.</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="about-section cta">
+        <div class="container">
+            <h2>Call to Action</h2>
+            <p>Dreaming of space? Start saving for your space journey today. Subscribe to SharedStars and take your first step toward the final frontier.</p>
+        </div>
+    </section>
+
 </body>
 </html>
