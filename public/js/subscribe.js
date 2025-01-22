@@ -1,9 +1,11 @@
-// subscribe.js
 class PriceEvolutionChart {
     constructor() {
         this.chart = null;
         this.currentPlan = null;
+        this.personalCountdownInterval = null;
+        this.baselineCountdownInterval = null;
         this.initialize();
+        this.initializeBaselineTimer();
     }
 
     initialize() {
@@ -13,8 +15,6 @@ class PriceEvolutionChart {
             return;
         }
 
-        console.log('Initializing price evolution chart...');
-        
         this.chart = new Chart(ctx, {
             type: 'line',
             data: this.getChartData(),
@@ -28,18 +28,12 @@ class PriceEvolutionChart {
                         title: {
                             display: true,
                             text: 'Space Journey Cost ($)',
-                            font: {
-                                size: 14,
-                                weight: 'bold'
-                            }
+                            font: { size: 14, weight: 'bold' }
                         },
                         ticks: {
                             callback: value => {
-                                if (value >= 1000000) {
-                                    return `$${value/1000000}M`;
-                                } else if (value >= 1000) {
-                                    return `$${value/1000}k`;
-                                }
+                                if (value >= 1000000) return `$${value/1000000}M`;
+                                if (value >= 1000) return `$${value/1000}k`;
                                 return `$${value}`;
                             }
                         }
@@ -48,20 +42,14 @@ class PriceEvolutionChart {
                         title: {
                             display: true,
                             text: 'Timeline (Years)',
-                            font: {
-                                size: 14,
-                                weight: 'bold'
-                            }
+                            font: { size: 14, weight: 'bold' }
                         }
                     }
                 },
                 plugins: {
                     legend: {
                         position: 'top',
-                        labels: {
-                            usePointStyle: true,
-                            padding: 20
-                        }
+                        labels: { usePointStyle: true, padding: 20 }
                     },
                     tooltip: {
                         backgroundColor: 'rgba(0, 0, 0, 0.8)',
@@ -71,11 +59,8 @@ class PriceEvolutionChart {
                         callbacks: {
                             label: context => {
                                 const value = context.raw;
-                                if (value >= 1000000) {
-                                    return `$${(value/1000000).toFixed(1)}M`;
-                                } else if (value >= 1000) {
-                                    return `$${(value/1000).toFixed(1)}k`;
-                                }
+                                if (value >= 1000000) return `$${(value/1000000).toFixed(1)}M`;
+                                if (value >= 1000) return `$${(value/1000).toFixed(1)}k`;
                                 return `$${value}`;
                             }
                         }
@@ -86,295 +71,180 @@ class PriceEvolutionChart {
 
         this.initializePlanListeners();
     }
+
     getChartData(selectedPlan = null) {
-        // Historical starting prices (2022)
-        const basePrice = 450000;  // $450k starting price
-        const targetPrice = 5000;  // $5k target by 2039
-        const years = [2022, 2025, 2030, 2035, 2039];
+        const basePrice = 450000;
+        const years = [2024, 2027, 2030, 2035, 2039];
         
-        // Calculate market baseline
-        const marketPrices = years.map(year => {
-            const yearsFromStart = year - 2022;
-            return basePrice * Math.pow(0.85, yearsFromStart); // 15% reduction per year
+        const basePrices = years.map(year => {
+            const yearsFromStart = year - 2024;
+            return basePrice * Math.pow(0.85, yearsFromStart);
         });
-    
+
         const datasets = [{
-            label: 'Market Price',
-            data: marketPrices,
-            borderColor: 'rgb(107, 114, 128)',
-            backgroundColor: 'rgba(107, 114, 128, 0.1)',
+            label: 'Standard Journey',
+            data: basePrices,
+            borderColor: 'rgb(156, 163, 175)',
+            backgroundColor: 'rgba(156, 163, 175, 0.1)',
             borderWidth: 2,
             tension: 0.4
         }];
-    
+
         if (selectedPlan) {
-            const planRates = {
-                individual: 0.75,  // 25% faster than market
-                family: 0.70,     // 30% faster than market
-                elite: 0.55       // 45% faster than market
+            const planConfigs = {
+                individual: {
+                    rate: 0.75,
+                    color: 'rgb(59, 130, 246)',
+                    label: 'Explorer Path'
+                },
+                family: {
+                    rate: 0.70,
+                    color: 'rgb(139, 92, 246)',
+                    label: 'Pioneer Path'
+                },
+                elite: {
+                    rate: 0.55,
+                    color: 'rgb(234, 179, 8)',
+                    label: 'Elite Path'
+                }
             };
-    
-            const planColors = {
-                individual: 'rgb(59, 130, 246)', // blue-500
-                family: 'rgb(139, 92, 246)',     // purple-500
-                elite: 'rgb(234, 179, 8)'        // yellow-500
-            };
-    
-            const personalPrices = years.map(year => {
-                const yearsFromStart = year - 2022;
-                return basePrice * Math.pow(planRates[selectedPlan.type], yearsFromStart);
-            });
-    
-            datasets.push({
-                label: 'Your Journey',
-                data: personalPrices,
-                borderColor: planColors[selectedPlan.type],
-                backgroundColor: `${planColors[selectedPlan.type].replace('rgb', 'rgba').replace(')', ', 0.1)')}`,
-                borderWidth: 3,
-                tension: 0.4
-            });
+
+            const config = planConfigs[selectedPlan];
+            if (config) {
+                datasets.push({
+                    label: config.label,
+                    data: years.map(year => {
+                        const yearsFromStart = year - 2024;
+                        return basePrice * Math.pow(config.rate, yearsFromStart);
+                    }),
+                    borderColor: config.color,
+                    backgroundColor: `${config.color.replace('rgb', 'rgba').replace(')', ', 0.1)')}`,
+                    borderWidth: 3,
+                    tension: 0.4,
+                    pointStyle: 'star'
+                });
+            }
         }
-    
-        return {
-            labels: years,
-            datasets
-        };
+
+        return { labels: years, datasets };
     }
 
+    initializeBaselineTimer() {
+        const targetDate = new Date('2039-01-01');
+        
+        const updateTimer = () => {
+            const now = new Date();
+            const timeLeft = targetDate - now;
+            
+            const years = Math.floor(timeLeft / (365.25 * 24 * 60 * 60 * 1000));
+            const months = Math.floor((timeLeft % (365.25 * 24 * 60 * 60 * 1000)) / (30.44 * 24 * 60 * 60 * 1000));
+            const days = Math.floor((timeLeft % (30.44 * 24 * 60 * 60 * 1000)) / (24 * 60 * 60 * 1000));
+            const hours = Math.floor((timeLeft % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+            const minutes = Math.floor((timeLeft % (60 * 60 * 1000)) / (60 * 1000));
+            const seconds = Math.floor((timeLeft % (60 * 1000)) / 1000);
+    
+            document.querySelector('[data-base-timer="years"]').textContent = years.toString().padStart(2, '0');
+            document.querySelector('[data-base-timer="months"]').textContent = months.toString().padStart(2, '0');
+            document.querySelector('[data-base-timer="days"]').textContent = days.toString().padStart(2, '0');
+            document.querySelector('[data-base-timer="hours"]').textContent = hours.toString().padStart(2, '0');
+            document.querySelector('[data-base-timer="minutes"]').textContent = minutes.toString().padStart(2, '0');
+            document.querySelector('[data-base-timer="seconds"]').textContent = seconds.toString().padStart(2, '0');
+        };
+    
+        updateTimer();
+        this.baselineCountdownInterval = setInterval(updateTimer, 1000);
+    }
     updateChart(planType) {
-        if (!this.chart) {
-            console.error('Chart not initialized');
-            return;
-        }
-
-        console.log('Updating chart with plan:', planType);
-        const newData = this.getChartData({ type: planType });
+        if (!this.chart) return;
+        
+        this.currentPlan = planType;
+        const newData = this.getChartData({ type: planType });  // Fixed argument structure
         this.chart.data = newData;
         this.chart.update('active');
-
-        // Show and update personal countdown
+        
         const personalCountdown = document.getElementById('personal-countdown');
         if (personalCountdown) {
             personalCountdown.style.display = 'block';
             this.updatePersonalCountdown(planType);
         }
     }
-    updateCountdown(selectedPlan) {
-        // Base countdown (stays constant)
-        const baselineElements = {
-            years: document.querySelector('[data-baseline="years"]'),
-            months: document.querySelector('[data-baseline="months"]'),
-            days: document.querySelector('[data-baseline="days"]'),
-            hours: document.querySelector('[data-baseline="hours"]'),
-            minutes: document.querySelector('[data-baseline="minutes"]'),
-            seconds: document.querySelector('[data-baseline="seconds"]')
-        };
     
-        // Your accelerated countdown
-        const countdownElements = {
-            years: document.querySelector('[data-countdown="years"]'),
-            months: document.querySelector('[data-countdown="months"]'),
-            days: document.querySelector('[data-countdown="days"]'),
-            hours: document.querySelector('[data-countdown="hours"]'),
-            minutes: document.querySelector('[data-countdown="minutes"]'),
-            seconds: document.querySelector('[data-countdown="seconds"]')
-        };
-    
-        // Calculate accelerated time based on plan
-        const planMultipliers = {
-            individual: 0.6,  // 40% faster
-            family: 0.4,     // 60% faster
-            elite: 0.1       // 90% faster
-        };
-    
-        const updateTimer = () => {
-            const now = new Date();
-            const baseTarget = new Date('2039-01-01');
-            let timeLeft = baseTarget - now;
-    
-            // Update baseline countdown
-            if (baselineElements.years) {
-                const years = Math.floor(timeLeft / (1000 * 60 * 60 * 24 * 365));
-                baselineElements.years.textContent = years.toString().padStart(2, '0');
-                // ... similar for other units ...
-            }
-    
-            // Update accelerated countdown if plan selected
-            if (selectedPlan && countdownElements.years) {
-                const multiplier = planMultipliers[selectedPlan.type] || 1;
-                timeLeft *= multiplier;
-                
-                const years = Math.floor(timeLeft / (1000 * 60 * 60 * 24 * 365));
-                countdownElements.years.textContent = years.toString().padStart(2, '0');
-                // ... similar for other units ...
-            }
-        };
-    
-        // Initial update
-        updateTimer();
-        // Update every second
-        return setInterval(updateTimer, 1000);
-    }
     updatePersonalCountdown(planType) {
         const accelerationRates = {
-            individual: 0.25, // 25% faster
-            family: 0.40,    // 40% faster
-            elite: 0.80      // 80% faster
+            individual: 0.25,
+            family: 0.40,
+            elite: 0.80
         };
-
-        const baseYears = 17; // Years to 2039 from now
+    
+        const baseYears = 15;
         const reduction = accelerationRates[planType] || 0;
-        const adjustedYears = baseYears * (1 - reduction);
-
-        // Update acceleration display
-        const accelerationEl = document.querySelector('.acceleration-percentage');
-        if (accelerationEl) {
-            accelerationEl.textContent = `${Math.round(reduction * 100)}`;
-        }
-
-        // Calculate target date
+        const adjustedYears = Math.ceil(baseYears * (1 - reduction));
+    
         const targetDate = new Date();
         targetDate.setFullYear(targetDate.getFullYear() + adjustedYears);
         this.startPersonalCountdown(targetDate);
+    
+        const percentageEl = document.querySelector('.acceleration-percentage');
+        if (percentageEl) {
+            percentageEl.textContent = `${Math.round(reduction * 100)}`;
+        }
     }
-
+    
     startPersonalCountdown(targetDate) {
-        console.log('Starting personal countdown to:', targetDate);
-    
-        const updateTimer = () => {
-            const now = new Date();
-            const difference = targetDate - now;
-    
-            if (difference <= 0) {
-                clearInterval(this.personalCountdownInterval);
-                console.log('Countdown completed!');
-                return;
-            }
-    
-            const timeUnits = {
-                years: Math.floor(difference / (1000 * 60 * 60 * 24 * 365)),
-                months: Math.floor((difference % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24 * 30.44)),
-                days: Math.floor((difference % (1000 * 60 * 60 * 24 * 30.44)) / (1000 * 60 * 60 * 24)),
-                hours: Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
-                minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
-                seconds: Math.floor((difference % (1000 * 60)) / 1000)
-            };
-    
-            // Update the countdown timer values dynamically
-            Object.entries(timeUnits).forEach(([unit, value]) => {
-                const element = document.querySelector(`[data-personal-countdown="${unit}"]`);
-                if (element) {
-                    const formattedValue = value.toString().padStart(2, '0');
-                    if (element.textContent !== formattedValue) {
-                        element.textContent = formattedValue;
-                        element.classList.add('number-changed');
-                        setTimeout(() => element.classList.remove('number-changed'), 300);
-                    }
-                } else {
-                    console.error(`Element for personal countdown unit "${unit}" not found!`);
-                }
-            });
-        };
-    
-        // Clear any existing interval
         if (this.personalCountdownInterval) {
             clearInterval(this.personalCountdownInterval);
         }
     
-        // Start the countdown
+        const updateTimer = () => {
+            const now = new Date();
+            const timeLeft = targetDate - now;
+    
+            const units = {
+                years: Math.floor(timeLeft / (365.25 * 24 * 60 * 60 * 1000)),
+                months: Math.floor((timeLeft % (365.25 * 24 * 60 * 60 * 1000)) / (30.44 * 24 * 60 * 60 * 1000)),
+                days: Math.floor((timeLeft % (30.44 * 24 * 60 * 60 * 1000)) / (24 * 60 * 60 * 1000)),
+                hours: Math.floor((timeLeft % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000)),
+                minutes: Math.floor((timeLeft % (60 * 60 * 1000)) / (60 * 1000)),
+                seconds: Math.floor((timeLeft % (60 * 1000)) / 1000)
+            };
+    
+            Object.entries(units).forEach(([unit, value]) => {
+                const element = document.querySelector(`[data-personal-countdown="${unit}"]`);
+                if (element) {
+                    element.textContent = value.toString().padStart(2, '0');
+                    element.classList.remove('text-gray-400');
+                    element.classList.add('text-blue-800');
+                }
+            });
+        };
+    
         updateTimer();
         this.personalCountdownInterval = setInterval(updateTimer, 1000);
     }
     
-    handlePlanSelection(planDetails) {
-        console.log('Handling plan selection:', planDetails);
-    
-        // Store selected plan
-        this.selectedPlan = planDetails;
-    
-        // Update the chart
-        this.updateChart(planDetails);
-    
-        // Reset and activate the personal countdown
-        document.querySelectorAll('[data-personal-countdown]').forEach(el => {
-            el.textContent = '--'; // Reset values to "--"
-            el.classList.remove('text-gray-400');
-            el.classList.add('text-blue-800');
-        });
-    
-        // Calculate and start the countdown
-        if (planDetails.type) {
-            const targetDate = new Date();
-            const accelerationRates = {
-                individual: 0.75, // 25% faster
-                family: 0.6,      // 40% faster
-                elite: 0.3        // 70% faster
-            };
-    
-            const yearsToTarget = 17 * (accelerationRates[planDetails.type] || 1);
-            console.log('Calculated target date for plan:', planDetails.type, 'is', targetDate);
-            targetDate.setFullYear(targetDate.getFullYear() + yearsToTarget);
-    
-            this.startPersonalCountdown(targetDate); // Start countdown
-        } else {
-            console.error('No valid plan type selected!');
-        }
-    }
-    
+    // Replace your current initializePlanListeners() method
     initializePlanListeners() {
-        document.querySelectorAll('[data-plan]').forEach(button => {
+        console.log('Initializing plan listeners');
+        const planButtons = document.querySelectorAll('.plan-select-btn');  // Match HTML class
+        planButtons.forEach(button => {
             button.addEventListener('click', (e) => {
+                e.preventDefault();
                 const planType = button.getAttribute('data-plan');
                 if (planType) {
                     console.log('Plan selected:', planType);
-                    this.handlePlanSelection({ type: planType });
+                    this.chart.data = this.getChartData({ type: planType });
+                    this.chart.update('active');
+                    
+                    const personalCountdown = document.getElementById('personal-countdown');
+                    if (personalCountdown) {
+                        personalCountdown.style.display = 'block';
+                        this.updatePersonalCountdown(planType);
+                    }
                 }
             });
         });
     }
-    
-// Base Countdown Timer functionality
-class BaseCountdown {
-    constructor() {
-        this.targetDate = new Date('2039-01-01');
-        this.start();
-    }
-
-    start() {
-        const updateTimer = () => {
-            const now = new Date();
-            const difference = this.targetDate - now;
-
-            const timeUnits = {
-                years: Math.floor(difference / (1000 * 60 * 60 * 24 * 365)),
-                months: Math.floor((difference % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24 * 30.44)),
-                days: Math.floor((difference % (1000 * 60 * 60 * 24 * 30.44)) / (1000 * 60 * 60 * 24)),
-                hours: Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
-                minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
-                seconds: Math.floor((difference % (1000 * 60)) / 1000)
-            };
-
-            Object.entries(timeUnits).forEach(([unit, value]) => {
-                const element = document.querySelector(`[data-base-countdown="${unit}"]`);
-                if (element) {
-                    const formattedValue = value.toString().padStart(2, '0');
-                    if (element.textContent !== formattedValue) {
-                        element.textContent = formattedValue;
-                        element.classList.add('number-changed');
-                        setTimeout(() => element.classList.remove('number-changed'), 300);
-                    }
-                }
-            });
-        };
-
-        // Update immediately and then every second
-        updateTimer();
-        setInterval(updateTimer, 1000);
-    }
-}
-
-// Initialize everything when document loads
+// Initialize when document loads
 document.addEventListener('DOMContentLoaded', () => {
     new PriceEvolutionChart();
-    new BaseCountdown();
 });
