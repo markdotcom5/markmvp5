@@ -107,50 +107,107 @@
 
 <!-- Price Evolution & Sign-up Section -->
 <section id="price-evolution" class="section price-evolution-section">
-    <!-- Background Image -->
     <div class="section-background">
-               <!-- Title -->
-        <h2 class="price-title">The Price of Admission is Dropping. Are You Ready for Space?</h2>
+        <!-- Title -->
+        <h2 class="price-title">Space Faster -- Subscribe Now</h2>
 
         <!-- Graph Container -->
         <div class="graph-container">
             <canvas id="priceEvolutionChart"></canvas>
         </div>
         <div class="disclaimer">
-            <p>*Price projections represent SharedStars' estimates based on current market trends and industry projections. 
-               Actual future costs may vary based on market conditions and technological advancements.</p>
-        </div>
-        <!-- Countdown Section -->
-        <div class="countdown-section">
-            <h3 class="countdown-title">TIME UNTIL PROJECTED MASS SPACE TRAVEL:</h3>
-            <div class="countdown-grid">
-                <div class="countdown-box">
-                    <span data-countdown="years" class="number">13</span>
-                    <span class="label">YEARS</span>
-                </div>
-                <div class="countdown-box">
-                    <span data-countdown="months" class="number">11</span>
-                    <span class="label">MONTHS</span>
-                </div>
-                <div class="countdown-box">
-                    <span data-countdown="days" class="number">11</span>
-                    <span class="label">DAYS</span>
-                </div>
-                <div class="countdown-box">
-                    <span data-countdown="hours" class="number">23</span>
-                    <span class="label">HOURS</span>
-                </div>
-                <div class="countdown-box">
-                    <span data-countdown="minutes" class="number">47</span>
-                    <span class="label">MINUTES</span>
-                </div>
-                <div class="countdown-box">
-                    <span data-countdown="seconds" class="number">22</span>
-                    <span class="label">SECONDS</span>
-                </div>
-            </div>
+            <p>*Based on current market trends and industry projections</p>
         </div>
 
+<!-- Price Evolution & Countdown Section -->
+<div class="bg-white rounded-xl shadow-lg p-8 max-w-4xl mx-auto mt-8">
+    <!-- Chart Section -->
+    <div class="mb-12">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Your Path to Space</h2>
+        <div class="graph-container h-[400px]">
+            <canvas id="priceEvolutionChart"></canvas>
+        </div>
+        <p class="text-sm text-gray-500 mt-4 text-center italic">
+            *Based on market projections and subscription plan
+        </p>
+    </div>
+
+    <!-- Base Timeline Section -->
+    <div class="countdown-section bg-gray-50 rounded-xl p-6 mb-8">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold text-gray-800">BASELINE PATH TO SPACE</h3>
+            <div class="flex gap-4 text-sm text-gray-600">
+                <span>Current: $450,000</span>
+                <span>→</span>
+                <span>Target: $5,000</span>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-6 gap-4">
+            <div class="countdown-box bg-white p-4 rounded-lg text-center shadow">
+                <span data-base-countdown="years" class="number text-3xl font-bold text-gray-800">13</span>
+                <span class="label text-sm text-gray-600 mt-1 block">YEARS</span>
+            </div>
+            <div class="countdown-box bg-white p-4 rounded-lg text-center shadow">
+                <span data-base-countdown="months" class="number text-3xl font-bold text-gray-800">11</span>
+                <span class="label text-sm text-gray-600 mt-1 block">MONTHS</span>
+            </div>
+            <div class="countdown-box bg-white p-4 rounded-lg text-center shadow">
+                <span data-base-countdown="days" class="number text-3xl font-bold text-gray-800">11</span>
+                <span class="label text-sm text-gray-600 mt-1 block">DAYS</span>
+            </div>
+            <div class="countdown-box bg-white p-4 rounded-lg text-center shadow">
+                <span data-base-countdown="hours" class="number text-3xl font-bold text-gray-800">23</span>
+                <span class="label text-sm text-gray-600 mt-1 block">HOURS</span>
+            </div>
+            <div class="countdown-box bg-white p-4 rounded-lg text-center shadow">
+                <span data-base-countdown="minutes" class="number text-3xl font-bold text-gray-800">47</span>
+                <span class="label text-sm text-gray-600 mt-1 block">MINUTES</span>
+            </div>
+            <div class="countdown-box bg-white p-4 rounded-lg text-center shadow">
+                <span data-base-countdown="seconds" class="number text-3xl font-bold text-gray-800">22</span>
+                <span class="label text-sm text-gray-600 mt-1 block">SECONDS</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Personal Timeline Section (hidden by default) -->
+    <div id="personal-countdown" class="countdown-section bg-blue-50 rounded-xl p-6 hidden">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold text-blue-800">YOUR ACCELERATED TIMELINE</h3>
+            <div class="text-sm font-semibold text-blue-600">
+                <span class="acceleration-percentage">0%</span> Faster
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-6 gap-4">
+            <div class="countdown-box bg-white p-4 rounded-lg text-center shadow-md border-2 border-blue-100">
+                <span data-personal-countdown="years" class="number text-3xl font-bold text-blue-800">--</span>
+                <span class="label text-sm text-blue-600 mt-1 block">YEARS</span>
+            </div>
+            <div class="countdown-box bg-white p-4 rounded-lg text-center shadow-md border-2 border-blue-100">
+                <span data-personal-countdown="months" class="number text-3xl font-bold text-blue-800">--</span>
+                <span class="label text-sm text-blue-600 mt-1 block">MONTHS</span>
+            </div>
+            <div class="countdown-box bg-white p-4 rounded-lg text-center shadow-md border-2 border-blue-100">
+                <span data-personal-countdown="days" class="number text-3xl font-bold text-blue-800">--</span>
+                <span class="label text-sm text-blue-600 mt-1 block">DAYS</span>
+            </div>
+            <div class="countdown-box bg-white p-4 rounded-lg text-center shadow-md border-2 border-blue-100">
+                <span data-personal-countdown="hours" class="number text-3xl font-bold text-blue-800">--</span>
+                <span class="label text-sm text-blue-600 mt-1 block">HOURS</span>
+            </div>
+            <div class="countdown-box bg-white p-4 rounded-lg text-center shadow-md border-2 border-blue-100">
+                <span data-personal-countdown="minutes" class="number text-3xl font-bold text-blue-800">--</span>
+                <span class="label text-sm text-blue-600 mt-1 block">MINUTES</span>
+            </div>
+            <div class="countdown-box bg-white p-4 rounded-lg text-center shadow-md border-2 border-blue-100">
+                <span data-personal-countdown="seconds" class="number text-3xl font-bold text-blue-800">--</span>
+                <span class="label text-sm text-blue-600 mt-1 block">SECONDS</span>
+            </div>
+        </div>
+    </div>
+</div>
         <div class="cta-section">
             <h2 class="cta-main-title">START SAVING FOR YOUR SPACE SEAT TODAY</h2>
             <div class="pricing-options">

@@ -3,14 +3,14 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Subscribe - StelTrek Academy</title>
+        <title>Subscribe - SharedStars</title>
         <link rel="stylesheet" href="/css/main.css">
         <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Chart.js -->
-        <script src="/js/subscribe.js"></script> <!-- Main JS file -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="/js/subscribe.js"></script>
     </head>
 <body>
-    <!-- Top Logo -->
+    <!-- Header -->
     <header class="header">
         <div class="container flex justify-between items-center px-4 py-4 bg-gray-100 shadow">
             <div class="logo">
@@ -18,247 +18,329 @@
                     <img src="/css/images/SharedStars.svg" alt="SharedStars" class="logo-image" width="150" height="40">
                 </a>
             </div>
-            <button class="menu-icon p-2 rounded-lg hover:bg-gray-300">
-                <div class="w-6 h-0.5 bg-black mb-1"></div>
-                <div class="w-6 h-0.5 bg-black mb-1"></div>
-                <div class="w-6 h-0.5 bg-black"></div>
-            </button>
         </div>
     </header>  
 
     <main class="bg-gray-100 min-h-screen py-12 pt-20">
         <div class="container mx-auto px-4">
+            <!-- Hero Section -->
             <header class="text-center mb-12 pt-24">
-                <h1 class="text-4xl font-bold text-gray-900 mb-6">SUBSCRIPTION PLANS: Chart a Course</h1>
-                <p class="text-xl text-gray-600 max-w-4xl mx-auto mb-8">
-                    Choose your plan and start your journey today. Secure your place in the future of space travel.
-                </p>
-
+                <h1 class="text-5xl font-extrabold text-gray-900 mb-6">Space Faster? Subscribe Now!</h1>
+                
                 <!-- Urgency Banner -->
                 <div class="bg-yellow-100 text-yellow-800 text-center py-2 rounded shadow-md mb-6">
-                    <p><strong>Don't get left behind!</strong> Secure your future in space today—spaces are filling fast.</p>
+                    <p class="font-bold text-lg">Space Seats are Filling Up Fast!!</p>
                 </div>
 
                 <!-- Key Benefits -->
                 <div class="bg-white rounded-xl shadow-xl p-8 max-w-4xl mx-auto">
                     <ul class="space-y-4 text-gray-700">
                         <li class="flex items-start">
-                            <svg class="w-4 h-4 text-green-500 mt-1 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 text-green-500 mt-1 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                             </svg>
-                            <span>Access to the Academy complete with AI-assisted training and VR modules</span>
+                            <span class="text-lg">AI-Guided Training & Personal VR Environment</span>
                         </li>
                         <li class="flex items-start">
-                            <svg class="w-4 h-4 text-green-500 mt-1 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 text-green-500 mt-1 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                             </svg>
-                            <span>Track fitness, tokens, leaderboard rankings, and preparedness</span>
+                            <span class="text-lg">Real-time Fitness & Readiness Tracking</span>
                         </li>
                         <li class="flex items-start">
-                            <svg class="w-4 h-4 text-green-500 mt-1 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 text-green-500 mt-1 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                             </svg>
-                            <span>Earn credits towards your dream of space travel</span>
+                            <span class="text-lg">Space Flight Credits with Every Payment</span>
                         </li>
                         <li class="flex items-start">
-                            <svg class="w-4 h-4 text-green-500 mt-1 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 text-green-500 mt-1 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                             </svg>
-                            <span>Exclusive speaker events and community involvement</span>
+                            <span class="text-lg">Priority Access to Astronaut Events</span>
                         </li>
                         <li class="flex items-start">
-                            <svg class="w-4 h-4 text-green-500 mt-1 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 text-green-500 mt-1 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                             </svg>
-                            <span>Certification of skills and education</span>
+                            <span class="text-lg">Space Flight Certification Program</span>
                         </li>
                     </ul>
                 </div>
 
-                <!-- Price Trend Chart -->
-                <div class="chart-container" style="position: relative; width: 100%; max-width: 800px; height: 400px; margin: 0 auto;">
-                    <p class="text-center text-gray-600 mb-4 italic">Select a plan to see your personalized journey to space</p>
-                    <div class="bg-white rounded-xl shadow-lg p-6">
-                        <h2 class="text-2xl font-bold mb-6 text-center">Your Path to Space</h2>
+                <!-- Graph Section -->
+                <div class="bg-white rounded-xl shadow-lg p-8 max-w-7xl mx-auto mt-8">
+                    <h2 class="text-3xl font-bold text-center text-gray-900 mb-6">Your Path to Space</h2>
+                    <p class="text-center text-gray-600 mb-4 italic">Select a plan below to see your accelerated path</p>
+                    <div class="graph-container relative h-96">
                         <canvas id="priceEvolutionChart"></canvas>
-                        <p class="text-sm text-gray-500 mt-4 text-center">*Based on your subscription plan and market projections</p>
                     </div>
+                    <p class="text-sm text-gray-500 mt-4 text-center italic">
+                        *Based on market projections and subscription plan
+                    </p>
                 </div>
             </header>
-            <!-- Subscription Plans -->
+<!-- Subscription Plans -->
 <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
-    <!-- Individual Explorer Plan -->
+    <!-- Individual Explorer -->
     <div class="bg-white rounded-2xl shadow-xl overflow-hidden transform hover:scale-105 transition-transform duration-300">
-        <div class="bg-blue-600 p-6 relative overflow-hidden">
-            <div class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2">
-                <div class="bg-blue-500 text-white text-xs px-3 py-1 rounded-full transform rotate-45">
-                    Starter
-                </div>
-            </div>
+        <div class="bg-blue-600 p-6 relative">
+            <span class="absolute top-0 right-0 bg-blue-700 text-white text-xs py-1 px-3 rounded-bl-lg">15-year track</span>
             <h2 class="text-2xl font-bold text-white text-center">Individual Explorer</h2>
             <div class="text-center mt-4">
                 <span class="text-white text-4xl font-bold">$49.99</span>
                 <span class="text-white text-xl">/month</span>
             </div>
-            <p class="text-white text-center mt-2 text-sm">Perfect for solo space enthusiasts</p>
+            <p class="text-white text-center mt-2">Reach Space Within 15 Years</p>
         </div>
         <div class="p-6">
             <ul class="space-y-4">
                 <li class="flex items-center">
-                    <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    <span class="text-gray-700">Basic training modules</span>
+                    <span>Personal AI Training Coach</span>
                 </li>
                 <li class="flex items-center">
-                    <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    <span class="text-gray-700">2 hours/month VR training</span>
+                    <span>10 Hours Monthly VR Training</span>
                 </li>
                 <li class="flex items-center">
-                    <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    <span class="text-gray-700">Community forum access</span>
+                    <span>Space Credits: 100/month</span>
                 </li>
                 <li class="flex items-center">
-                    <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    <span class="text-gray-700">Monthly webinars</span>
+                    <span>Basic Certification Path</span>
                 </li>
             </ul>
-            <div class="mt-8">
-                <button class="w-full bg-blue-600 text-white rounded-lg py-4 font-semibold hover:bg-blue-700 transition-colors duration-300 shadow-lg hover:shadow-xl"
-                    data-plan="individual"
-                    data-price="49.99">
-                    Start Your Journey
-                </button>
-                <p class="text-center text-sm text-gray-500 mt-3">No long-term commitment required</p>
-            </div>
+            <button class="w-full bg-blue-600 text-white rounded-lg py-4 mt-6 hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl font-semibold" 
+                data-plan="individual" 
+                data-price="49.99">
+                Begin Your Space Journey
+            </button>
+            <p class="text-sm text-center text-gray-600 mt-4">15-year path to space</p>
         </div>
     </div>
 
-    <!-- Family Pioneer Plan -->
-    <div class="bg-white rounded-2xl shadow-xl overflow-hidden transform hover:scale-105 transition-transform duration-300 relative z-10 scale-105">
-        <div class="absolute top-0 left-0 right-0 -translate-y-1/2">
-            <div class="bg-purple-500 text-white text-sm px-4 py-1 rounded-full mx-auto w-max">
-                Most Popular
-            </div>
-        </div>
-        <div class="bg-purple-600 p-6">
+    <!-- Family Pioneer -->
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden transform hover:scale-105 transition-transform duration-300">
+        <div class="bg-purple-600 p-6 relative">
+            <span class="absolute top-0 right-0 bg-purple-700 text-white text-xs py-1 px-3 rounded-bl-lg">10-year track</span>
             <h2 class="text-2xl font-bold text-white text-center">Family Pioneer</h2>
             <div class="text-center mt-4">
                 <span class="text-white text-4xl font-bold">$89.99</span>
                 <span class="text-white text-xl">/month</span>
             </div>
-            <p class="text-white text-center mt-2 text-sm">Perfect for families & small groups</p>
+            <p class="text-white text-center mt-2">Reach Space Within 10 Years</p>
         </div>
         <div class="p-6">
             <ul class="space-y-4">
                 <li class="flex items-center">
-                    <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    <span class="text-gray-700">Access for up to 4 members</span>
+                    <span>Train Up to 4 Family Members</span>
                 </li>
                 <li class="flex items-center">
-                    <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    <span class="text-gray-700">Unlimited VR training</span>
+                    <span>Unlimited VR Sessions</span>
                 </li>
                 <li class="flex items-center">
-                    <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    <span class="text-gray-700">Priority support 24/7</span>
+                    <span>Space Credits: 250/month</span>
                 </li>
                 <li class="flex items-center">
-                    <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    <span class="text-gray-700">Quarterly virtual missions</span>
+                    <span>Advanced Group Training</span>
                 </li>
             </ul>
-            <div class="mt-8">
-                <button class="w-full bg-purple-600 text-white rounded-lg py-4 font-semibold hover:bg-purple-700 transition-colors duration-300 shadow-lg hover:shadow-xl"
-                    data-plan="family"
-                    data-price="89.99">
-                    Join as Family
-                </button>
-                <p class="text-center text-sm text-gray-500 mt-3">14-day money-back guarantee</p>
-            </div>
+            <button class="w-full bg-purple-600 text-white rounded-lg py-4 mt-6 hover:bg-purple-700 transition-colors shadow-lg hover:shadow-xl font-semibold"
+                data-plan="family"
+                data-price="89.99">
+                Secure Family Access
+            </button>
+            <p class="text-sm text-center text-gray-600 mt-4">10-year path to space</p>
         </div>
     </div>
 
-    <!-- Galactic Elite Plan -->
+    <!-- Galactic Elite -->
     <div class="bg-white rounded-2xl shadow-xl overflow-hidden transform hover:scale-105 transition-transform duration-300">
-        <div class="p-6" style="background: linear-gradient(135deg, #FFD700, #FFA500)">
-            <div class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2">
-                <div class="bg-yellow-500 text-gray-900 text-xs px-3 py-1 rounded-full transform rotate-45">
-                    Premium
-                </div>
-            </div>
+        <div class="bg-yellow-400 p-6 relative">
+            <span class="absolute top-0 right-0 bg-yellow-500 text-gray-900 text-xs py-1 px-3 rounded-bl-lg">VIP Access</span>
             <h2 class="text-2xl font-bold text-gray-900 text-center">Galactic Elite</h2>
             <div class="text-center mt-4">
                 <span class="text-gray-900 text-4xl font-bold">$2,048</span>
                 <span class="text-gray-900 text-xl">/month</span>
             </div>
-            <p class="text-gray-900 text-center mt-2 text-sm">For serious space pioneers</p>
+            <p class="text-gray-900 text-center mt-2">Space Within 12 Months</p>
         </div>
         <div class="p-6">
             <ul class="space-y-4">
                 <li class="flex items-center">
-                    <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    <span class="text-gray-700">All premium features included</span>
+                    <span>Priority Space Seat Access</span>
                 </li>
                 <li class="flex items-center">
-                    <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    <span class="text-gray-700">1-on-1 expert mentoring</span>
+                    <span>Private Training Facility</span>
                 </li>
                 <li class="flex items-center">
-                    <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    <span class="text-gray-700">Private VR facility access</span>
+                    <span>Space Credits: 1000/month</span>
                 </li>
                 <li class="flex items-center">
-                    <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    <span class="text-gray-700">Priority space seat reservation</span>
+                    <span>Personal Space Mentor</span>
                 </li>
             </ul>
-            <div class="mt-8">
-                <button class="w-full bg-gradient-to-r from-yellow-400 to-yellow-600 text-gray-900 rounded-lg py-4 font-bold hover:from-yellow-500 hover:to-yellow-700 transition-all duration-300 shadow-lg hover:shadow-xl"
-                    data-plan="elite"
-                    data-price="2048">
-                    Secure Elite Access
-                </button>
-                <p class="text-center text-sm text-gray-500 mt-3">VIP concierge service included</p>
-            </div>
+            <button class="w-full bg-yellow-400 text-gray-900 rounded-lg py-4 mt-6 hover:bg-yellow-500 transition-colors shadow-lg hover:shadow-xl font-semibold"
+                data-plan="elite"
+                data-price="2048">
+                Secure Priority Access
+            </button>
+            <p class="text-sm text-center text-gray-600 mt-4">Expedited Training Program</p>
         </div>
     </div>
 </div>
-    </main>
-
-    <footer class="bg-gray-900 text-white py-12 mt-16">
-        <div class="container mx-auto px-4 max-w-6xl">
-            <div class="text-center mb-8">
-                <h3 class="text-2xl font-bold mb-2">Making space travel accessible for everyone</h3>
-                <div class="flex justify-center gap-4 mb-8">
-                    <a href="#" class="hover:text-blue-400">𝕏 Twitter</a>
-                    <a href="#" class="hover:text-blue-400">LinkedIn</a>
-                    <a href="#" class="hover:text-blue-400">📸 Instagram</a>
+<!-- Countdown Section -->
+<div class="bg-white rounded-xl shadow-lg p-8 max-w-7xl mx-auto mt-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Baseline Timer -->
+        <div class="bg-gray-50 rounded-lg p-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-4 text-center">BASELINE PATH TO SPACE</h3>
+            <div class="grid grid-cols-3 md:grid-cols-6 gap-2">
+                <div class="countdown-box bg-white p-3 rounded-lg text-center shadow">
+                    <span data-baseline="years" class="number text-2xl font-bold text-gray-800">13</span>
+                    <span class="label text-xs text-gray-600 block">YEARS</span>
+                </div>
+                <div class="countdown-box bg-white p-3 rounded-lg text-center shadow">
+                    <span data-baseline="months" class="number text-2xl font-bold text-gray-800">11</span>
+                    <span class="label text-xs text-gray-600 block">MONTHS</span>
+                </div>
+                <div class="countdown-box bg-white p-3 rounded-lg text-center shadow">
+                    <span data-baseline="days" class="number text-2xl font-bold text-gray-800">08</span>
+                    <span class="label text-xs text-gray-600 block">DAYS</span>
+                </div>
+                <div class="countdown-box bg-white p-3 rounded-lg text-center shadow">
+                    <span data-baseline="hours" class="number text-2xl font-bold text-gray-800">22</span>
+                    <span class="label text-xs text-gray-600 block">HOURS</span>
+                </div>
+                <div class="countdown-box bg-white p-3 rounded-lg text-center shadow">
+                    <span data-baseline="minutes" class="number text-2xl font-bold text-gray-800">07</span>
+                    <span class="label text-xs text-gray-600 block">MINUTES</span>
+                </div>
+                <div class="countdown-box bg-white p-3 rounded-lg text-center shadow">
+                    <span data-baseline="seconds" class="number text-2xl font-bold text-gray-800">48</span>
+                    <span class="label text-xs text-gray-600 block">SECONDS</span>
                 </div>
             </div>
         </div>
-    </footer>
+
+        <!-- Your Timer -->
+        <!-- Your Timer -->
+<div class="bg-blue-50 rounded-lg p-6">
+    <h3 class="text-xl font-bold text-blue-800 mb-4 text-center">YOUR ACCELERATED TIMELINE</h3>
+    <div class="grid grid-cols-3 md:grid-cols-6 gap-2">
+        <div class="countdown-box bg-white p-3 rounded-lg text-center shadow">
+            <span data-personal-countdown="years" class="number text-2xl font-bold text-gray-400">--</span>
+            <span class="label text-xs text-blue-600 block">YEARS</span>
+        </div>
+        <div class="countdown-box bg-white p-3 rounded-lg text-center shadow">
+            <span data-personal-countdown="months" class="number text-2xl font-bold text-gray-400">--</span>
+            <span class="label text-xs text-blue-600 block">MONTHS</span>
+        </div>
+        <div class="countdown-box bg-white p-3 rounded-lg text-center shadow">
+            <span data-personal-countdown="days" class="number text-2xl font-bold text-gray-400">--</span>
+            <span class="label text-xs text-blue-600 block">DAYS</span>
+        </div>
+        <div class="countdown-box bg-white p-3 rounded-lg text-center shadow">
+            <span data-personal-countdown="hours" class="number text-2xl font-bold text-gray-400">--</span>
+            <span class="label text-xs text-blue-600 block">HOURS</span>
+        </div>
+        <div class="countdown-box bg-white p-3 rounded-lg text-center shadow">
+            <span data-personal-countdown="minutes" class="number text-2xl font-bold text-gray-400">--</span>
+            <span class="label text-xs text-blue-600 block">MINUTES</span>
+        </div>
+        <div class="countdown-box bg-white p-3 rounded-lg text-center shadow">
+            <span data-personal-countdown="seconds" class="number text-2xl font-bold text-gray-400">--</span>
+            <span class="label text-xs text-blue-600 block">SECONDS</span>
+        </div>
+    </div>
+</div>
+    </div>
+</div>
+</div>
+</main>
+
+<footer class="bg-gray-900 text-white py-12 mt-16">
+<div class="container mx-auto px-4 max-w-6xl">
+<div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
+    <div>
+        <h3 class="font-bold mb-4">About</h3>
+        <ul class="space-y-2">
+            <li><a href="/about" class="hover:text-blue-400">Our Story</a></li>
+            <li><a href="/academy" class="hover:text-blue-400">Space Academy</a></li>
+            <li><a href="/early-access" class="hover:text-blue-400">Early Access</a></li>
+        </ul>
+    </div>
+    <div>
+        <h3 class="font-bold mb-4">Community</h3>
+        <ul class="space-y-2">
+            <li><a href="/events" class="hover:text-blue-400">Events</a></li>
+            <li><a href="/blog" class="hover:text-blue-400">Blog</a></li>
+            <li><a href="/forum" class="hover:text-blue-400">Forum</a></li>
+        </ul>
+    </div>
+    <div>
+        <h3 class="font-bold mb-4">Resources</h3>
+        <ul class="space-y-2">
+            <li><a href="/faq" class="hover:text-blue-400">FAQ</a></li>
+            <li><a href="/support" class="hover:text-blue-400">Support</a></li>
+            <li><a href="/contact" class="hover:text-blue-400">Contact</a></li>
+        </ul>
+    </div>
+    <div>
+        <h3 class="font-bold mb-4">Legal</h3>
+        <ul class="space-y-2">
+            <li><a href="/terms" class="hover:text-blue-400">Terms</a></li>
+            <li><a href="/privacy" class="hover:text-blue-400">Privacy</a></li>
+            <li><a href="/disclaimer" class="hover:text-blue-400">Disclaimer</a></li>
+        </ul>
+    </div>
+</div>
+<div class="text-center">
+    <h3 class="text-2xl font-bold mb-2">Making space travel accessible for everyone</h3>
+    <div class="flex justify-center gap-4 mb-8">
+        <a href="#" class="hover:text-blue-400">𝕏 Twitter</a>
+        <a href="#" class="hover:text-blue-400">LinkedIn</a>
+        <a href="#" class="hover:text-blue-400">📸 Instagram</a>
+    </div>
+</div>
+<div class="text-center text-gray-400 text-sm">
+    © 2024 Celestial Technologies, LLC. All rights reserved.
+</div>
+</div>
+</footer>
 </body>
 </html>
