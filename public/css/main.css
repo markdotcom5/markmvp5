@@ -169,11 +169,13 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 20px;
 }
 
 /* Logo styles */
 .logo {
   height: 40px;
+  width: 200px;
 }
 
 .logo-image {
