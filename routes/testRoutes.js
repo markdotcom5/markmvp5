@@ -1,10 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const { authenticate, requireRole } = require('../middleware/authenticate');
+const { authenticate } = require('../middleware/authenticate'); // Import your authenticate middleware
 
-// Test route for role-based access
-router.get('/test-role', authenticate, requireRole(['admin']), (req, res) => {
-    res.status(200).json({ message: 'Welcome, admin!' });
+// Define a test protected route
+router.get('/protected', authenticate, (req, res) => {
+    res.json({
+        message: 'You are authenticated!',
+        user: req.user, // Should be set by the authenticate middleware
+    });
 });
 
 module.exports = router;

@@ -35,14 +35,26 @@ const validateSessionInput = (req, res, next) => {
     next();
 };
 
-// Debugging Logs
-console.log('authenticate middleware:', typeof authenticate);
-console.log('sessionLimiter:', typeof sessionLimiter);
-console.log('TrainingSession Model:', TrainingSession);
-console.log('validateSessionInput middleware:', typeof validateSessionInput);
+// Route: Fetch Training Modules
+router.get('/modules', authenticate, async (req, res) => {
+    try {
+        const modules = [
+            { id: 1, name: 'Physical Training', description: 'Improve your physical readiness.' },
+            { id: 2, name: 'Mental Training', description: 'Boost your mental strength and focus.' },
+            { id: 3, name: 'Space Simulation', description: 'Experience simulated space missions.' },
+            { id: 4, name: 'Technical Skills', description: 'Develop technical skills for space exploration.' },
+            { id: 5, name: 'Team Dynamics', description: 'Enhance teamwork and leadership skills.' },
+        ];
+
+        res.json({ success: true, modules });
+    } catch (error) {
+        console.error('Error fetching modules:', error.message);
+        res.status(500).json({ error: 'Failed to fetch training modules.' });
+    }
+});
 
 // Protected Route: Create a Training Session
-router.post('/sessions', authenticate, async (req, res) => {
+router.post('/sessions', authenticate, validateSessionInput, async (req, res) => {
     const { sessionType, dateTime, participants, points = 0 } = req.body;
 
     try {
@@ -151,4 +163,188 @@ router.patch('/sessions/:sessionId/complete', authenticate, sessionLimiter, asyn
     }
 });
 
+// Start AI Assessment
+router.post('/assessment/start', authenticate, sessionLimiter, async (req, res) => {
+    try {
+        console.log('Starting new assessment session...');
+        
+        const session = new TrainingSession({
+            userId: req.user._id,
+            sessionType: 'Assessment',
+            dateTime: new Date(),
+            status: 'in-progress',
+            aiGuidance: {
+                enabled: true,
+                lastGuidance: 'Starting initial assessment'
+            },
+            assessment: {  // Add this explicit assessment initialization
+                type: 'initial',
+                responses: [],
+                startedAt: new Date(),
+                aiRecommendations: {
+                    focusAreas: [],
+                    suggestedModules: [],
+                    personalizedFeedback: '',
+                    nextSteps: []
+                }
+            }
+        });
+
+        console.log('Getting initial assessment questions...');
+        const assessmentQuestions = await AISpaceCoach.getInitialAssessment();
+        
+        await session.save();
+        
+        res.json({
+            success: true,
+            sessionId: session._id,
+            questions: assessmentQuestions
+        });
+    } catch (error) {
+        console.error('Complete error object:', error);
+        res.status(500).json({ 
+            error: 'Failed to start assessment',
+            details: error.message 
+        });
+    }
+});
+
+// Submit Assessment Answer
+router.post('/assessment/:sessionId/submit', authenticate, sessionLimiter, async (req, res) => {
+    try {
+        const { question, answer } = req.body;
+        const session = await TrainingSession.findOne({
+            _id: req.params.sessionId,
+            userId: req.user._id,
+            status: 'in-progress'
+        });
+
+        if (!session) {
+            return res.status(404).json({ error: 'Assessment session not found' });
+        }
+
+        // Record the response
+        session.submitAssessmentResponse(question, answer);
+
+        // Get AI analysis of the answer
+        const aiAnalysis = await AISpaceCoach.analyzeResponse(question, answer);
+        
+        // Update session with AI recommendations
+        if (aiAnalysis.recommendations) {
+            session.assessment.aiRecommendations = {
+                ...session.assessment.aiRecommendations,
+                ...aiAnalysis.recommendations
+            };
+        }
+
+        await session.save();
+
+        // Check if this was the last question
+        const isComplete = session.assessment.responses.length >= aiAnalysis.totalQuestions;
+
+        res.json({
+            success: true,
+            isComplete,
+            nextQuestion: isComplete ? null : aiAnalysis.nextQuestion,
+            immediateGuidance: aiAnalysis.immediateGuidance
+        });
+    } catch (error) {
+        console.error('Error submitting assessment answer:', error);
+        res.status(500).json({ error: 'Failed to submit answer' });
+    }
+});
+
+// Complete Assessment and Generate Training Plan
+router.post('/assessment/:sessionId/complete', authenticate, sessionLimiter, async (req, res) => {
+    try {
+        const session = await TrainingSession.findOne({
+            _id: req.params.sessionId,
+            userId: req.user._id,
+            status: 'in-progress'
+        });
+
+        if (!session) {
+            return res.status(404).json({ error: 'Assessment session not found' });
+        }
+
+        // Generate final analysis and training plan
+        const finalAnalysis = await AISpaceCoach.generateTrainingPlan(session.assessment.responses);
+        
+        // Update session with results
+        session.completeAssessment(finalAnalysis.score, finalAnalysis.recommendations);
+        session.status = 'completed';
+        session.metrics = {
+            physicalReadiness: finalAnalysis.metrics.physical,
+            mentalPreparedness: finalAnalysis.metrics.mental,
+            technicalProficiency: finalAnalysis.metrics.technical,
+            overallScore: finalAnalysis.metrics.overall
+        };
+
+        await session.save();
+
+        res.json({
+            success: true,
+            trainingPlan: {
+                recommendedModules: finalAnalysis.recommendations.suggestedModules,
+                focusAreas: finalAnalysis.recommendations.focusAreas,
+                timeline: finalAnalysis.recommendations.timeline,
+                nextSteps: finalAnalysis.recommendations.nextSteps
+            },
+            metrics: session.metrics
+        });
+    } catch (error) {
+        console.error('Error completing assessment:', error);
+        res.status(500).json({ error: 'Failed to complete assessment' });
+    }
+});
+
+// Toggle AI Guidance
+router.post('/ai-guidance/toggle', authenticate, async (req, res) => {
+    try {
+        const { enabled } = req.body;
+        const session = await TrainingSession.findOne({
+            userId: req.user._id,
+            status: 'in-progress'
+        });
+
+        if (session) {
+            session.aiGuidance.enabled = enabled;
+            await session.save();
+        }
+
+        res.json({
+            success: true,
+            aiGuidanceEnabled: enabled
+        });
+    } catch (error) {
+        console.error('Error toggling AI guidance:', error);
+        res.status(500).json({ error: 'Failed to toggle AI guidance' });
+    }
+});
+
+// Get AI Recommendations
+router.get('/ai-recommendations', authenticate, async (req, res) => {
+    try {
+        const latestSession = await TrainingSession.findOne({
+            userId: req.user._id
+        }).sort({ createdAt: -1 });
+
+        if (!latestSession) {
+            return res.status(404).json({ error: 'No training sessions found' });
+        }
+
+        const recommendations = await AISpaceCoach.getPersonalizedRecommendations(
+            req.user._id,
+            latestSession.metrics
+        );
+
+        res.json({
+            success: true,
+            recommendations
+        });
+    } catch (error) {
+        console.error('Error getting AI recommendations:', error);
+        res.status(500).json({ error: 'Failed to get recommendations' });
+    }
+});
 module.exports = router;

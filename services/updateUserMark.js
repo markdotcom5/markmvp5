@@ -1,33 +1,37 @@
 const mongoose = require('mongoose');
-const User = require('../models/User'); // Adjust path if necessary
+const User = require('../models/User'); // Adjust the path if necessary
 
-mongoose.connect('mongodb+srv://Sophis7152567:S3EmtfBGRC3V1nGR@cluster0.20bhg.mongodb.net/StelTrek_MVP5', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-}).then(async () => {
-    console.log('Connected to MongoDB Atlas!');
+const connectAndUpdate = async () => {
+    try {
+        // Connect to MongoDB
+        await mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+        console.log("✅ Connected to MongoDB.");
 
-    const update = {
-        location: {
-            coordinates: [-73.935242, 40.73061], // Example coordinates (longitude, latitude)
-            state: 'New York',
-            country: 'USA'
-        },
-        trainingCohort: {
-            startDate: '2024-12-01',
-            programType: 'Astronaut Training'
-        }
-    };
+        // Your logic here (e.g., updating user marks)
+        console.log("Performing user updates...");
 
-    const result = await User.updateOne({ name: 'mark' }, { $set: update });
+        // Example logic: Updating a user's field
+        const updatedUser = await User.findOneAndUpdate(
+            { email: "testuser@example.com" }, // Example query
+            { $set: { score: 100 } },          // Example update
+            { new: true, runValidators: true }
+        );
 
-    if (result.modifiedCount > 0) {
-        console.log('User "mark" updated successfully!');
-    } else {
-        console.log('No updates applied. Check if the user "mark" exists.');
+        console.log("✅ User updated:", updatedUser);
+
+    } catch (err) {
+        console.error("❌ Error during update process:", err.message);
+    } finally {
+        // Ensure the connection is closed after the script completes
+        await mongoose.connection.close();
+        console.log("✅ MongoDB connection closed.");
     }
+};
 
-    mongoose.connection.close();
-}).catch(err => {
-    console.error('Error connecting to MongoDB:', err);
-});
+// Run the script if executed directly
+if (require.main === module) {
+    connectAndUpdate();
+}
+
+// Export the function for reuse
+module.exports = connectAndUpdate;

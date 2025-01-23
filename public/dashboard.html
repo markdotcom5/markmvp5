@@ -3,44 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - StelTrek Academy</title>
-    <link rel="stylesheet" href="/css/main.css"> <!-- Link your main CSS -->
+    <meta name="description" content="StelTrek Academy Dashboard">
+    <title>StelTrek Academy Dashboard</title>
+    <link rel="stylesheet" href="/css/main.css">
 </head>
 <body>
-    <header>
-        <h1>Welcome to Your Dashboard</h1>
-        <button id="logout-btn" class="logout-btn">Logout</button>
+    <!-- Header -->
+    <header class="site-header">
+        <nav>
+            <ul>
+                <li><a href="/index.html">Home</a></li>
+                <li><a href="/academy.html">Academy</a></li>
+                <li><a href="/leaderboard.html">Leaderboard</a></li>
+                <li><a href="/profile.html">Profile</a></li>
+                <li><button id="logout-button">Logout</button></li>
+            </ul>
+        </nav>
     </header>
-    <main>
-        <section id="progress-dashboard">
-            <h2>Your Progress</h2>
-            <div class="progress-bar-container" role="progressbar" aria-valuemin="0" aria-valuemax="100">
-                <div class="progress-fill"></div>
-                <span class="progress-text">0%</span>
-            </div>
-            <ul class="stats-list">
-                <li>Rank: <span id="user-rank">--</span></li>
-                <li>Score: <span id="user-score">0</span></li>
-                <li>Missions Completed: <span id="missions-completed">0</span></li>
+
+    <!-- Main Dashboard -->
+    <main class="dashboard">
+        <!-- Welcome Section -->
+        <section class="welcome-section">
+            <h1>Welcome Back, <span id="user-name">Explorer</span>!</h1>
+            <p>Your journey to the stars continues. Explore your progress below.</p>
+        </section>
+
+        <!-- Training Modules -->
+        <section id="training-modules">
+            <h2>Training Modules</h2>
+            <ul class="modules-grid" id="modules-list">
+                <!-- Training modules dynamically loaded -->
             </ul>
         </section>
 
-        <section id="achievements">
-            <h2>Your Achievements</h2>
-            <ul id="achievements-list"></ul>
-        </section>
-
-        <section id="next-mission">
-            <h2>Upcoming Mission</h2>
-            <div class="mission-container">
-                <p>Loading next mission...</p>
+        <!-- Certifications -->
+        <section id="certifications">
+            <h2>Your Certifications</h2>
+            <div class="cert-grid">
+                <!-- Certifications dynamically loaded -->
             </div>
         </section>
+
+        <!-- Leaderboard Snapshot -->
+        <section id="leaderboard">
+            <h2>Leaderboard</h2>
+            <p>Your Rank: <span id="user-rank">Rookie Explorer</span> | Points: <span id="user-points">3500</span></p>
+            <h3>Top Performers</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Name</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-body">
+                    <!-- Leaderboard dynamically loaded -->
+                </tbody>
+            </table>
+        </section>
+
+        <!-- AR/VR Training Modules -->
+        <section id="vr-training">
+            <h2>AR/VR Training Modules <span class="coming-soon">Coming Soon</span></h2>
+            <p>Experience space travel like never before with immersive simulations.</p>
+            <div class="vr-images">
+                <img src="/images/vr-headset.jpg" alt="VR Headset">
+                <img src="/images/space-station-view.jpg" alt="Space Station View">
+            </div>
+        </section>
+
+        <!-- Community Engagement -->
+        <section id="community-engagement">
+            <h2>Community Engagement</h2>
+            <ul>
+                <li>Refer new subscribers and earn points.</li>
+                <li>Participate in group challenges or team missions.</li>
+                <li>Become a mentor and guide new explorers on their journey.</li>
+            </ul>
+        </section>
+
+        <!-- Upcoming Events -->
+        <section id="upcoming-events">
+            <h2>Upcoming Events</h2>
+            <ul>
+                <li>Mars Mission Webinar - Dec 10</li>
+                <li>Zero-G Training - Dec 15</li>
+                <li>Space Industry Networking Event - Jan 5</li>
+            </ul>
+        </section>
     </main>
+
+    <!-- Footer -->
     <footer>
-        <p>© 2025 StelTrek Academy. All rights reserved.</p>
+        <p>© 2024 StelTrek Academy. All rights reserved.</p>
     </footer>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Include Chart.js -->
-    <script src="/js/dashboard.js"></script> <!-- Link your dashboard JS -->
+
+    <!-- JavaScript -->
+    <script src="/js/dashboard.js"></script>
 </body>
 </html>

@@ -1,108 +1,250 @@
-document.addEventListener("DOMContentLoaded", async () => {
-    // Initialize subscription page
-    initializeSubscriptionPage();
-
-    // Set up event listeners
-    setupEventListeners();
-});
-
-async function initializeSubscriptionPage() {
-    try {
-        const userSubscription = await fetchUserSubscription();
-        updateSubscriptionUI(userSubscription);
-    } catch (error) {
-        console.error("Error initializing subscription page:", error);
-        showError("Failed to load subscription details");
-    }
-}
-
-async function fetchUserSubscription() {
-    const response = await fetch("/api/payment/subscription", {
-        headers: {
-            "Authorization": `Bearer ${localStorage.getItem("token")}`
-        }
-    });
-
-    if (!response.ok) {
-        throw new Error("Failed to fetch user subscription");
+class PriceEvolutionChart {
+    constructor() {
+        this.chart = null;
+        this.currentPlan = null;
+        this.personalCountdownInterval = null;
+        this.baselineCountdownInterval = null;
+        this.initialize();
+        this.initializeBaselineTimer();
     }
 
-    return response.json();
-}
-
-function updateSubscriptionUI(subscription) {
-    const planButtons = document.querySelectorAll("[data-plan]");
-    planButtons.forEach(button => {
-        button.classList.remove("selected-plan");
-        if (button.dataset.plan === subscription.plan) {
-            button.classList.add("selected-plan");
-        }
-    });
-
-    const currentPlanText = document.getElementById("current-plan");
-    if (currentPlanText) {
-        currentPlanText.textContent = subscription.plan || "No subscription";
-    }
-}
-
-function setupEventListeners() {
-    const planButtons = document.querySelectorAll("[data-plan]");
-    planButtons.forEach(button => {
-        button.addEventListener("click", () => handlePlanSelection(button.dataset.plan));
-    });
-
-    const logoutBtn = document.getElementById("logout-btn");
-    if (logoutBtn) {
-        logoutBtn.addEventListener("click", handleLogout);
-    }
-}
-
-async function handlePlanSelection(plan) {
-    try {
-        const response = await fetch("/api/payment/subscribe", {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${localStorage.getItem("token")}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ plan })
-        });
-
-        if (!response.ok) {
-            throw new Error("Failed to update subscription");
+    initialize() {
+        const ctx = document.getElementById('priceEvolutionChart');
+        if (!ctx) {
+            console.error('Chart canvas not found');
+            return;
         }
 
-        const result = await response.json();
-        alert(`Successfully subscribed to the ${plan} plan!`);
-        updateSubscriptionUI(result);
-    } catch (error) {
-        console.error("Subscription error:", error);
-        showError("Failed to update subscription");
-    }
-}
-
-async function handleLogout() {
-    try {
-        const response = await fetch("/api/auth/logout", {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${localStorage.getItem("token")}`
+        this.chart = new Chart(ctx, {
+            type: 'line',
+            data: this.getChartData(),
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                aspectRatio: 2,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        title: {
+                            display: true,
+                            text: 'Space Journey Cost ($)',
+                            font: { size: 14, weight: 'bold' }
+                        },
+                        ticks: {
+                            callback: value => {
+                                if (value >= 1000000) return `$${value/1000000}M`;
+                                if (value >= 1000) return `$${value/1000}k`;
+                                return `$${value}`;
+                            }
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Timeline (Years)',
+                            font: { size: 14, weight: 'bold' }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: { usePointStyle: true, padding: 20 }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleFont: { size: 13 },
+                        bodyFont: { size: 12 },
+                        padding: 12,
+                        callbacks: {
+                            label: context => {
+                                const value = context.raw;
+                                if (value >= 1000000) return `$${(value/1000000).toFixed(1)}M`;
+                                if (value >= 1000) return `$${(value/1000).toFixed(1)}k`;
+                                return `$${value}`;
+                            }
+                        }
+                    }
+                }
             }
         });
 
-        if (!response.ok) {
-            throw new Error("Logout failed");
+        this.initializePlanListeners();
+    }
+
+    getChartData(selectedPlan = null) {
+        const basePrice = 450000;
+        const years = [2024, 2027, 2030, 2035, 2039];
+        
+        const basePrices = years.map(year => {
+            const yearsFromStart = year - 2024;
+            return basePrice * Math.pow(0.85, yearsFromStart);
+        });
+
+        const datasets = [{
+            label: 'Standard Journey',
+            data: basePrices,
+            borderColor: 'rgb(156, 163, 175)',
+            backgroundColor: 'rgba(156, 163, 175, 0.1)',
+            borderWidth: 2,
+            tension: 0.4
+        }];
+
+        if (selectedPlan) {
+            const planConfigs = {
+                individual: {
+                    rate: 0.75,
+                    color: 'rgb(59, 130, 246)',
+                    label: 'Explorer Path'
+                },
+                family: {
+                    rate: 0.70,
+                    color: 'rgb(139, 92, 246)',
+                    label: 'Pioneer Path'
+                },
+                elite: {
+                    rate: 0.55,
+                    color: 'rgb(234, 179, 8)',
+                    label: 'Elite Path'
+                }
+            };
+
+            const config = planConfigs[selectedPlan];
+            if (config) {
+                datasets.push({
+                    label: config.label,
+                    data: years.map(year => {
+                        const yearsFromStart = year - 2024;
+                        return basePrice * Math.pow(config.rate, yearsFromStart);
+                    }),
+                    borderColor: config.color,
+                    backgroundColor: `${config.color.replace('rgb', 'rgba').replace(')', ', 0.1)')}`,
+                    borderWidth: 3,
+                    tension: 0.4,
+                    pointStyle: 'star'
+                });
+            }
         }
 
-        localStorage.removeItem("token");
-        window.location.href = "/login";
-    } catch (error) {
-        console.error("Logout error:", error);
-        showError("Failed to log out");
+        return { labels: years, datasets };
     }
-}
 
-function showError(message) {
-    console.error(message);
-    alert(message); // Optional: Replace with a toast notification
-}
+    initializeBaselineTimer() {
+        const targetDate = new Date('2039-01-01');
+        
+        const updateTimer = () => {
+            const now = new Date();
+            const timeLeft = targetDate - now;
+            
+            const years = Math.floor(timeLeft / (365.25 * 24 * 60 * 60 * 1000));
+            const months = Math.floor((timeLeft % (365.25 * 24 * 60 * 60 * 1000)) / (30.44 * 24 * 60 * 60 * 1000));
+            const days = Math.floor((timeLeft % (30.44 * 24 * 60 * 60 * 1000)) / (24 * 60 * 60 * 1000));
+            const hours = Math.floor((timeLeft % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+            const minutes = Math.floor((timeLeft % (60 * 60 * 1000)) / (60 * 1000));
+            const seconds = Math.floor((timeLeft % (60 * 1000)) / 1000);
+    
+            document.querySelector('[data-base-timer="years"]').textContent = years.toString().padStart(2, '0');
+            document.querySelector('[data-base-timer="months"]').textContent = months.toString().padStart(2, '0');
+            document.querySelector('[data-base-timer="days"]').textContent = days.toString().padStart(2, '0');
+            document.querySelector('[data-base-timer="hours"]').textContent = hours.toString().padStart(2, '0');
+            document.querySelector('[data-base-timer="minutes"]').textContent = minutes.toString().padStart(2, '0');
+            document.querySelector('[data-base-timer="seconds"]').textContent = seconds.toString().padStart(2, '0');
+        };
+    
+        updateTimer();
+        this.baselineCountdownInterval = setInterval(updateTimer, 1000);
+    }
+    updateChart(planType) {
+        if (!this.chart) return;
+        
+        this.currentPlan = planType;
+        const newData = this.getChartData({ type: planType });  // Fixed argument structure
+        this.chart.data = newData;
+        this.chart.update('active');
+        
+        const personalCountdown = document.getElementById('personal-countdown');
+        if (personalCountdown) {
+            personalCountdown.style.display = 'block';
+            this.updatePersonalCountdown(planType);
+        }
+    }
+    
+    updatePersonalCountdown(planType) {
+        const accelerationRates = {
+            individual: 0.25,
+            family: 0.40,
+            elite: 0.80
+        };
+    
+        const baseYears = 15;
+        const reduction = accelerationRates[planType] || 0;
+        const adjustedYears = Math.ceil(baseYears * (1 - reduction));
+    
+        const targetDate = new Date();
+        targetDate.setFullYear(targetDate.getFullYear() + adjustedYears);
+        this.startPersonalCountdown(targetDate);
+    
+        const percentageEl = document.querySelector('.acceleration-percentage');
+        if (percentageEl) {
+            percentageEl.textContent = `${Math.round(reduction * 100)}`;
+        }
+    }
+    
+    startPersonalCountdown(targetDate) {
+        if (this.personalCountdownInterval) {
+            clearInterval(this.personalCountdownInterval);
+        }
+    
+        const updateTimer = () => {
+            const now = new Date();
+            const timeLeft = targetDate - now;
+    
+            const units = {
+                years: Math.floor(timeLeft / (365.25 * 24 * 60 * 60 * 1000)),
+                months: Math.floor((timeLeft % (365.25 * 24 * 60 * 60 * 1000)) / (30.44 * 24 * 60 * 60 * 1000)),
+                days: Math.floor((timeLeft % (30.44 * 24 * 60 * 60 * 1000)) / (24 * 60 * 60 * 1000)),
+                hours: Math.floor((timeLeft % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000)),
+                minutes: Math.floor((timeLeft % (60 * 60 * 1000)) / (60 * 1000)),
+                seconds: Math.floor((timeLeft % (60 * 1000)) / 1000)
+            };
+    
+            Object.entries(units).forEach(([unit, value]) => {
+                const element = document.querySelector(`[data-personal-countdown="${unit}"]`);
+                if (element) {
+                    element.textContent = value.toString().padStart(2, '0');
+                    element.classList.remove('text-gray-400');
+                    element.classList.add('text-blue-800');
+                }
+            });
+        };
+    
+        updateTimer();
+        this.personalCountdownInterval = setInterval(updateTimer, 1000);
+    }
+    
+    // Replace your current initializePlanListeners() method
+    initializePlanListeners() {
+        console.log('Initializing plan listeners');
+        const planButtons = document.querySelectorAll('.plan-select-btn');  // Match HTML class
+        planButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const planType = button.getAttribute('data-plan');
+                if (planType) {
+                    console.log('Plan selected:', planType);
+                    this.chart.data = this.getChartData({ type: planType });
+                    this.chart.update('active');
+                    
+                    const personalCountdown = document.getElementById('personal-countdown');
+                    if (personalCountdown) {
+                        personalCountdown.style.display = 'block';
+                        this.updatePersonalCountdown(planType);
+                    }
+                }
+            });
+        });
+    }
+// Initialize when document loads
+document.addEventListener('DOMContentLoaded', () => {
+    new PriceEvolutionChart();
+});

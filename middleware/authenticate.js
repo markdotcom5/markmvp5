@@ -7,19 +7,34 @@ const mongoose = require('mongoose');
 // Middleware: Authenticate HTTP Requests
 const authenticate = async (req, res, next) => {
     try {
-        const token = req.header('Authorization')?.replace('Bearer ', '').trim();
-        if (!token) {
-            return res.status(401).json({ error: 'Authentication token is required.' });
+        const authHeader = req.header('Authorization');
+        console.log('Auth header received:', authHeader); // Debug log
+
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            console.error('Invalid auth header format');
+            return res.status(401).json({ error: 'Authentication token must be Bearer token' });
         }
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'default-secret-key');
-        req.user = { _id: decoded._id, role: decoded.role || 'user' }; // Adjust payload structure as needed
+        const token = authHeader.replace('Bearer ', '').trim();
+        console.log('Token extracted:', token); // Debug log
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        console.log('Token decoded:', decoded); // Debug log
+
+        req.user = { 
+            _id: decoded._id || decoded.userId, // Handle both formats
+            role: decoded.role || 'user'
+        };
+        
+        console.log('User set in request:', req.user); // Debug log
         next();
     } catch (error) {
-        const isTokenExpired = error.name === 'TokenExpiredError';
-        res.status(401).json({
-            error: isTokenExpired ? 'Token has expired.' : 'Invalid or expired token.',
+        console.error('Authentication error details:', {
+            message: error.message,
+            name: error.name,
+            stack: error.stack
         });
+        res.status(401).json({ error: 'Invalid or expired token.' });
     }
 };
 
@@ -43,11 +58,16 @@ const authenticateWebSocket = (request) => {
         };
 
         const token = extractToken(request);
-        if (!token) return null;
+        if (!token) {
+            console.warn('WebSocket authentication failed: No token provided.');
+            return null;
+        }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'default-secret-key');
-        return { userId: decoded._id, role: decoded.role || 'user' }; // Include role if needed
-    } catch {
+        console.log('WebSocket authenticated successfully for user:', decoded._id);
+        return { userId: decoded._id, role: decoded.role || 'user' };
+    } catch (error) {
+        console.error('WebSocket authentication error:', error.message);
         return null;
     }
 };
@@ -57,31 +77,44 @@ const setupWebSocketServer = (server) => {
     const wss = new WebSocket.Server({ noServer: true });
     const clients = new Map(); // Map userId to WebSocket instance
 
+    const heartbeat = (ws) => {
+        ws.isAlive = true;
+    };
+
     wss.on('connection', (ws, req) => {
         const { userId } = req;
         clients.set(userId, ws);
 
-        // Handle incoming messages
+        ws.isAlive = true;
+        ws.on('pong', () => heartbeat(ws));
+
         ws.on('message', (message) => {
             console.log(`Message from ${userId}: ${message}`);
-            // Optionally process messages here
         });
 
-        // Handle WebSocket closure
         ws.on('close', () => {
             clients.delete(userId);
             console.log(`Connection closed for user ${userId}`);
         });
 
-        // Handle WebSocket errors
         ws.on('error', (error) => {
             console.error(`WebSocket error for user ${userId}:`, error);
         });
     });
 
+    setInterval(() => {
+        wss.clients.forEach((ws) => {
+            if (!ws.isAlive) {
+                console.warn('Terminating dead WebSocket connection.');
+                return ws.terminate();
+            }
+            ws.isAlive = false;
+            ws.ping();
+        });
+    }, 30000); // Check every 30 seconds
+
     server.on('upgrade', (request, socket, head) => {
         const authData = authenticateWebSocket(request);
-
         if (!authData) {
             socket.destroy();
             return;
@@ -106,6 +139,7 @@ const setupWebSocketServer = (server) => {
 
     return { wss, broadcastMessage };
 };
+
 
 // Training Module Schema
 const moduleSchema = new mongoose.Schema(

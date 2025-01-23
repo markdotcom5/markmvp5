@@ -3,444 +3,938 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StelTrek Academy - AI-Guided Path to Space</title>
+    <title>SharedStars - AI-Guided Space Training</title>
     <link rel="stylesheet" href="/css/main.css">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png">
 </head>
 <body>
     <!-- Header -->
     <header class="header">
-        <div class="logo">
-            <a href="/">STELTREK</a>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="/" aria-label="SharedStars Homepage">
+                        <img src="/css/images/SharedStars.svg" alt="SharedStars" class="logo-image" width="150" height="40">
+                    </a>
+                </div>
+                <button class="menu-trigger" aria-label="Open Menu" aria-expanded="false">
+                    <span class="menu-icon"></span>
+                    <span class="menu-text">Menu</span>
+                </button>
+            </div>
         </div>
-        <button class="menu-trigger" onclick="toggleMenu()">Menu</button>
-    </header>    
+    </header>
 
     <!-- Menu Overlay -->
-    <div id="menuOverlay" class="menu-overlay">
-        <div class="menu-content">
-            <!-- Close Button -->
-            <button class="close-button" onclick="toggleMenu()">×</button>
+    <div id="menuOverlay" class="menu-overlay hidden" aria-hidden="true">
+        <div class="container">
+            <div class="menu-content">
+                <button class="close-button" aria-label="Close Menu">&times;</button>
+                <nav aria-label="Main navigation">
+                    <ul class="menu-items">
+                        <li><a href="/" aria-current="page">Home</a></li>
+                        <li><a href="/about">About</a></li>
+                        <li><a href="/why-steltrek">Why StelTrek</a></li>
+                        <li><a href="/leaderboard">Leaderboard</a></li>
+                        <li><a href="/training">Training</a></li>
+                        <li><a href="/academy">StelTrek Academy</a></li>
+                        <li><a href="/subscribe">Subscribe</a></li>
+                        <li><a href="/shop">Shop</a></li>
+                        <li><a href="/profile">Profile</a></li>
+                        <li><a href="/signup">Sign Up</a></li>
+                        <li><a href="/login">Login</a></li>
+                    </ul>
+                </nav>
 
-            <!-- Navigation Items -->
-            <nav class="menu-items">
-                <ul>
-                    <li><a href="/">Home</a></li>
-                    <li><a href="/why-steltrek">Why StelTrek</a></li>
-                    <li><a href="/about">About</a></li>
-                    <li><a href="/leaderboard">Leaderboard</a></li>
-                    <li><a href="/training">Training</a></li>
-                    <li><a href="/academy">StelTrek Academy</a></li>
-                    <li><a href="/subscribe">Subscribe</a></li>
-                    <li><a href="/shop">Shop</a></li>
-                    <li><a href="/profile">Profile</a></li>
-                    <li><a href="/signup">Sign Up</a></li>
-                    <li><a href="/login">Login</a></li>
-                    <li><a href="/welcome">Welcome</a></li>
-                </ul>
-            </nav>
-
-            <!-- Language Selector -->
-            <div class="language-selector">
-                <label for="language">Language:</label>
-                <select id="languageSelector" onchange="changeLanguage(this.value)">
-                    <option value="en">United States - English</option>
-                    <option value="zh">中国 - 中文</option>
-                    <option value="ko">한국 - 한국어</option>
-                    <option value="es">España - Español</option>
-                </select>
+                <!-- Language Selector -->
+                <div class="language-selector">
+                    <h3>Select Your Language</h3>
+                    <div class="language-options" role="radiogroup" aria-label="Language selection">
+                        <button class="language-option" data-lang="en" aria-pressed="true">
+                            <span class="flag-icon usa"></span>USA - English
+                        </button>
+                        <button class="language-option" data-lang="zh" aria-pressed="false">
+                            <span class="flag-icon china"></span>中国 - 中文
+                        </button>
+                        <button class="language-option" data-lang="ko" aria-pressed="false">
+                            <span class="flag-icon korea"></span>한국 - 한국어
+                        </button>
+                        <button class="language-option" data-lang="es" aria-pressed="false">
+                            <span class="flag-icon spain"></span>España - Español
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Hero Section -->
-    <section id="hero" class="section hero-section">
-        <!-- Video Background -->
-        <video class="video-background" id="heroVideo" autoplay muted loop playsinline>
-            <source src="/videos/stelacktop.mp4" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>
-    
-        <!-- Video Overlay -->
-        <div class="video-overlay"></div>
-    
-        <!-- Hero Content -->
-        <div class="hero-content">
-            <h1>Every Journey Begins with a Simple Dream</h1>
-            <div class="ai-badge">World's First AI-Guided Space Training</div>
-            <p class="subtitle">From Earth to Mars in 36 Months</p>
-    
-            <!-- AI Toggle Section -->
-            <div class="ai-toggle-container">
-                <button class="toggle-option manual active">Manual Navigation</button>
-                <button class="toggle-option ai">Full AI Guidance</button>
-                <p class="toggle-note">Like Tesla's FSD, but for your space journey</p>
+    <!-- Main Content -->
+    <main id="main">
+        <!-- Hero Section -->
+        <section id="hero" class="hero-section">
+            <div class="video-container">
+                <video id="heroVideo" class="video-background" autoplay muted loop playsinline aria-hidden="true">
+                    <source src="/videos/stelacktop.mp4" type="video/mp4">
+                </video>
             </div>
-        </div>
-    </section>
-
-    <!-- JavaScript -->
-    <script src="/js/main.js"></script>
+            
+            <div class="container">
+                <div class="hero-content">
+                    <h1 class="hero-title">Become Space-Ready in 36 Months</h1>
+                    <p class="hero-subtitle">AI-Powered Space Training - Like Tesla FSD for Astronauts</p>
+                    
+                    <!-- AI Toggle Section -->
+                    <div class="ai-toggle-section">
+                        <div class="ai-toggle-box">
+                            <div class="ai-toggle-container" role="group" aria-label="Training Mode Selection">
+                                <button class="toggle-option manual active" data-mode="manual" aria-pressed="true">
+                                    <h3>Self-Paced Training</h3>
+                                    <p>Traditional space training with structured modules</p>
+                                </button>
+                                <button class="toggle-option ai" data-mode="ai" aria-pressed="false">
+                                    <h3>AI Accelerated Path</h3>
+                                    <p>Get to space sooner with AI-guided personalized training</p>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
 </body>
 </html>
 
-    <<!-- Training Experience -->
-<section id="training" class="section training-section">
-    <!-- Hero Section -->
-<video class="video-background" id="heroVideo" autoplay muted loop playsinline>
-    <source src="/videos/stelacktop.mp4" type="video/mp4">
-</video>
-    <div class="video-overlay"></div>
-    <div class="section-content">
-        <h2>Advanced AI-Guided Training</h2>
-        <p class="section-subtitle">Your Personal Space Training Coach</p>
+<!-- Price Evolution & Sign-up Section -->
+<section id="price-evolution" class="section price-evolution-section">
+    <div class="section-background">
+        <!-- Title -->
+        <h2 class="price-title">Space Faster -- Subscribe Now</h2>
 
-        <div class="training-grid">
-            <div class="training-module">
-                <div class="module-icon">🏋️</div>
-                <h3>Physical Conditioning</h3>
-                <ul class="module-features">
-                    <li>Zero-G adaptation training</li>
-                    <li>Cardiovascular optimization</li>
-                    <li>Space-specific strength training</li>
-                    <li>Real-time biometric monitoring</li>
-                </ul>
-                <div class="success-rate">
-                    <span class="rate">96%</span>
-                    <span class="label">Pass Rate</span>
-                </div>
+        <!-- Graph Container -->
+        <div class="graph-container">
+            <canvas id="priceEvolutionChart"></canvas>
+        </div>
+        <div class="disclaimer">
+            <p>*Based on current market trends and industry projections</p>
+        </div>
+
+<!-- Price Evolution & Countdown Section -->
+<div class="bg-white rounded-xl shadow-lg p-8 max-w-4xl mx-auto mt-8">
+    <!-- Chart Section -->
+    <div class="mb-12">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Your Path to Space</h2>
+        <div class="graph-container h-[400px]">
+            <canvas id="priceEvolutionChart"></canvas>
+        </div>
+        <p class="text-sm text-gray-500 mt-4 text-center italic">
+            *Based on market projections and subscription plan
+        </p>
+    </div>
+
+    <!-- Base Timeline Section -->
+    <div class="countdown-section bg-gray-50 rounded-xl p-6 mb-8">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold text-gray-800">BASELINE PATH TO SPACE</h3>
+            <div class="flex gap-4 text-sm text-gray-600">
+                <span>Current: $450,000</span>
+                <span>→</span>
+                <span>Target: $5,000</span>
             </div>
-
-            <div class="training-module featured">
-                <div class="module-icon">🚀</div>
-                <h3>Technical Operations</h3>
-                <ul class="module-features">
-                    <li>VR spacecraft control simulations</li>
-                    <li>Emergency procedure training</li>
-                    <li>System maintenance protocols</li>
-                    <li>Navigation and docking practice</li>
-                </ul>
-                <div class="success-rate">
-                    <span class="rate">98%</span>
-                    <span class="label">Certification Rate</span>
-                </div>
+        </div>
+        
+        <div class="grid grid-cols-6 gap-4">
+            <div class="countdown-box bg-white p-4 rounded-lg text-center shadow">
+                <span data-base-countdown="years" class="number text-3xl font-bold text-gray-800">13</span>
+                <span class="label text-sm text-gray-600 mt-1 block">YEARS</span>
             </div>
-
-            <div class="training-module">
-                <div class="module-icon">🧠</div>
-                <h3>Mental Preparation</h3>
-                <ul class="module-features">
-                    <li>Stress management techniques</li>
-                    <li>Decision making under pressure</li>
-                    <li>Team dynamics training</li>
-                    <li>Extended isolation preparation</li>
-                </ul>
-                <div class="success-rate">
-                    <span class="rate">94%</span>
-                    <span class="label">Readiness Score</span>
-                </div>
+            <div class="countdown-box bg-white p-4 rounded-lg text-center shadow">
+                <span data-base-countdown="months" class="number text-3xl font-bold text-gray-800">11</span>
+                <span class="label text-sm text-gray-600 mt-1 block">MONTHS</span>
+            </div>
+            <div class="countdown-box bg-white p-4 rounded-lg text-center shadow">
+                <span data-base-countdown="days" class="number text-3xl font-bold text-gray-800">11</span>
+                <span class="label text-sm text-gray-600 mt-1 block">DAYS</span>
+            </div>
+            <div class="countdown-box bg-white p-4 rounded-lg text-center shadow">
+                <span data-base-countdown="hours" class="number text-3xl font-bold text-gray-800">23</span>
+                <span class="label text-sm text-gray-600 mt-1 block">HOURS</span>
+            </div>
+            <div class="countdown-box bg-white p-4 rounded-lg text-center shadow">
+                <span data-base-countdown="minutes" class="number text-3xl font-bold text-gray-800">47</span>
+                <span class="label text-sm text-gray-600 mt-1 block">MINUTES</span>
+            </div>
+            <div class="countdown-box bg-white p-4 rounded-lg text-center shadow">
+                <span data-base-countdown="seconds" class="number text-3xl font-bold text-gray-800">22</span>
+                <span class="label text-sm text-gray-600 mt-1 block">SECONDS</span>
             </div>
         </div>
     </div>
-</section>
 
-    <<!-- Founder's Story -->
-<section id="story" class="section founder-section">
-    <!-- Hero Section -->
-<video class="video-background" id="heroVideo" autoplay muted loop playsinline>
-    <source src="/videos/stelacktop.mp4" type="video/mp4">
-</video>
-    <div class="video-overlay"></div>
-    <div class="section-content">
-        <div class="story-grid">
-            <div class="story-text">
-                <h2>How StelTrek Academy Was Born</h2>
-                <div class="story-content">
-                    <p>At one of the lowest points in my life, I grappled with a sense of despair—not just from personal challenges, but from a dream that felt impossibly out of reach. Space travel, with its astronomical costs, seemed reserved for a privileged few.</p>
-                    <p>The Three-Body Problem trilogy changed everything. Its exploration of humanity's resilience and collective drive to overcome impossible odds ignited a spark. I realized space travel shouldn't be exclusive to the elite.</p>
-                    <p>Today, StelTrek Academy has trained over 2,500 individuals, with 500+ graduates working in the space industry. Our AI-guided system has revolutionized how people prepare for space, making the journey accessible to anyone willing to dream and work hard.</p>
+    <!-- Personal Timeline Section (hidden by default) -->
+    <div id="personal-countdown" class="countdown-section bg-blue-50 rounded-xl p-6 hidden">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold text-blue-800">YOUR ACCELERATED TIMELINE</h3>
+            <div class="text-sm font-semibold text-blue-600">
+                <span class="acceleration-percentage">0%</span> Faster
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-6 gap-4">
+            <div class="countdown-box bg-white p-4 rounded-lg text-center shadow-md border-2 border-blue-100">
+                <span data-personal-countdown="years" class="number text-3xl font-bold text-blue-800">--</span>
+                <span class="label text-sm text-blue-600 mt-1 block">YEARS</span>
+            </div>
+            <div class="countdown-box bg-white p-4 rounded-lg text-center shadow-md border-2 border-blue-100">
+                <span data-personal-countdown="months" class="number text-3xl font-bold text-blue-800">--</span>
+                <span class="label text-sm text-blue-600 mt-1 block">MONTHS</span>
+            </div>
+            <div class="countdown-box bg-white p-4 rounded-lg text-center shadow-md border-2 border-blue-100">
+                <span data-personal-countdown="days" class="number text-3xl font-bold text-blue-800">--</span>
+                <span class="label text-sm text-blue-600 mt-1 block">DAYS</span>
+            </div>
+            <div class="countdown-box bg-white p-4 rounded-lg text-center shadow-md border-2 border-blue-100">
+                <span data-personal-countdown="hours" class="number text-3xl font-bold text-blue-800">--</span>
+                <span class="label text-sm text-blue-600 mt-1 block">HOURS</span>
+            </div>
+            <div class="countdown-box bg-white p-4 rounded-lg text-center shadow-md border-2 border-blue-100">
+                <span data-personal-countdown="minutes" class="number text-3xl font-bold text-blue-800">--</span>
+                <span class="label text-sm text-blue-600 mt-1 block">MINUTES</span>
+            </div>
+            <div class="countdown-box bg-white p-4 rounded-lg text-center shadow-md border-2 border-blue-100">
+                <span data-personal-countdown="seconds" class="number text-3xl font-bold text-blue-800">--</span>
+                <span class="label text-sm text-blue-600 mt-1 block">SECONDS</span>
+            </div>
+        </div>
+    </div>
+</div>
+        <div class="cta-section">
+            <h2 class="cta-main-title">START SAVING FOR YOUR SPACE SEAT TODAY</h2>
+            <div class="pricing-options">
+                <div class="pricing-plan">
+                    <h3>Individual Explorer</h3>
+                    <p class="price">$49.99/mo</p>
+                    <button class="secure-seat-btn">SECURE YOUR SEAT</button>
                 </div>
-                <div class="story-stats">
-                    <div class="stat">
-                        <span class="number">2,500+</span>
-                        <span class="label">Active Trainees</span>
+                <div class="pricing-plan">
+                    <h3>Family Plan</h3>
+                    <p class="price">$89.99 - $179.99/mo</p>
+                    <button class="secure-seat-btn">SECURE YOUR SEATS</button>
+                </div>
+                <div class="pricing-plan featured">
+                    <h3>Galactic Explorer</h3>
+                    <p class="price">$2,048/mo</p>
+                    <button class="secure-seat-btn">SECURE PRIORITY ACCESS</button>
+                </div>
+            </div>
+            <button class="learn-more-btn">LEARN MORE</button>
+            <p class="early-access-note">*Early access members receive priority seating and exclusive benefits</p>
+        </div>
+<!-- AI Guidance Section -->
+<section id="ai-guidance" class="section ai-guidance-section">
+    <div class="section-content">
+        <div class="ai-preview-container">
+            <!-- Left side: AI Coach Preview -->
+            <div class="ai-coach-preview">
+                <span class="feature-label">POWERED BY AI</span>
+                <h2>Your Personal Space Training Coach</h2>
+                <p class="feature-description">
+                    Advanced AI system that adapts to your progress and provides 
+                    real-time guidance 24/7
+                </p>
+                
+                <!-- Preview Cards -->
+                <div class="feature-cards">
+                    <div class="feature-card">
+                        <div class="card-icon">🎯</div>
+                        <span>Personalized Training Path</span>
                     </div>
-                    <div class="stat">
-                        <span class="number">500+</span>
-                        <span class="label">Industry Placements</span>
+                    <div class="feature-card">
+                        <div class="card-icon">📈</div>
+                        <span>Real-time Progress Tracking</span>
                     </div>
-                    <div class="stat">
-                        <span class="number">94%</span>
-                        <span class="label">Success Rate</span>
+                    <div class="feature-card">
+                        <div class="card-icon">🏆</div>
+                        <span>Achievement System</span>
+                    </div>
+                </div>
+
+                <!-- Social Proof -->
+                <div class="social-proof">
+                    <div class="user-count">
+                        <strong>2,500+</strong> trainees already using AI guidance
+                    </div>
+                </div>
+
+                <!-- CTA Buttons -->
+                <div class="cta-buttons">
+                    <a href="/ai-coach" class="primary-btn">Explore AI Features</a>
+                    <a href="/demo" class="secondary-btn">Watch Demo</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section id="academy-preview" class="academy-section relative">
+    <!-- Video Background -->
+    <div class="video-container">
+        <video class="video-background" autoplay muted loop playsinline aria-hidden="true">
+            <source src="/videos/academy.mp4" type="video/mp4">
+        </video>
+    </div>
+
+    <!-- Content Overlay -->
+    <div class="container relative z-10">
+        <div class="academy-content text-center">
+            <span class="text-blue-400 uppercase font-semibold tracking-wide">SharedStars Academy</span>
+            <h2 class="text-white text-4xl font-extrabold mt-4">Your Gateway to Space Exploration</h2>
+            <p class="text-gray-300 mt-4">
+                Experience interactive AR/VR training, real-world simulations, and AI-guided certifications that prepare you for the next frontier: space.
+            </p>
+
+            <!-- Quick Stats -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-10">
+                <div>
+                    <span class="text-3xl font-extrabold text-blue-300">2,500+</span>
+                    <p class="text-gray-300 mt-2">Active Trainees</p>
+                </div>
+                <div>
+                    <span class="text-3xl font-extrabold text-green-300">94%</span>
+                    <p class="text-gray-300 mt-2">Success Rate</p>
+                </div>
+                <div>
+                    <span class="text-3xl font-extrabold text-purple-300">36</span>
+                    <p class="text-gray-300 mt-2">Months to Space</p>
+                </div>
+            </div>
+
+            <!-- Call to Action -->
+            <div class="mt-10">
+                <a href="/academy" class="btn-primary">Explore the Academy</a>
+                <a href="/academy/tour" class="btn-secondary ml-4">Take a Virtual Tour</a>
+            </div>
+        </div>
+    </div>
+</section>
+<section id="leaderboard-preview" class="leaderboard-section relative">
+    <!-- Video Background -->
+    <div class="video-container">
+        <video class="video-background" autoplay muted loop playsinline>
+            <source src="/videos/leaderboard1.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>        
+    </div>
+
+    <!-- Content Overlay -->
+    <div class="container relative z-10">
+        <div class="leaderboard-content text-center">
+            <span class="text-purple-400 uppercase font-semibold tracking-wide">Global Rankings</span>
+            <h2 class="text-white text-4xl font-extrabold mt-4">Top Space Pioneers</h2>
+
+            <!-- Top 3 Rankings -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-10">
+                <!-- Silver -->
+                <div class="bg-black bg-opacity-50 p-6 rounded-lg">
+                    <div class="text-5xl">🥈</div>
+                    <h3 class="text-xl font-bold mt-4">David Kim</h3>
+                    <p class="text-gray-300">97.2% - Final Phase</p>
+                </div>
+
+                <!-- Gold -->
+                <div class="bg-yellow-500 bg-opacity-20 p-6 rounded-lg">
+                    <div class="text-5xl">🥇</div>
+                    <h3 class="text-xl font-bold mt-4 text-yellow-300">Sarah Chen</h3>
+                    <p class="text-gray-300 mt-2">98.5% - Mars Ready</p>
+                    <div class="mt-4">
+                        <span class="bg-blue-200 text-blue-700 px-2 py-1 rounded">🏆 Physical Elite</span>
+                        <span class="bg-green-200 text-green-700 px-2 py-1 rounded">⭐ Tech Master</span>
+                    </div>
+                </div>
+
+                <!-- Bronze -->
+                <div class="bg-black bg-opacity-50 p-6 rounded-lg">
+                    <div class="text-5xl">🥉</div>
+                    <h3 class="text-xl font-bold mt-4">James Wilson</h3>
+                    <p class="text-gray-300">96.8% - Advanced</p>
+                </div>
+            </div>
+
+            <!-- Call to Action -->
+            <div class="mt-10">
+                <a href="/leaderboard" class="btn-primary">View Full Rankings</a>
+                <a href="/profile/stats" class="btn-secondary ml-4">Check Your Rank</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Origin Story Preview Section -->
+<section id="origin-preview" class="origin-preview-section">
+    <div class="section-content">
+        <span class="story-label">OUR STORY</span>
+        <h2>How SharedStars Began</h2>
+        
+        <!-- Quote Card -->
+        <div class="founder-quote">
+            <blockquote>
+                "Space travel shouldn't be reserved for the wealthy few. 
+                It should be accessible to everyone willing to dream, learn, and prepare."
+            </blockquote>
+            <div class="book-reference">
+                <span class="book-icon">📚</span>
+                Inspired by "The Three-Body Problem" trilogy
+            </div>
+        </div>
+
+        <!-- Mission Statement -->
+        <div class="mission-card">
+            <h3>Our Mission</h3>
+            <p>Democratizing space travel through accessible training, 
+               community support, and innovative technology.</p>
+            
+            <div class="mission-stats">
+                <div class="stat">
+                    <span class="number">2,500+</span>
+                    <span class="label">Active Trainees</span>
+                </div>
+                <div class="stat">
+                    <span class="number">$49.99</span>
+                    <span class="label">Starting Monthly</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA Section -->
+        <div class="story-cta">
+            <a href="/about" class="primary-btn">Read Our Full Story</a>
+            <a href="/founder" class="secondary-btn">Meet the Founder</a>
+        </div>
+    </div>
+</section>
+<!-- Board Preview Section -->
+<section id="board-preview" class="board-preview-section">
+    <div class="section-content">
+        <span class="board-label">BOARD OF ADVISORS</span>
+        <h2>Backed by Industry Leaders</h2>
+        <p class="section-subtitle">Our mission is supported by experts from NASA, SpaceX, and leading space organizations</p>
+
+        <!-- Featured Advisors Grid -->
+        <div class="featured-advisors">
+            <!-- NASA Advisor -->
+            <div class="advisor-card">
+                <div class="advisor-header">
+                    <div class="advisor-company">NASA ARMSTRONG</div>
+                    <img src="/css/images/dr mark.png" alt="Dr. Mark R. Prele" class="advisor-image">
+                </div>
+                <div class="advisor-content">
+                    <h3>Dr. Mark R. Prele</h3>
+                    <p class="title">Chief Medical Officer & Flight Surgeon</p>
+                    <div class="expertise-tags">
+                        <span>Space Medicine</span>
+                        <span>Flight Safety</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SpaceX Advisor -->
+            <div class="advisor-card featured">
+                <div class="advisor-header">
+                    <div class="advisor-company">Former SpaceX</div>
+                    <img src="/css/images/travis.png" alt="Travis Talbot" class="advisor-image">
+                </div>
+                <div class="advisor-content">
+                    <h3>Travis Talbot</h3>
+                    <p class="title">Senior Manufacturing Engineer</p>
+                    <div class="expertise-tags">
+                        <span>Propulsion Systems</span>
+                        <span>Spacecraft Design</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NASA Datanaut -->
+            <div class="advisor-card">
+                <div class="advisor-header">
+                    <div class="advisor-company">NASA DATANAUT</div>
+                    <img src="/css/images/laura.png" alt="Laura Anne Edwards" class="advisor-image">
+                </div>
+                <div class="advisor-content">
+                    <h3>Laura Anne Edwards</h3>
+                    <p class="title">Global Innovation Executive</p>
+                    <div class="expertise-tags">
+                        <span>Space Tech</span>
+                        <span>Innovation</span>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Credentials Summary -->
+        <div class="credentials-bar">
+            <div class="credential">
+                <span class="number">50+</span>
+                <span class="label">Years Combined Experience</span>
+            </div>
+            <div class="credential">
+                <span class="number">3</span>
+                <span class="label">Space Organizations</span>
+            </div>
+            <div class="credential">
+                <span class="number">12</span>
+                <span class="label">Industry Patents</span>
+            </div>
+        </div>
+
+        <!-- CTA Section -->
+        <div class="board-cta">
+            <h3>Want to meet our entire advisory board?</h3>
+            <div class="cta-buttons">
+                <a href="/about.html#board" class="primary-btn">Meet Full Board</a>
+                <a href="/about.html#expertise" class="secondary-btn">View Expertise</a>
+            </div>
+            <p class="advisor-note">*Our advisors actively participate in curriculum development and safety protocols</p>
+        </div>
     </div>
 </section>
-
-   <!-- Leaderboard Preview -->
-<section id="leaderboard" class="section leaderboard-section">
-    <!-- Hero Section -->
-<video class="video-background" id="heroVideo" autoplay muted loop playsinline>
-    <source src="/videos/stelacktop.mp4" type="video/mp4">
-</video>
-    <div class="video-overlay"></div>
+<!-- Early Access Preview Section -->
+<section id="early-access-preview" class="section early-access-section">
     <div class="section-content">
-        <h2>Your Journey to the Stars</h2>
-        <p class="section-subtitle">Real-time Progress Tracking</p>
+        <span class="preview-label">EARLY ACCESS PROGRAM</span>
+        <h2>Join Our Pioneer Program</h2>
+        <p class="section-subtitle">Be among the first to shape the future of space training</p>
 
-        <div class="leaderboard-preview">
-            <div class="top-performers">
-                <h3>Current Leaders</h3>
-                <div class="performer">
-                    <span class="rank">1</span>
-                    <span class="name">Sarah K.</span>
-                    <span class="score">98.5%</span>
-                    <span class="status">Mars-Ready</span>
+        <!-- Beta Access Benefits -->
+        <div class="benefits-grid">
+            <div class="benefit-card">
+                <div class="benefit-icon">🎯</div>
+                <h3>Priority Access</h3>
+                <p>First access to our AI-guided training system</p>
+                <div class="benefit-features">
+                    <span>Early Bird Pricing</span>
+                    <span>Lifetime Benefits</span>
                 </div>
-                <div class="performer">
-                    <span class="rank">2</span>
-                    <span class="name">David M.</span>
-                    <span class="score">97.2%</span>
-                    <span class="status">Final Phase</span>
+            </div>
+
+            <div class="benefit-card featured">
+                <div class="benefit-icon">👥</div>
+                <h3>Pioneer Community</h3>
+                <p>Join an exclusive group of initial space training pioneers</p>
+                <div class="benefit-features">
+                    <span>Direct Input on Features</span>
+                    <span>Exclusive Events</span>
                 </div>
-                <div class="performer">
-                    <span class="rank">3</span>
-                    <span class="name">Elena R.</span>
-                    <span class="score">96.8%</span>
-                    <span class="status">Advanced Training</span>
+            </div>
+
+            <div class="benefit-card">
+                <div class="benefit-icon">🚀</div>
+                <h3>Future Benefits</h3>
+                <p>Secure your place in our first space training cohort</p>
+                <div class="benefit-features">
+                    <span>Priority Scheduling</span>
+                    <span>Founding Member Status</span>
                 </div>
             </div>
         </div>
-    </div>
-</section>
 
-    <<!-- Success Stories -->
-<section id="success" class="section success-section">
-    <!-- Hero Section -->
-<video class="video-background" id="heroVideo" autoplay muted loop playsinline>
-    <source src="/videos/stelacktop.mp4" type="video/mp4">
-</video>
-    <div class="video-overlay"></div>
+        <!-- Early Access Stats -->
+        <div class="early-access-stats">
+            <div class="stat-card">
+                <span class="stat-number">200</span>
+                <p>Early Access Spots</p>
+            </div>
+            <div class="stat-card highlight">
+                <span class="stat-number">65%</span>
+                <p>Spots Reserved</p>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">$49.99</span>
+                <p>Early Bird Price</p>
+            </div>
+        </div>
+
+        <!-- CTA Section -->
+        <div class="early-access-cta">
+            <h3>Limited Spots Available</h3>
+            <div class="cta-buttons">
+                <a href="/early-access" class="primary-btn">Reserve Your Spot</a>
+                <a href="/pioneer-program" class="secondary-btn">Learn More</a>
+            </div>
+            <p class="early-access-note">*Early access members receive lifetime benefits and priority space training selection</p>
+        </div>
+    </div>
+</section><!-- Pricing Preview Section -->
+<section id="pricing-preview" class="section pricing-preview-section">
     <div class="section-content">
-        <h2>From Dream to Reality: Our Mars-Ready Graduates</h2>
+        <span class="pricing-label">MEMBERSHIP</span>
+        <h2>Start Your Journey to Space</h2>
+        <p class="section-subtitle">From $49.99/month • Special Early Access Rates</p>
 
-        <div class="success-stories">
-            <div class="story">
-                <div class="graduate-info">
-                    <h3>Sarah Chen</h3>
-                    <p class="role">SpaceX Operations Specialist</p>
-                    <p class="quote">"StelTrek's AI guidance cut my training time in half. Now I'm helping plan Mars missions."</p>
-                    <div class="timeline">Training to Hired: 14 months</div>
+        <!-- Featured Plan -->
+        <div class="featured-plan">
+            <div class="early-access-badge">Limited Time Offer</div>
+            <h3>Early Pioneer Access</h3>
+            <div class="price-display">
+                <div class="price">
+                    <span class="amount">$49.99</span>
+                    <span class="period">/month</span>
+                </div>
+                <div class="price-note">Lock in founding member rate</div>
+            </div>
+
+            <!-- Key Benefits -->
+            <div class="key-benefits">
+                <div class="benefit">
+                    <span class="check">✓</span>
+                    <div class="benefit-text">
+                        <strong>Full Academy Access</strong>
+                        <p>Complete space training curriculum</p>
+                    </div>
+                </div>
+                <div class="benefit">
+                    <span class="check">✓</span>
+                    <div class="benefit-text">
+                        <strong>AI Training Guide</strong>
+                        <p>24/7 personalized coaching</p>
+                    </div>
+                </div>
+                <div class="benefit">
+                    <span class="check">✓</span>
+                    <div class="benefit-text">
+                        <strong>Priority Status</strong>
+                        <p>Early access to new features</p>
+                    </div>
                 </div>
             </div>
 
-            <div class="story">
-                <div class="graduate-info">
-                    <h3>Marcus Rodriguez</h3>
-                    <p class="role">NASA Advanced Systems Engineer</p>
-                    <p class="quote">"The AR/VR training was incredibly realistic. It prepared me perfectly for the real thing."</p>
-                    <div class="timeline">Training to Hired: 18 months</div>
+            <!-- Quick Stats -->
+            <div class="plan-stats">
+                <div class="stat">
+                    <span class="number">200</span>
+                    <span class="label">Early Access Spots</span>
+                </div>
+                <div class="stat highlight">
+                    <span class="number">65%</span>
+                    <span class="label">Already Reserved</span>
                 </div>
             </div>
+        </div>
 
-            <div class="story">
-                <div class="graduate-info">
-                    <h3>Aisha Patel</h3>
-                    <p class="role">Blue Origin Mission Specialist</p>
-                    <p class="quote">"Started as a teacher, now I'm training for the first civilian Mars mission."</p>
-                    <div class="timeline">Training to Selected: 24 months</div>
-                </div>
+        <!-- Plan Options Preview -->
+        <div class="plan-options">
+            <div class="option">
+                <h4>Individual Explorer</h4>
+                <p>Starting at $49.99/mo</p>
             </div>
+            <div class="option">
+                <h4>Family Pioneer</h4>
+                <p>Up to 4 members from $89.99/mo</p>
+            </div>
+            <div class="option">
+                <h4>Galactic Elite</h4>
+                <p>Premium access from $2,048/mo</p>
+            </div>
+        </div>
+
+        <!-- CTA Section -->
+        <div class="pricing-cta">
+            <a href="/subscribe" class="primary-btn">View All Plans</a>
+            <a href="/early-access" class="featured-btn pulse">Secure Early Access</a>
+            <p class="pricing-note">*Limited time early access pricing • Money-back guarantee</p>
         </div>
     </div>
 </section>
-
-    <!-- Subscription Plans -->
-<section id="subscribe" class="section plans-section">
-    <h2>Begin Your Journey to Space</h2>
-    <div class="plans-grid">
-        <!-- Individual Explorer Plan -->
-        <div class="plan">
-            <h3>Individual Explorer</h3>
-            <div class="price">$49.99/mo</div>
-            <ul class="features">
-                <li>Full AI-guided training</li>
-                <li>VR/AR simulations</li>
-                <li>Personal progress tracking</li>
-                <li>Access to global leaderboards</li>
-                <li>Community forum access</li>
-            </ul>
-            <button class="button-primary">Start Training</button>
-        </div>
-
-        <!-- Family Pioneer Plan -->
-        <div class="plan featured">
-            <div class="best-value">MOST POPULAR</div>
-            <h3>Family Pioneer</h3>
-            <div class="price">$89.99/mo</div>
-            <ul class="features">
-                <li>Everything in Individual Explorer</li>
-                <li>Up to 4 family members</li>
-                <li>Group challenges and rewards</li>
-                <li>Priority customer support</li>
-                <li>Family progress tracking</li>
-            </ul>
-            <button class="button-primary pulse">Choose Plan</button>
-        </div>
     
-        <!-- Galactic Elite Plan -->
-        <div class="plan premium">
-            <h3>Galactic Elite</h3>
-            <div class="price">$2,048/mo</div>
-            <ul class="features">
-                <li>All features unlocked</li>
-                <li>1-on-1 expert mentoring</li>
-                <li>Exclusive industry networking</li>
-                <li>Priority placement in space initiatives</li>
-                <li>Accelerated program timeline</li>
-                <li>Executive coaching and career guidance</li>
-                <li>Personalized space-readiness roadmap</li>
-            </ul>
-            <button class="button-primary elite">Contact for Details</button>
+<!-- Community Preview Section -->
+<section id="community-preview" class="section community-preview-section">
+    <div class="section-content">
+        <span class="community-label">SPACE PIONEERS COMMUNITY</span>
+        <h2>Be Part of Something Extraordinary</h2>
+        <p class="section-subtitle">Join the founding members of our space training community</p>
+
+        <div class="community-features">
+            <!-- Founding Members -->
+            <div class="community-card">
+                <div class="card-icon">👥</div>
+                <h3>Founding Members</h3>
+                <p>Shape the future of space training as part of our initial community.</p>
+                <div class="member-preview">
+                    <div class="member-avatars">
+                        <div class="avatar-stack">
+                            <span class="avatar-placeholder"></span>
+                            <span class="avatar-placeholder"></span>
+                            <span class="avatar-placeholder"></span>
+                        </div>
+                    </div>
+                    <p><strong>Join 200 Reserved Members</strong></p>
+                    <span class="spots-remaining">Limited spots remaining</span>
+                </div>
+            </div>
+
+            <!-- Expert Sessions -->
+            <div class="community-card featured">
+                <div class="card-icon">🚀</div>
+                <h3>Expert Sessions</h3>
+                <p>Exclusive access to live sessions with space industry leaders.</p>
+                <div class="upcoming-preview">
+                    <span class="preview-label">First Session</span>
+                    <h4>Space Training Fundamentals</h4>
+                    <p>With Dr. Mark R. Prele - NASA Flight Surgeon</p>
+                    <span class="session-exclusive">Early access members only</span>
+                </div>
+            </div>
+
+            <!-- Pioneer Benefits -->
+            <div class="community-card">
+                <div class="card-icon">🌟</div>
+                <h3>Pioneer Benefits</h3>
+                <p>Exclusive perks for our founding community members.</p>
+                <ul class="benefits-list">
+                    <li>Priority Access to Events</li>
+                    <li>Direct Input on Features</li>
+                    <li>Lifetime Pioneer Status</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Community CTA -->
+        <div class="community-cta">
+            <h3>Ready to Join Our Pioneer Community?</h3>
+            <div class="cta-buttons">
+                <a href="/community" class="primary-btn">Learn More</a>
+                <a href="/early-access" class="secondary-btn">Reserve Your Spot</a>
+            </div>
+            <p class="community-note">*Early members help shape our community guidelines and features</p>
         </div>
     </div>
-    <div class="plan-guarantee">
-        <span class="guarantee-icon">🛡️</span>
-        <p>30-Day Money-Back Guarantee • Cancel Anytime • No Questions Asked</p>
+</section>
+<!-- FAQ Preview Section -->
+<section id="faq-preview" class="section faq-preview-section">
+    <div class="section-content">
+        <span class="faq-label">FREQUENTLY ASKED</span>
+        <h2>Common Questions</h2>
+        <p class="section-subtitle">Quick answers to get you started</p>
+
+        <div class="faq-grid">
+            <!-- Most Important FAQs for Early Access -->
+            <div class="faq-item">
+                <div class="faq-icon">🚀</div>
+                <h3>What is Early Access?</h3>
+                <p>Early Access gives you founding member status, locked-in pricing of $49.99/month, and priority access to all future features and space training opportunities. Limited to first 200 members.</p>
+            </div>
+
+            <div class="faq-item featured">
+                <div class="faq-icon">💰</div>
+                <h3>How much is the investment?</h3>
+                <p>Early Access members lock in our lowest rate of $49.99/month. This includes full access to our AI training system, community features, and exclusive founding member benefits.</p>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-icon">🤝</div>
+                <h3>Is there a commitment?</h3>
+                <p>We offer a 30-day money-back guarantee. You can cancel anytime, but Early Access benefits including locked-in pricing are reserved for continuous members.</p>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-icon">🎓</div>
+                <h3>When does training start?</h3>
+                <p>Early Access members begin their journey immediately with our AI assessment and initial training modules. Full platform features roll out continuously with member input.</p>
+            </div>
+        </div>
+
+        <!-- Popular Topics -->
+        <div class="faq-topics">
+            <h3>Browse by Topic</h3>
+            <div class="topic-grid">
+                <a href="/faq#pricing" class="topic-card">
+                    <span class="topic-icon">💰</span>
+                    <span class="topic-name">Pricing</span>
+                </a>
+                <a href="/faq#training" class="topic-card">
+                    <span class="topic-icon">📚</span>
+                    <span class="topic-name">Training</span>
+                </a>
+                <a href="/faq#community" class="topic-card">
+                    <span class="topic-icon">👥</span>
+                    <span class="topic-name">Community</span>
+                </a>
+                <a href="/faq#technical" class="topic-card">
+                    <span class="topic-icon">⚙️</span>
+                    <span class="topic-name">Technical</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- FAQ CTA -->
+        <div class="faq-cta">
+            <div class="cta-content">
+                <h3>Still have questions?</h3>
+                <div class="cta-buttons">
+                    <a href="/faq" class="primary-btn">View All FAQs</a>
+                    <a href="/contact" class="secondary-btn">Contact Us</a>
+                </div>
+                <p class="support-note">Average response time: < 24 hours</p>
+            </div>
+        </div>
     </div>
 </section>
 
-<<!-- Community Section -->
-<section id="community" class="section community-section">
-    <h2>Join the StelTrek Community</h2>
-    <div class="community-features">
-        <!-- Study Groups -->
-        <div class="feature">
-            <h3>Study Groups</h3>
-            <p>Connect with fellow space enthusiasts and collaborate on training goals.</p>
-            <div class="stat">👥 2,500+ Active Members</div>
-        </div>
-        
-        <!-- Live Sessions -->
-        <div class="feature">
-            <h3>Live Sessions</h3>
-            <p>Engage in weekly Q&As and workshops with top space industry experts.</p>
-            <div class="stat">🎥 200+ Sessions Recorded</div>
-        </div>
-        
-        <!-- Group Challenges -->
-        <div class="feature">
-            <h3>Group Challenges</h3>
-            <p>Participate in monthly missions, compete, and earn community badges.</p>
-            <div class="stat">🏆 50+ Ongoing Challenges</div>
-        </div>
-    </div>
-</section>
-<!-- AI Guide Preview -->
-<section id="ai-guide" class="section ai-guide-section">
-    <h2>Your AI Space Training Guide</h2>
-    <p class="intro">Experience the future of space training with AI-powered tools designed to accelerate your journey.</p>
-    <div class="ai-features">
-        <!-- Personalized Learning -->
-        <div class="feature">
-            <h3>📚 Personalized Learning</h3>
-            <p>Customized to your pace, style, and goals for maximum efficiency.</p>
-        </div>
-        
-        <!-- Real-time Feedback -->
-        <div class="feature">
-            <h3>⚡ Real-time Feedback</h3>
-            <p>Receive instant corrections and guidance to stay on track.</p>
-        </div>
-        
-        <!-- Progress Optimization -->
-        <div class="feature">
-            <h3>🚀 Progress Optimization</h3>
-            <p>AI adjusts your training path dynamically to ensure consistent improvement.</p>
-        </div>
-    </div>
-    <div class="ai-demo">
-        <button class="button-secondary pulse">🎥 Watch AI Demo</button>
-    </div>
-</section>
+<!-- Final CTA Section -->
+<section id="final-cta" class="section final-cta-section">
+    <div class="section-content">
+        <span class="early-access-label">LIMITED TIME OFFER</span>
+        <h2>Secure Your Place in Space History</h2>
+        <p class="cta-tagline">Join the Pioneer Program Today</p>
 
-<!-- FAQ Section -->
-<section id="faq" class="section faq-section">
-    <h2>Frequently Asked Questions</h2>
-    <div class="faq-grid">
-        <!-- FAQ Item 1 -->
-        <div class="faq-item">
-            <h3>❓ How does AI guidance work?</h3>
-            <p>Like Tesla's Full Self-Driving, our AI system takes control of your training journey, optimizing your path and providing real-time guidance.</p>
+        <!-- Early Access Counter -->
+        <div class="access-counter">
+            <div class="counter-stat">
+                <span class="number">135</span>
+                <span class="label">Spots Claimed</span>
+            </div>
+            <div class="counter-stat highlight">
+                <span class="number">65</span>
+                <span class="label">Spots Left</span>
+            </div>
+            <div class="counter-stat">
+                <span class="price">$49.99</span>
+                <span class="label">Per Month</span>
+            </div>
         </div>
-        
-        <!-- FAQ Item 2 -->
-        <div class="faq-item">
-            <h3>🎓 Do I need prior experience?</h3>
-            <p><strong>No prior space training needed.</strong> Our AI system starts at your level and builds your knowledge from the ground up.</p>
-        </div>
-        
-        <!-- FAQ Item 3 -->
-        <div class="faq-item">
-            <h3>⏱️ How long until I'm space-ready?</h3>
-            <p>Most trainees achieve basic space readiness in <strong>18-24 months</strong>. Elite members can fast-track to <strong>12 months</strong>.</p>
-        </div>
-    </div>
-    <div class="faq-cta">
-        <p>Still have questions? <a href="/contact" class="button-secondary">Contact Us</a></p>
-    </div>
-</section>
 
-<!-- Final CTA -->
-<section id="final-cta" class="section cta-section">
-    <h2>Your Journey to Space Begins Today</h2>
-    <div class="cta-content">
-        <p class="cta-text">🚀 Join <strong>2,500+</strong> active trainees preparing for humanity's next giant leap into space.</p>
-        <button class="button-primary large pulse">Start Your Training</button>
-        <p class="guarantee-text">🛡️ 30-Day Money-Back Guarantee • No Questions Asked</p>
+        <!-- Main CTA -->
+        <div class="cta-container">
+            <div class="primary-cta">
+                <button class="primary-btn pulse">
+                    Reserve Your Spot Now
+                    <span class="btn-note">Early Access Rate • $49.99/mo</span>
+                </button>
+            </div>
+
+            <div class="cta-divider">
+                <span>or</span>
+            </div>
+
+            <div class="secondary-cta">
+                <button class="secondary-btn">Schedule Free Demo</button>
+            </div>
+        </div>
+
+        <!-- Benefits Summary -->
+        <div class="benefits-summary">
+            <div class="benefit-item">
+                <span class="check">✓</span>
+                <span>30-Day Money-Back Guarantee</span>
+            </div>
+            <div class="benefit-item">
+                <span class="check">✓</span>
+                <span>Lock In Founding Member Rate</span>
+            </div>
+            <div class="benefit-item">
+                <span class="check">✓</span>
+                <span>Priority Space Training Access</span>
+            </div>
+        </div>
+
+        <!-- Trust Indicators -->
+        <div class="trust-signals">
+            <div class="secure-badge">
+                <span class="lock-icon">🔒</span>
+                Secure Payment
+            </div>
+            <div class="support-badge">
+                <span class="support-icon">💬</span>
+                24/7 Support
+            </div>
+            <div class="guarantee-badge">
+                <span class="shield-icon">🛡️</span>
+                Money-Back Guarantee
+            </div>
+        </div>
     </div>
 </section>
 
 <!-- Footer -->
 <footer class="footer">
     <div class="footer-content">
-        <!-- About Section -->
-        <div class="footer-section">
-            <h3>🌌 StelTrek Academy</h3>
-            <p>Making space exploration accessible for everyone, one step at a time.</p>
+        <!-- Brand Section -->
+        <div class="footer-section brand">
+            <img src="/css/images/SharedStars.svg" alt="SharedStars" class="footer-logo">
+            <p class="brand-text">Making space travel accessible for everyone</p>
+            <div class="social-links">
+                <a href="#" class="social-link" target="_blank" rel="noopener">
+                    <span class="social-icon">𝕏</span> Twitter
+                </a>
+                <a href="#" class="social-link" target="_blank" rel="noopener">
+                    <span class="social-icon">in</span> LinkedIn
+                </a>
+                <a href="#" class="social-link" target="_blank" rel="noopener">
+                    <span class="social-icon">📸</span> Instagram
+                </a>
+            </div>
         </div>
-        
-        <!-- Contact Section -->
-        <div class="footer-section">
-            <h3>📧 Contact</h3>
-            <p>Email us for support or media inquiries:</p>
-            <ul class="footer-links">
-                <li><a href="mailto:support@steltrek.com">support@steltrek.com</a></li>
-                <li><a href="mailto:media@steltrek.com">media@steltrek.com</a></li>
+
+        <!-- Navigation Links -->
+        <div class="footer-section links">
+            <h3>Navigation</h3>
+            <ul>
+                <li><a href="/academy">Space Academy</a></li>
+                <li><a href="/early-access">Early Access</a></li>
+                <li><a href="/community">Community</a></li>
+                <li><a href="/about">Our Story</a></li>
+                <li><a href="/advisors">Board of Advisors</a></li>
             </ul>
         </div>
-        
+
+        <!-- Business Inquiries -->
+        <div class="footer-section contact">
+            <h3>Contact</h3>
+            <ul>
+                <li><a href="mailto:investors@celestialtech.com">Investor Relations</a></li>
+                <li><a href="mailto:press@celestialtech.com">Media Inquiries</a></li>
+                <li><a href="mailto:support@celestialtech.com">Support</a></li>
+                <li><a href="/partnerships">Partnerships</a></li>
+            </ul>
+        </div>
+
         <!-- Legal Section -->
-        <div class="footer-section">
-            <h3>⚖️ Legal</h3>
-            <ul class="footer-links">
+        <div class="footer-section legal">
+            <h3>Legal</h3>
+            <ul>
                 <li><a href="/privacy">Privacy Policy</a></li>
                 <li><a href="/terms">Terms of Service</a></li>
+                <li><a href="/safety">Safety Guidelines</a></li>
+                <li><a href="/disclaimer">Disclaimer</a></li>
             </ul>
         </div>
     </div>
+
+    <!-- Trust Badges -->
+    <div class="trust-badges">
+        <div class="badge">
+            <span class="badge-icon">🔒</span>
+            Secure Payments
+        </div>
+        <div class="badge">
+            <span class="badge-icon">⭐</span>
+            Money-Back Guarantee
+        </div>
+        <div class="badge">
+            <span class="badge-icon">🛡️</span>
+            Data Protection
+        </div>
+    </div>
+
+    <!-- Footer Bottom -->
     <div class="footer-bottom">
-        <p>&copy; <script>document.write(new Date().getFullYear());</script> StelTrek Academy. All Rights Reserved.</p>
-        <p class="footer-social">Follow us: 
-            <a href="https://twitter.com/steltrek" target="_blank">Twitter</a> | 
-            <a href="https://facebook.com/steltrek" target="_blank">Facebook</a> | 
-            <a href="https://instagram.com/steltrek" target="_blank">Instagram</a>
-        </p>
+        <p>© 2025 Celestial Technologies, LLC. All Rights Reserved.</p>
+        <p class="location">Delaware, United States</p>
     </div>
 </footer>
-
-<script src="/js/main.js"></script>
-<script src="/js/animations.js"></script>
-</body>
-</html>
+       <!-- Scripts -->
+       <script src="js/animations.js"></script>
+       <script src="js/main.js"></script>
+       <script src="js/trialFlow.js"></script>
+       <script src="js/training.js"></script>
+       <script src="/js/countdown.js"></script>
+   </body>
+   </html>

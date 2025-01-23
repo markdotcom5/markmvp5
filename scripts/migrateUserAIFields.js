@@ -1,4 +1,3 @@
-// scripts/migrateUserAIFields.js
 require('dotenv').config();
 const mongoose = require('mongoose');
 const User = require('../models/User');
@@ -7,26 +6,10 @@ const fs = require('fs');
 
 // Language configuration matching your frontend
 const LANGUAGE_CONFIG = {
-    en: {
-        flag: "🇺🇸",
-        name: "English",
-        default: true
-    },
-    zh: {
-        flag: "🇨🇳",
-        name: "Chinese",
-        default: false
-    },
-    ko: {
-        flag: "🇰🇷",
-        name: "Korean",
-        default: false
-    },
-    es: {
-        flag: "🇪🇸",
-        name: "Spanish",
-        default: false
-    }
+    en: { flag: "🇺🇸", name: "English", default: true },
+    zh: { flag: "🇨🇳", name: "Chinese", default: false },
+    ko: { flag: "🇰🇷", name: "Korean", default: false },
+    es: { flag: "🇪🇸", name: "Spanish", default: false }
 };
 
 // AI Guidance configuration
@@ -36,19 +19,16 @@ const AI_GUIDANCE_LEVELS = {
     FULL_GUIDANCE: 'full_guidance'
 };
 
-async function migrateUsers() {
+async function migrateUsers(dryRun = false) {
     try {
         console.log('Starting user migration for AI and language settings...');
-        
+
         if (!process.env.MONGO_URI) {
             throw new Error('MONGO_URI not found in environment variables');
         }
-        
-        await mongoose.connect(process.env.MONGO_URI, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true
-        });
-        console.log('Connected to database');
+
+        await mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+        console.log('✅ Connected to database');
 
         const users = await User.find({});
         console.log(`Found ${users.length} users to migrate`);
@@ -60,7 +40,6 @@ async function migrateUsers() {
         for (const user of users) {
             try {
                 const updates = {
-                    // AI Guidance System
                     aiGuidance: user.aiGuidance || {
                         mode: AI_GUIDANCE_LEVELS.MANUAL,
                         activatedAt: null,
@@ -70,11 +49,7 @@ async function migrateUsers() {
                             pacePreference: 'balanced',
                             focusAreas: [],
                             adaptiveUI: true,
-                            language: {
-                                preferred: null,
-                                flag: null,
-                                lastUpdated: new Date()
-                            }
+                            language: { preferred: null, flag: null, lastUpdated: new Date() }
                         },
                         context: {
                             currentPhase: 'onboarding',
@@ -83,15 +58,8 @@ async function migrateUsers() {
                             activeModules: [],
                             recentDecisions: [],
                             lastUpdated: new Date()
-                        },
-                        preferences: {
-                            interactionStyle: 'conversational',
-                            notificationFrequency: 'moderate',
-                            automationLevel: 'balanced',
-                            interfaceComplexity: 'adaptive'
                         }
                     },
-                    // Enhanced training tracking
                     trainingProgress: {
                         currentModule: null,
                         completedModules: [],
@@ -100,7 +68,6 @@ async function migrateUsers() {
                         lastActivity: new Date(),
                         nextMilestone: null
                     },
-                    // Language and localization
                     localization: {
                         selectedLanguage: null,
                         flag: null,
@@ -111,10 +78,8 @@ async function migrateUsers() {
                 };
 
                 // Handle existing language settings
-                let currentLanguage = user.settings?.language;
-                
+                const currentLanguage = user.settings?.language;
                 if (!currentLanguage || !LANGUAGE_CONFIG[currentLanguage]) {
-                    updates['settings.language'] = null;
                     updates.localization.selectedLanguage = null;
                     updates.localization.flag = null;
                     languageUpdates++;
@@ -123,7 +88,6 @@ async function migrateUsers() {
                     updates.localization.flag = LANGUAGE_CONFIG[currentLanguage].flag;
                 }
 
-                // Ensure all settings exist
                 if (!user.settings) {
                     updates.settings = {
                         language: null,
@@ -143,25 +107,26 @@ async function migrateUsers() {
                     };
                 }
 
-                // Update user
-                const result = await User.updateOne(
-                    { _id: user._id },
-                    { $set: updates },
-                    { runValidators: true }
-                );
+                if (!dryRun) {
+                    const result = await User.updateOne(
+                        { _id: user._id },
+                        { $set: updates },
+                        { runValidators: true }
+                    );
 
-                if (result.modifiedCount > 0) {
-                    updated++;
-                    console.log(`Updated user ${user._id}${!currentLanguage ? ' (needs language selection)' : ''}`);
+                    if (result.modifiedCount > 0) {
+                        updated++;
+                        console.log(`Updated user ${user._id}${!currentLanguage ? ' (needs language selection)' : ''}`);
+                    }
+                } else {
+                    console.log(`Dry run: User ${user._id} would be updated.`);
                 }
-
             } catch (error) {
                 errors++;
                 console.error(`Error updating user ${user._id}:`, error.message);
             }
         }
 
-        // Verify frontend files
         const requiredFiles = [
             'public/js/languages.js',
             'public/js/language-switcher.js',
@@ -173,16 +138,17 @@ async function migrateUsers() {
             try {
                 await fs.promises.access(path.join(process.cwd(), file));
                 console.log(`✓ ${file} exists`);
-            } catch (error) {
+            } catch {
                 console.error(`✗ Warning: ${file} not found`);
             }
         }
 
-        // Create indexes
         console.log('\nCreating indexes...');
-        await User.collection.createIndex({ 'aiGuidance.mode': 1 });
-        await User.collection.createIndex({ 'settings.language': 1 });
-        await User.collection.createIndex({ 'localization.selectedLanguage': 1 });
+        await Promise.allSettled([
+            User.collection.createIndex({ 'aiGuidance.mode': 1 }),
+            User.collection.createIndex({ 'settings.language': 1 }),
+            User.collection.createIndex({ 'localization.selectedLanguage': 1 })
+        ]);
         console.log('Indexes created successfully');
 
         console.log('\nMigration Summary:');
@@ -191,9 +157,8 @@ async function migrateUsers() {
         console.log(`Successfully updated: ${updated}`);
         console.log(`Users needing language selection: ${languageUpdates}`);
         console.log(`Errors encountered: ${errors}`);
-
     } catch (error) {
-        console.error('Migration failed:', error);
+        console.error('Migration failed:', error.message);
     } finally {
         await mongoose.connection.close();
         console.log('\nDatabase connection closed');
@@ -204,16 +169,12 @@ async function migrateUsers() {
 const args = process.argv.slice(2);
 const isDryRun = args.includes('--dry-run');
 
-if (isDryRun) {
-    console.log('Performing dry run - no changes will be made');
-}
-
-migrateUsers()
+migrateUsers(isDryRun)
     .then(() => {
         console.log('Migration completed');
         process.exit(0);
     })
-    .catch(error => {
-        console.error('Migration failed:', error);
+    .catch((error) => {
+        console.error('Migration failed:', error.message);
         process.exit(1);
     });
