@@ -1,4 +1,3 @@
-// public/js/menu.js
 document.addEventListener('DOMContentLoaded', () => {
     const translations = {
         en: {
@@ -20,45 +19,43 @@ document.addEventListener('DOMContentLoaded', () => {
     const menuItems = [
         { key: 'home', href: '/index.html' },
         { key: 'why', href: '/Why-StelTrek.html' },
-        // ... other menu items
+        { key: 'about', href: '/about.html' },
+        { key: 'leaderboard', href: '/leaderboard.html' },
+        { key: 'login', href: '/login.html' },
+        { key: 'retail', href: '/merchandise.html' },
+        { key: 'profile', href: '/profile.html' },
+        { key: 'signup', href: '/signup.html' },
+        { key: 'academy', href: '/academy.html' },
+        { key: 'welcome', href: '/welcome.html' },
+        { key: 'subscribe', href: '/subscribe.html' }
     ];
 
-    // Language selection handling
+    const menuContainer = document.getElementById('menu-container');
+    const menuContent = menuContainer.querySelector('.menu-content');
+    const menuButton = document.getElementById('menu-button');
+
     const langButtons = document.querySelectorAll('.lang-btn');
     langButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             const lang = btn.dataset.lang;
             document.cookie = `language=${lang};path=/`;
-            
-            // Hide language container
             document.getElementById('language-container').style.display = 'none';
-            
-            // Show menu button
-            document.getElementById('menu-button').style.display = 'block';
-            
-            // Initialize menu with selected language
+            menuButton.style.display = 'block';
             initializeMenu(lang);
         });
     });
 
-    // Check if language is already selected
-    const selectedLang = document.cookie.split(';')
-        .find(c => c.trim().startsWith('language='));
-    
-    if (selectedLang) {
-        const lang = selectedLang.split('=')[1];
-        initializeMenu(lang);
-    }
+    const selectedLang = document.cookie.split(';').find(c => c.trim().startsWith('language='));
+    const lang = selectedLang ? selectedLang.split('=')[1] : 'en';
+    initializeMenu(lang);
 
     function initializeMenu(lang) {
-        const menuContainer = document.getElementById('menu-container');
-        const menuContent = menuContainer.querySelector('.menu-content');
-        const menuButton = document.getElementById('menu-button');
+        console.log('Initializing menu for language:', lang);
 
         // Clear existing menu items
         menuContent.innerHTML = '';
 
-        // Add translated menu items
+        // Populate menu with translated items
         menuItems.forEach(item => {
             const link = document.createElement('a');
             link.href = item.href;
@@ -67,13 +64,15 @@ document.addEventListener('DOMContentLoaded', () => {
             menuContent.appendChild(link);
         });
 
-        // Menu hover behavior
-        menuButton.addEventListener('mouseenter', () => {
-            menuContainer.style.display = 'flex';
-        });
-
-        menuContainer.addEventListener('mouseleave', () => {
-            menuContainer.style.display = 'none';
-        });
+        // Ensure event listeners are only added once
+        if (!menuButton.dataset.listenersAdded) {
+            menuButton.addEventListener('mouseenter', () => {
+                menuContainer.style.display = 'flex';
+            });
+            menuContainer.addEventListener('mouseleave', () => {
+                menuContainer.style.display = 'none';
+            });
+            menuButton.dataset.listenersAdded = true;
+        }
     }
 });
