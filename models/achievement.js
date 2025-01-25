@@ -1,65 +1,47 @@
 const mongoose = require('mongoose');
 
-// Achievement Schema
 const achievementSchema = new mongoose.Schema({
-    name: { 
-        type: String, 
-        required: [true, 'Achievement name is required'], 
-        trim: true 
+    name: {
+        type: String,
+        required: true,
+        unique: true
     },
-    description: { 
-        type: String, 
-        trim: true 
+    description: {
+        type: String,
+        required: true
     },
-    points: { 
-        type: Number, 
-        default: 0, 
-        min: [0, 'Points cannot be negative'] 
+    criteria: {
+        type: {
+            type: String,
+            enum: ['score', 'level', 'activity', 'custom'],
+            required: true
+        },
+        value: Number,
+        customLogic: String
     },
-    userId: { 
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: 'User', 
-        required: true 
+    icon: {
+        type: String,
+        default: '/images/default-achievement.png'
     },
-    earnedAt: { 
-        type: Date, 
-        default: Date.now, 
-        immutable: true 
+    rarity: {
+        type: String,
+        enum: ['common', 'rare', 'epic', 'legendary'],
+        default: 'common'
     },
-    category: { 
-        type: String, 
-        enum: ['physical', 'mental', 'technical', 'leadership'],
-        default: 'physical',
-        message: '{VALUE} is not a valid category'
+    points: {
+        type: Number,
+        default: 0
     },
-    isHighlighted: { 
-        type: Boolean, 
-        default: false 
-    }, // Whether the achievement is highlighted
-}, { 
-    timestamps: true 
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
 });
 
-// Virtuals
-achievementSchema.virtual('summary').get(function() {
-    return `${this.name} - ${this.description || 'No description available'}`;
-});
+achievementSchema.index({ name: 1 });
+achievementSchema.index({ rarity: 1 });
+achievementSchema.index({ points: -1 });
 
-// Methods
-achievementSchema.methods.getSummary = function() {
-    return {
-        name: this.name,
-        description: this.description,
-        points: this.points,
-        earnedAt: this.earnedAt,
-        category: this.category,
-    };
-};
+const Achievement = mongoose.model('Achievement', achievementSchema);
 
-// Statics
-achievementSchema.statics.findByUser = function(userId) {
-    return this.find({ userId }).sort({ earnedAt: -1 });
-};
-
-// Export the Achievement Model
-module.exports = mongoose.model('Achievement', achievementSchema);
+module.exports = Achievement;

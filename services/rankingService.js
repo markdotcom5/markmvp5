@@ -1,12 +1,36 @@
 const User = require('../models/User');
+const EventEmitter = require('events');
 
 const cache = {
     data: new Map(),
     timeout: 5 * 60 * 1000 // 5 minutes
 };
 
-class RankingService {
-    static async calculateGlobalRanking(user) {
+class RankingService extends EventEmitter {
+    constructor(webSocketService) {
+        super();
+        this.ws = webSocketService;
+        this.bindEvents();
+    }
+
+    bindEvents() {
+        this.on('rankUpdate', this.broadcastRankUpdate.bind(this));
+        this.on('achievementUnlocked', this.broadcastAchievement.bind(this));
+    }
+
+    broadcastRankUpdate({ userId, newRank }) {
+        if (this.ws) {
+            this.ws.broadcast('rankUpdate', { userId, newRank });
+        }
+    }
+
+    broadcastAchievement(achievement) {
+        if (this.ws) {
+            this.ws.broadcast('achievementUnlocked', achievement);
+        }
+    }
+
+    async calculateGlobalRanking(user) {
         try {
             if (!user?.spaceReadinessScore) throw new Error('Invalid user data');
 
@@ -22,13 +46,19 @@ class RankingService {
             const ranking = this.calculateRankingMetrics(higherScores + 1, totalUsers);
             this.setCache(cacheKey, ranking);
 
+            this.emit('rankUpdate', {
+                userId: user.id,
+                newRank: ranking.rank,
+                type: 'global'
+            });
+
             return ranking;
         } catch (error) {
             throw new Error('Failed to calculate global ranking');
         }
     }
 
-    static async calculateLocalRanking(user, radiusMiles = 50, location) {
+    async calculateLocalRanking(user, radiusMiles = 50, location) {
         try {
             const radiusMeters = radiusMiles * 1609.34;
             const query = {
@@ -45,18 +75,25 @@ class RankingService {
             ]);
 
             const higherScores = nearbyUsers.filter(u => u.spaceReadinessScore > user.spaceReadinessScore).length;
-
-            return {
+            const ranking = {
                 ...this.calculateRankingMetrics(higherScores + 1, totalLocal),
                 radius: radiusMiles,
                 nearbyCount: totalLocal
             };
+
+            this.emit('rankUpdate', {
+                userId: user.id,
+                newRank: ranking.rank,
+                type: 'local'
+            });
+
+            return ranking;
         } catch (error) {
             throw new Error('Failed to calculate local ranking');
         }
     }
 
-    static async getRankings(type, options = { page: 1, limit: 10 }) {
+    async getRankings(type, options = { page: 1, limit: 10 }) {
         try {
             const skip = (options.page - 1) * options.limit;
             const cacheKey = `rankings_${type}_${options.page}_${options.limit}`;
@@ -86,13 +123,19 @@ class RankingService {
             }));
     
             this.setCache(cacheKey, formattedRankings);
+
+            this.emit('rankingsUpdated', {
+                type,
+                rankings: formattedRankings
+            });
+
             return formattedRankings;
         } catch (error) {
             throw new Error(`Failed to get ${type} rankings`);
         }
     }
 
-    static calculateRankingMetrics(rank, total) {
+    calculateRankingMetrics(rank, total) {
         if (total === 0) return { rank: 0, percentile: 0 };
         const percentile = ((total - rank) / total) * 100;
         return {
@@ -103,7 +146,7 @@ class RankingService {
         };
     }
 
-    static getQuintileLabel(rank, total) {
+    getQuintileLabel(rank, total) {
         const percentile = ((total - rank) / total) * 100;
         if (percentile >= 95) return 'Pioneer Elite';
         if (percentile >= 80) return 'Star Explorer';
@@ -113,7 +156,7 @@ class RankingService {
         return 'Rookie Explorer';
     }
 
-    static getCache(key) {
+    getCache(key) {
         const cached = cache.data.get(key);
         if (cached && Date.now() - cached.timestamp < cache.timeout) {
             return cached.data;
@@ -121,15 +164,16 @@ class RankingService {
         return null;
     }
 
-    static setCache(key, data) {
+    setCache(key, data) {
         cache.data.set(key, { data, timestamp: Date.now() });
     }
 
-    static clearCache() {
+    clearCache() {
         cache.data.clear();
     }
 }
 
+// Cache cleanup interval
 setInterval(() => {
     const now = Date.now();
     for (const [key, value] of cache.data.entries()) {

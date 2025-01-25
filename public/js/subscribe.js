@@ -1,77 +1,61 @@
 class PriceEvolutionChart {
     constructor() {
-        this.chart = null;
-        this.currentPlan = null;
-        this.personalCountdownInterval = null;
-        this.baselineCountdownInterval = null;
-        this.initialize();
-        this.initializeBaselineTimer();
+        // Existing initialization
+        this.stripe = Stripe(process.env.STRIPE_PUBLISHABLE_KEY);
+        this.elements = this.stripe.elements();
+        this.card = this.elements.create('card');
+        this.setupStripeElements();
     }
 
-    initialize() {
-        const ctx = document.getElementById('priceEvolutionChart');
-        if (!ctx) {
-            console.error('Chart canvas not found');
-            return;
+    setupStripeElements() {
+        this.card.mount('#card-element');
+        this.card.addEventListener('change', this.handleCardChange);
+    }
+
+    async handlePlanSelection(planType, button) {
+        try {
+            const { paymentMethod } = await this.stripe.createPaymentMethod({
+                type: 'card',
+                card: this.card
+            });
+
+            const response = await fetch('/api/subscription/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    paymentMethodId: paymentMethod.id,
+                    plan: planType
+                })
+            });
+
+            const { clientSecret, subscriptionId } = await response.json();
+            const { error } = await this.stripe.confirmCardPayment(clientSecret);
+
+            if (error) throw new Error(error.message);
+
+            await this.updateSubscriptionStatus(subscriptionId, 'active');
+            this.updateChart(planType);
+            this.updatePersonalCountdown(planType);
+
+        } catch (error) {
+            console.error('Payment failed:', error);
+            this.showError(error.message);
         }
-
-        this.chart = new Chart(ctx, {
-            type: 'line',
-            data: this.getChartData(),
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                aspectRatio: 2,
-                scales: {
-                    y: {
-                        beginAtZero: false,
-                        title: {
-                            display: true,
-                            text: 'Space Journey Cost ($)',
-                            font: { size: 14, weight: 'bold' }
-                        },
-                        ticks: {
-                            callback: value => {
-                                if (value >= 1000000) return `$${value/1000000}M`;
-                                if (value >= 1000) return `$${value/1000}k`;
-                                return `$${value}`;
-                            }
-                        }
-                    },
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Timeline (Years)',
-                            font: { size: 14, weight: 'bold' }
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        position: 'top',
-                        labels: { usePointStyle: true, padding: 20 }
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        titleFont: { size: 13 },
-                        bodyFont: { size: 12 },
-                        padding: 12,
-                        callbacks: {
-                            label: context => {
-                                const value = context.raw;
-                                if (value >= 1000000) return `$${(value/1000000).toFixed(1)}M`;
-                                if (value >= 1000) return `$${(value/1000).toFixed(1)}k`;
-                                return `$${value}`;
-                            }
-                        }
-                    }
-                }
-            }
-        });
-
-        this.initializePlanListeners();
     }
 
+    initializePlanListeners() {
+        const planButtons = document.querySelectorAll('.plan-select-btn');
+        planButtons.forEach(button => {
+            button.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const planType = button.getAttribute('data-plan');
+                if (planType) {
+                    await this.handlePlanSelection(planType, button);
+                }
+            });
+        });
+    }
+}
     getChartData(selectedPlan = null) {
         const basePrice = 450000;
         const years = [2024, 2027, 2030, 2035, 2039];

@@ -1,13 +1,27 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 40">
-    <style>
-    .logo-text {
-        font-family: Arial, sans-serif;
-        font-size: 32px;
-        font-weight: bold;
-        letter-spacing: 1px;
-        fill: #2563EB; /* A rich, darker blue */
-        filter: drop-shadow(0 0 3px rgba(37, 99, 235, 0.3)); /* Subtle glow */
-    }
-    </style>
-    <text x="10" y="28" class="logo-text">SharedStars</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 60">
+  <defs>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#4F9EF7"/>
+      <stop offset="100%" style="stop-color:#2B68BC"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <text x="20" y="40" 
+        font-family="Space Grotesk, Arial" 
+        font-size="40" 
+        font-weight="700" 
+        fill="url(#logoGradient)" 
+        filter="url(#glow)">
+    SharedStars
+  </text>
+  <path d="M5 30 L15 20 L5 10" 
+        stroke="url(#logoGradient)" 
+        stroke-width="2" 
+        fill="none"/>
 </svg>

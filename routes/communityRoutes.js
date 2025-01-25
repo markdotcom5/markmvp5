@@ -4,12 +4,12 @@ const WebSocket = require('ws');
 const Joi = require('joi');
 const { authenticate } = require('../middleware/authenticate');
 
-// Import necessary models
-const StudyGroup = require('../models/studygroup');
+// Update these imports to match your exact file names:
+const StudyGroup = require('../models/studyGroup');
 const Challenge = require('../models/challenge');
-const PeerMatch = require('../models/peermatch');
+const PeerMatch = require('../models/peerMatch');
 const Discussion = require('../models/discussion');
-const User = require('../models/user');
+const User = require('../models/User');
 
 // WebSocket setup
 const wss = new WebSocket.Server({ noServer: true });

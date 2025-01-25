@@ -9,20 +9,18 @@ const session = require("express-session");
 const cookieParser = require("cookie-parser");
 const fs = require("fs");
 const http = require("http");
-const { setupWebSocketServer, authenticate } = require("./middleware/authenticate");
+const { setupWebSocketServer } = require("./middleware/authenticate");
 const AIWebController = require("./services/AIWebController");
 const compression = require('compression');
-
-// Just this one line for the AI router
+const stripeRouter = require("./routes/stripe");
+const stripeWebhook = require("./webhooks/stripe");
+const subscriptionRouter = require("./routes/subscription");
 const aiRouter = require("./routes/aiRoutes").router;
-// Import testRouter here
 const testRouter = require('./routes/testRoutes');
+const leaderboardRoutes = require('./routes/leaderboard');
 
 const app = express();
 
-// =======================
-// Cleanup Function
-// =======================
 function cleanup(signal) {
     console.log(`🧹 Received ${signal}. Cleaning up before exit...`);
     if (server) {
@@ -41,19 +39,16 @@ function cleanup(signal) {
     }
 }
 
-// Listen for termination signals
 process.on("SIGINT", () => cleanup("SIGINT"));
 process.on("SIGTERM", () => cleanup("SIGTERM"));
 
-// Add compression first
 app.use(compression());
+app.use('/api/leaderboard', leaderboardRoutes); // Register leaderboard routes
 
-// Static File Serving with Caching
 app.use(express.static(path.join(__dirname, "public"), {
-    maxAge: '7d', // Cache static files for 7 days
+    maxAge: '7d'
 }));
 
-// Test Routes (Only in Development)
 if (process.env.NODE_ENV === "development") {
     app.get("/test-css", (req, res) => {
         const cssPath = path.join(__dirname, "public", "css", "main.css");
@@ -87,7 +82,6 @@ if (process.env.NODE_ENV === "development") {
     });
 }
 
-// Serve Specific Video for Testing
 app.get("/video-test", (req, res) => {
     const videoPath = path.join(__dirname, "public", "videos", "stelacktop.mov");
     fs.access(videoPath, fs.constants.F_OK, (err) => {
@@ -105,7 +99,6 @@ app.get("/video-test", (req, res) => {
     });
 });
 
-// ======== MongoDB Setup ========
 mongoose.set("strictQuery", true);
 
 if (process.env.NODE_ENV === "development") {
@@ -142,15 +135,11 @@ const connectDB = async () => {
     }
 };
 
-// =======================
-// Middleware Setup
-// =======================
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use(cookieParser());
 
-// Session Configuration
 const MongoStore = require("connect-mongo");
 app.use(
     session({
@@ -170,7 +159,6 @@ app.use(
     })
 );
 
-// Security Configuration
 app.use(
     helmet({
         contentSecurityPolicy: {
@@ -190,7 +178,6 @@ app.use(
     })
 );
 
-// Rate Limiting
 const aiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 100,
@@ -206,9 +193,9 @@ const fsdLimiter = rateLimit({
 app.use("/api/ai", aiLimiter);
 app.use("/api/ai/fsd", fsdLimiter);
 
-// =======================
-// Register Routes
-// =======================
+app.use('/webhook/stripe', express.raw({type: 'application/json'}), stripeWebhook);
+
+// Later in routers section
 const routers = {
     about: require("./routes/about"),
     achievements: require("./routes/achievements"),
@@ -224,12 +211,13 @@ const routers = {
     modules: require("./routes/modules"),
     payment: require("./routes/payment"),
     signup: require("./routes/signup"),
+    stripe: stripeRouter,
+    subscription: require("./routes/subscription"),
     testOpenAI: require("./routes/testOpenAI"),
     training: require("./routes/training"),
     user: require("./routes/user"),
-    video: require("./routes/video"),
-    webhooks: require("./routes/webhooks"),
-};
+    video: require("./routes/video")
+ };
 
 Object.entries(routers).forEach(([name, router]) => {
     console.log(`Registering route: /api/${name}, Type: ${typeof router}`);
@@ -242,48 +230,12 @@ Object.entries(routers).forEach(([name, router]) => {
 });
 
 app.use('/api/testRoutes', testRouter);
-// ======== Catch-All Static Fallback ========
-app.use((req, res) => {
-    res.status(404).json({
-        error: "Not Found",
-        message: "The requested resource could not be found.",
-        path: req.path,
-    });
-});
-
-app.use((err, req, res, next) => {
-    if (err.code === "ENOENT") {
-        console.warn(`File not found: ${req.path}`);
-        return res.status(404).send("File not found");
-    }
-    if (err.message && err.message.includes("Range Not Satisfiable")) {
-        console.warn(`Range error for file: ${req.path}`);
-        return res.status(416).send("Range Not Satisfiable");
-    }
-    console.error("Global Error:", {
-        message: err.message,
-        stack: err.stack,
-        path: req.path,
-        method: req.method,
-    });
-    res.status(err.status || 500).json({
-        error: "Server Error",
-        message:
-            process.env.NODE_ENV === "development"
-                ? err.message
-                : "An unexpected error occurred",
-    });
-});
-
 
 // WebSocket Integration
-// =======================
 const server = http.createServer(app);
 const { wss, broadcastMessage } = setupWebSocketServer(server);
 
-// =======================
 // Error Handling
-// =======================
 app.use((req, res) => {
     res.status(404).json({
         error: "Not Found",
@@ -316,21 +268,15 @@ app.use((err, req, res, next) => {
     });
 });
 
-// =======================
-// Start the Server
 const startServer = async () => {
     try {
-        // Connect to the database
         await connectDB();
-
         const PORT = process.env.PORT || 3000;
-
-        // Start listening on the primary port
+        
         server.listen(PORT, () => {
             console.log(`🚀 Server running on http://localhost:${PORT}`);
         });
 
-        // Handle port conflicts and fallback to a new port
         server.on("error", (err) => {
             if (err.code === "EADDRINUSE") {
                 console.error(`❌ Port ${PORT} is already in use. Trying a different port...`);
@@ -343,13 +289,12 @@ const startServer = async () => {
             }
         });
 
-        // Handle shutdown signals (e.g., SIGINT, SIGTERM)
         process.on("SIGINT", () => cleanup("SIGINT"));
         process.on("SIGTERM", () => cleanup("SIGTERM"));
 
     } catch (error) {
         console.error("Failed to start server:", error);
-        process.exit(1); // Exit with failure
+        process.exit(1);
     }
 };
 
