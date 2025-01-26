@@ -20,6 +20,7 @@ const testRouter = require('./routes/testRoutes');
 const leaderboardRoutes = require('./routes/leaderboard');
 
 const app = express();
+const server = http.createServer(app);
 
 function cleanup(signal) {
     console.log(`🧹 Received ${signal}. Cleaning up before exit...`);
@@ -43,7 +44,7 @@ process.on("SIGINT", () => cleanup("SIGINT"));
 process.on("SIGTERM", () => cleanup("SIGTERM"));
 
 app.use(compression());
-app.use('/api/leaderboard', leaderboardRoutes); // Register leaderboard routes
+app.use('/api/leaderboard', leaderboardRoutes);
 
 app.use(express.static(path.join(__dirname, "public"), {
     maxAge: '7d'
@@ -168,7 +169,7 @@ app.use(
                 styleSrc: ["'self'", "'unsafe-inline'", "https:"],
                 imgSrc: ["'self'", "data:", "https:", "/api/placeholder"],
                 frameSrc: ["'self'", "https://www.sora.com"],
-                connectSrc: ["'self'", "https://api.openai.com"],
+                connectSrc: ["'self'", "https://api.openai.com", "ws:", "wss:"],
                 fontSrc: ["'self'", "https:", "data:"],
                 mediaSrc: ["'self'", "blob:", "data:"],
             },
@@ -195,7 +196,9 @@ app.use("/api/ai/fsd", fsdLimiter);
 
 app.use('/webhook/stripe', express.raw({type: 'application/json'}), stripeWebhook);
 
-// Later in routers section
+// Import dashboard router with WebSocket support
+const { router: dashboardRouter, wss: dashboardWss } = require('./routes/dashboard');
+
 const routers = {
     about: require("./routes/about"),
     achievements: require("./routes/achievements"),
@@ -203,7 +206,7 @@ const routers = {
     aiWebController: require("./routes/aiWebController"),
     auth: require("./routes/auth"),
     community: require("./routes/communityRoutes"),
-    dashboard: require("./routes/dashboard"),
+    dashboard: dashboardRouter,
     index: require("./routes/index"),
     insights: require("./routes/insights"),
     leaderboard: require("./routes/leaderboard"),
@@ -217,7 +220,7 @@ const routers = {
     training: require("./routes/training"),
     user: require("./routes/user"),
     video: require("./routes/video")
- };
+};
 
 Object.entries(routers).forEach(([name, router]) => {
     console.log(`Registering route: /api/${name}, Type: ${typeof router}`);
@@ -231,9 +234,12 @@ Object.entries(routers).forEach(([name, router]) => {
 
 app.use('/api/testRoutes', testRouter);
 
-// WebSocket Integration
-const server = http.createServer(app);
-const { wss, broadcastMessage } = setupWebSocketServer(server);
+// WebSocket upgrade handler
+server.on('upgrade', (request, socket, head) => {
+    dashboardWss.handleUpgrade(request, socket, head, (ws) => {
+        dashboardWss.emit('connection', ws, request);
+    });
+});
 
 // Error Handling
 app.use((req, res) => {
@@ -288,9 +294,6 @@ const startServer = async () => {
                 console.error("Unhandled server error:", err);
             }
         });
-
-        process.on("SIGINT", () => cleanup("SIGINT"));
-        process.on("SIGTERM", () => cleanup("SIGTERM"));
 
     } catch (error) {
         console.error("Failed to start server:", error);

@@ -1,40 +1,158 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const { authenticate } = require("../middleware/authenticate");
-const User = require("../models/User"); // User model
-const Dashboard = require("../models/Dashboard"); // Optional Dashboard model (if applicable)
+const mongoose = require('mongoose');
+const { authenticate } = require('../middleware/authenticate');
+const TrainingSession = require('../models/TrainingSession');
+const WebSocket = require('ws');
 
-// Route for rendering the dynamically generated dashboard
-router.get("/", authenticate, async (req, res) => {
+const wss = new WebSocket.Server({ noServer: true });
+
+wss.on('connection', async (ws, req) => {
+    // Send initial stats on connection
     try {
-        // Fetch user data from the database
-        const user = await User.findById(req.user.id).lean();
-
-        if (!user) {
-            return res.status(404).send("User not found");
-        }
-
-        // Prepare data to render in the view
-        const dashboardData = {
-            name: user.name || "Explorer",
-            rank: user.rank || "Unranked",
-            score: user.score || 0,
-            missions: user.missionsCompleted || 0,
-            achievements: user.achievements || [],
-            nextMission: user.nextMission || "No mission assigned",
-        };
-
-        // Render the dashboard view and pass the user data
-        res.render("dashboard", dashboardData);
+        const stats = await getStats(req.user._id);
+        ws.send(JSON.stringify({ type: 'stats', stats }));
     } catch (error) {
-        console.error("Error fetching dashboard data:", error.message);
-
-        // Return a detailed error page or message to the user
-        res.status(500).render("error", {
-            message: "An error occurred while loading your dashboard. Please try again later.",
-            error: error.message,
-        });
+        console.error('WebSocket initial stats error:', error);
     }
+
+    // Listen for progress updates from database and send to client
+    TrainingSession.watch().on('change', async (change) => {
+        try {
+            if (change.operationType === 'update' || change.operationType === 'insert') {
+                const stats = await getStats(req.user._id);
+                ws.send(JSON.stringify({ type: 'stats', stats }));
+            }
+        } catch (error) {
+            console.error('WebSocket change stream error:', error);
+        }
+    });
 });
 
-module.exports = router;
+async function getStats(userId) {
+    const stats = await TrainingSession.aggregate([
+        {
+            $match: {
+                userId: new mongoose.Types.ObjectId(userId)
+            }
+        },
+        {
+            $group: {
+                _id: null,
+                totalPoints: { $sum: "$points" },
+                avgScore: { $avg: "$metrics.overallScore" },
+                activeSessions: {
+                    $sum: {
+                        $cond: [
+                            { $eq: ["$status", "in-progress"] },
+                            1,
+                            0
+                        ]
+                    }
+                }
+            }
+        }
+    ]);
+
+    return {
+        points: stats[0]?.totalPoints || 0,
+        successRate: stats[0]?.avgScore || 0,
+        activeMissions: stats[0]?.activeSessions || 0
+    };
+}
+
+router.get("/stats", authenticate, async (req, res) => {
+    try {
+        const stats = await getStats(req.user._id);
+        res.json(stats);
+    } catch (error) {
+        console.error('Dashboard stats error:', error);
+        res.status(500).json({ error: 'Failed to fetch stats' });
+    }
+});
+router.get("/mission", authenticate, async (req, res) => {
+    try {
+        const mission = await TrainingSession.findOne({ 
+            userId: req.user._id,
+            status: 'in-progress'
+        }).sort('-dateTime');
+        
+        if (!mission) {
+            return res.status(404).json({ message: "No active mission found" });
+        }
+        
+        res.json(mission);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+router.get("/charts", authenticate, async (req, res) => {
+    try {
+        const progressData = await TrainingSession.find({
+            userId: req.user._id,
+            status: { $in: ['in-progress', 'completed'] }
+        })
+        .sort('-dateTime')
+        .limit(10)
+        .select('progress metrics sessionType completedTasks dateTime');
+
+        const chartData = {
+            progress: {
+                labels: progressData.map(p => new Date(p.dateTime).toLocaleDateString()),
+                data: progressData.map(p => p.progress)
+            },
+            achievements: {
+                labels: progressData.map(p => p.sessionType),
+                data: progressData.map(p => p.metrics.overallScore)
+            }
+        };
+
+        res.json(chartData);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+// routes/dashboard.js
+router.post("/mission", authenticate, async (req, res) => {
+    try {
+        const mission = new TrainingSession({
+            userId: req.user._id,
+            sessionType: req.body.type,
+            moduleId: `MISSION-${Date.now()}`,
+            status: req.body.status,
+            points: 0,
+            metrics: {
+                overallScore: 0
+            }
+        });
+        
+        await mission.save();
+        res.json(mission);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+router.patch("/mission/:id", authenticate, async (req, res) => {
+    try {
+        const mission = await TrainingSession.findByIdAndUpdate(
+            req.params.id,
+            { 
+                $set: {
+                    progress: req.body.progress,
+                    'metrics.overallScore': req.body.metrics.overallScore,
+                    lastUpdated: new Date()
+                }
+            },
+            { new: true }
+        );
+        
+        if (!mission) {
+            return res.status(404).json({ error: "Mission not found" });
+        }
+        
+        res.json(mission);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+module.exports = { router, wss };

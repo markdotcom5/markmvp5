@@ -1,211 +1,304 @@
-document.addEventListener('DOMContentLoaded', async () => {
-    // Initialize dashboard
-    initializeDashboard();
-
-    // Set up event listeners
-    setupEventListeners();
-});
-
-async function initializeDashboard() {
-    try {
-        const [userStats, achievements, nextMission] = await Promise.all([
-            fetchUserStats(),
-            fetchAchievements(),
-            fetchNextMission()
-        ]);
-
-        updateStats(userStats);
-        updateAchievements(achievements);
-        updateNextMission(nextMission);
-    } catch (error) {
-        console.error('Error initializing dashboard:', error);
-        showError('Failed to load dashboard data');
+class DashboardController {
+    constructor() {
+        this.charts = {};
+        this.socket = null;
+        this.reconnectAttempts = 0;
+        this.maxReconnectAttempts = 5;
+        this.initialize();
     }
-}
 
-async function fetchUserStats() {
-    const response = await fetch('/api/user/stats', {
-        headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+    async initialize() {
+        try {
+            const [stats, chartData] = await Promise.all([
+                this.fetchStats(),
+                this.fetchChartData()
+            ]);
+
+            this.initializeCharts(chartData);
+            this.updateStats(stats);
+            this.setupWebSocket();
+            this.setupEventListeners();
+            this.setupTaskManagement();
+        } catch (error) {
+            showError('Dashboard initialization failed');
+            console.error('Dashboard initialization failed:', error);
         }
-    });
-    
-    if (!response.ok) {
-        throw new Error('Failed to fetch user stats');
     }
-    
-    return response.json();
-}
 
-async function fetchAchievements() {
-    const response = await fetch('/api/achievements', {
-        headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+    initializeCharts(data) {
+        this.charts.progress = new Chart('progressChart', {
+            type: 'line',
+            data: {
+                labels: data.progress.labels,
+                datasets: [{
+                    label: 'Training Progress',
+                    data: data.progress.data,
+                    borderColor: '#60A5FA',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: { color: '#fff' }
+                    }
+                },
+                scales: {
+                    y: { grid: { color: '#1E293B' } },
+                    x: { grid: { color: '#1E293B' } }
+                }
+            }
+        });
+
+        this.charts.achievements = new Chart('achievementsChart', {
+            type: 'bar',
+            data: {
+                labels: data.achievements.labels,
+                datasets: [{
+                    label: 'Achievements',
+                    data: data.achievements.data,
+                    backgroundColor: '#818CF8'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: { color: '#fff' }
+                    }
+                }
+            }
+        });
+    }
+
+    async fetchStats() {
+        try {
+            const response = await fetch('/api/dashboard/stats', {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
+            if (!response.ok) throw new Error('Failed to fetch stats');
+            return response.json();
+        } catch (error) {
+            showError('Failed to fetch dashboard stats');
+            throw error;
         }
-    });
-    
-    if (!response.ok) {
-        throw new Error('Failed to fetch achievements');
     }
-    
-    return response.json();
-}
 
-async function fetchNextMission() {
-    const response = await fetch('/api/training/next-mission', {
-        headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+    async fetchChartData() {
+        try {
+            const response = await fetch('/api/dashboard/charts', {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
+            if (!response.ok) throw new Error('Failed to fetch chart data');
+            return response.json();
+        } catch (error) {
+            showError('Failed to fetch chart data');
+            throw error;
         }
-    });
-    
-    if (!response.ok) {
-        throw new Error('Failed to fetch next mission');
-    }
-    
-    return response.json();
-}
-
-function updateStats(stats) {
-    // Update progress bar
-    const progressBar = document.querySelector('.progress-fill');
-    const progressText = document.querySelector('.progress-text');
-    const progress = stats.progress || 0;
-    
-    progressBar.style.width = `${progress}%`;
-    progressText.textContent = `${progress}%`;
-    progressBar.parentElement.setAttribute('aria-valuenow', progress);
-
-    // Update stats
-    document.getElementById('user-rank').textContent = stats.rank || '--';
-    document.getElementById('user-score').textContent = stats.score || '0';
-    document.getElementById('missions-completed').textContent = stats.missionsCompleted || '0';
-}
-
-function updateAchievements(achievements) {
-    const achievementsList = document.getElementById('achievements-list');
-    achievementsList.innerHTML = '';
-
-    if (achievements.length === 0) {
-        achievementsList.innerHTML = '<li class="achievement-item">No achievements yet</li>';
-        return;
     }
 
-    achievements.forEach(achievement => {
-        const li = document.createElement('li');
-        li.className = 'achievement-item';
-        li.innerHTML = `
-            <span class="achievement-icon">🏆</span>
-            <div class="achievement-info">
-                <strong>${achievement.title}</strong>
-                <p>${achievement.description}</p>
+    setupWebSocket() {
+        this.socket = new WebSocket(`wss://${window.location.host}/ws/dashboard`);
+        
+        this.socket.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                this.handleRealtimeUpdate(data);
+            } catch (error) {
+                console.error('WebSocket message parsing error:', error);
+            }
+        };
+        // Add to dashboard.js
+          checkWebSocketConnection() {
+           if (this.ws.readyState === WebSocket.OPEN) {
+         console.log('WebSocket connected');
+          this.requestInitialStats();
+         }
+        }
+        this.socket.onclose = () => {
+            if (this.reconnectAttempts < this.maxReconnectAttempts) {
+                setTimeout(() => {
+                    this.reconnectAttempts++;
+                    this.setupWebSocket();
+                }, 3000 * Math.pow(2, this.reconnectAttempts));
+            } else {
+                showError('Connection lost. Please refresh the page.');
+            }
+        };
+
+        this.socket.onerror = (error) => {
+            showError('WebSocket error occurred');
+            console.error('WebSocket error:', error);
+        };
+    }
+// In public/js/dashboard.js
+updateStats(data) {
+    document.querySelector('[data-stat="points"]').textContent = data.points;
+    document.querySelector('[data-stat="successRate"]').textContent = `${Math.round(data.successRate)}%`;
+    document.querySelector('[data-stat="activeMissions"]').textContent = data.activeMissions;
+}
+    handleRealtimeUpdate(data) {
+        switch(data.type) {
+            case 'stats':
+                this.updateStats(data.stats);
+                break;
+            case 'progress':
+                this.updateCharts(data);
+                break;
+            case 'task':
+                this.updateTasks(data.task);
+                break;
+            case 'achievement':
+                this.updateAchievements([data.achievement]);
+                break;
+            case 'mission-update':
+                this.updateNextMission(data.mission);
+                break;
+            default:
+                console.warn('Unknown update type:', data.type);
+        }
+    }
+
+    updateStats(stats) {
+        Object.entries(stats).forEach(([key, value]) => {
+            const element = document.getElementById(key);
+            if (element) {
+                element.textContent = typeof value === 'number' ? 
+                    value.toLocaleString() : value;
+            }
+        });
+    }
+
+    updateCharts(data) {
+        if (data.progress && this.charts.progress) {
+            this.charts.progress.data.datasets[0].data = data.progress;
+            this.charts.progress.update();
+        }
+        if (data.achievements && this.charts.achievements) {
+            this.charts.achievements.data.datasets[0].data = data.achievements;
+            this.charts.achievements.update();
+        }
+    }
+
+    setupEventListeners() {
+        document.getElementById('logout-button')?.addEventListener('click', this.handleLogout.bind(this));
+    }
+
+    async handleLogout() {
+        try {
+            const response = await fetch('/api/auth/logout', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
+            if (!response.ok) throw new Error('Logout failed');
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+        } catch (error) {
+            showError('Logout failed');
+            console.error('Logout failed:', error);
+        }
+    }
+
+    // Task Management
+    setupTaskManagement() {
+        this.setupTaskEventListeners();
+    }
+
+    async addTask(task) {
+        try {
+            const response = await fetch('/api/tasks', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify(task)
+            });
+            if (!response.ok) throw new Error('Failed to add task');
+            const data = await response.json();
+            this.updateTaskUI(data);
+        } catch (error) {
+            showError('Failed to add task');
+            console.error('Failed to add task:', error);
+        }
+    }
+
+    async updateTask(taskId, updates) {
+        try {
+            const response = await fetch(`/api/tasks/${taskId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify(updates)
+            });
+            if (!response.ok) throw new Error('Failed to update task');
+            const data = await response.json();
+            this.updateTaskUI(data);
+        } catch (error) {
+            showError('Failed to update task');
+            console.error('Failed to update task:', error);
+        }
+    }
+
+    updateTaskUI(task) {
+        const taskElement = document.querySelector(`[data-task-id="${task.id}"]`);
+        if (!taskElement) {
+            const prioritySection = document.querySelector(`.${task.priority}-priority`);
+            if (prioritySection) {
+                prioritySection.querySelector('.task-list')?.insertAdjacentHTML('beforeend', this.createTaskHTML(task));
+            }
+        } else {
+            taskElement.outerHTML = this.createTaskHTML(task);
+        }
+    }
+
+    createTaskHTML(task) {
+        return `
+            <div class="bg-gray-800/50 p-3 rounded" data-task-id="${task.id}">
+                <div class="flex justify-between">
+                    <span>${task.title}</span>
+                    <span class="text-${task.priority}-400">${task.deadline}</span>
+                </div>
             </div>
         `;
-        achievementsList.appendChild(li);
-    });
-}
-
-function updateNextMission(mission) {
-    const missionContainer = document.getElementById('next-mission');
-    
-    if (!mission) {
-        missionContainer.innerHTML = '<p>No upcoming missions</p>';
-        return;
     }
 
-    missionContainer.innerHTML = `
-        <h3 class="mission-title">${mission.title}</h3>
-        <p class="mission-description">${mission.description}</p>
-        <button onclick="startMission('${mission.id}')" class="mission-button">
-            Start Mission
-        </button>
-    `;
-}
-
-async function startMission(missionId) {
-    try {
-        const response = await fetch(`/api/training/start-mission/${missionId}`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                'Content-Type': 'application/json'
-            }
+    setupTaskEventListeners() {
+        document.querySelector('.btn-add-task')?.addEventListener('click', () => {
+            const task = {
+                title: 'New Task',
+                priority: 'medium',
+                deadline: 'Tomorrow'
+            };
+            this.addTask(task);
         });
 
-        if (!response.ok) {
-            throw new Error('Failed to start mission');
-        }
-
-        const result = await response.json();
-        window.location.href = `/training/mission/${missionId}`;
-    } catch (error) {
-        console.error('Error starting mission:', error);
-        showError('Failed to start mission');
-    }
-}
-
-function setupEventListeners() {
-    // Logout button
-    const logoutBtn = document.getElementById('logout-button');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', handleLogout);
-    }
-
-    // Add other event listeners as needed
-}
-
-async function handleLogout() {
-    try {
-        const response = await fetch('/api/auth/logout', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
+        document.querySelectorAll('.task-list').forEach(list => {
+            list.addEventListener('click', (e) => {
+                const taskElement = e.target.closest('[data-task-id]');
+                if (taskElement) {
+                    // Task click handling logic here
+                }
+            });
         });
-
-        if (!response.ok) {
-            throw new Error('Logout failed');
-        }
-
-        localStorage.removeItem('token');
-        window.location.href = '/login';
-    } catch (error) {
-        console.error('Logout error:', error);
-        showError('Failed to log out');
     }
 }
 
 function showError(message) {
-    // Implement error notification system
     console.error(message);
-    // You could add a toast notification or alert here
-}
-
-// Add event listener for real-time updates if needed
-function setupWebSocket() {
-    const ws = new WebSocket(getWebSocketUrl());
-    
-    ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        handleRealtimeUpdate(data);
-    };
-
-    ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
-    };
-
-    return ws;
-}
-
-function handleRealtimeUpdate(data) {
-    if (data.type === 'achievement') {
-        updateAchievements([data.achievement]);
-    } else if (data.type === 'mission-update') {
-        updateNextMission(data.mission);
-    } else if (data.type === 'stats-update') {
-        updateStats(data.stats);
+    // Implement your error notification system here
+    // Example: toast notification
+    if (window.toast) {
+        window.toast.error(message);
     }
 }
 
-function getWebSocketUrl() {
-    return `ws://${window.location.host}/api/ws`;  // Modify as needed for your WebSocket setup
-}
+// Initialize dashboard when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    new DashboardController();
+});

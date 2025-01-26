@@ -1,28 +1,46 @@
-// services/ServiceIntegrator.js
-const WebSocketService = require('./websocketService');
-const rankingService = require('./rankingService');
-const stripeService = require('./stripeService');
+// services/websocketService.js
+const WebSocket = require('ws');
+const TrainingSession = require('../models/TrainingSession');
 
-class ServiceIntegrator {
+class WebSocketService {
     constructor(server) {
-        this.ws = new WebSocketService(server);
-        
-        // Integrate with ranking updates
-        rankingService.on('rankUpdate', (data) => {
-            this.ws.broadcast({
-                type: 'rank_update',
-                data
-            });
-        });
+        this.wss = new WebSocket.Server({ server });
+        this.clients = new Map();
+        this.setupHandlers();
+    }
 
-        // Integrate with subscription updates
-        stripeService.on('subscriptionUpdate', (data) => {
-            this.ws.broadcast({
-                type: 'subscription_update',
-                data
+    setupHandlers() {
+        this.wss.on('connection', (ws, req) => {
+            const userId = this.getUserIdFromRequest(req);
+            this.clients.set(userId, ws);
+
+            ws.on('message', async (message) => {
+                const data = JSON.parse(message);
+                if (data.type === 'dashboard_request') {
+                    await this.updateDashboardStats(userId);
+                }
             });
+
+            ws.on('close', () => this.clients.delete(userId));
         });
+    }
+
+    async updateDashboardStats(userId) {
+        const stats = await TrainingSession.aggregate([
+            { $match: { userId } },
+            { $group: {
+                _id: null,
+                credits: { $sum: "$credits" },
+                rank: { $last: "$rank" },
+                successRate: { $avg: "$successRate" },
+                activeMissions: { 
+                    $sum: { $cond: [{ $eq: ["$status", "active"] }, 1, 0] }
+                }
+            }}
+        ]);
+        
+        this.broadcast('stats_update', stats[0], userId);
     }
 }
 
-module.exports = ServiceIntegrator;
+module.exports = WebSocketService;

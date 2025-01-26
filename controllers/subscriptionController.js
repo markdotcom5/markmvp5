@@ -1,158 +1,207 @@
 const Subscription = require('../models/Subscription');
+const User = require('../models/User');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const logger = require('../utils/logger');
 
-exports.createSubscription = async (req, res) => {
-    const { userId, plan, credits } = req.body;
-
-    if (!userId || !plan) {
-        return res.status(400).json({ error: 'User ID and subscription plan are required' });
-    }
-
-    try {
-        // Check for existing active subscription
-        const existingSubscription = await Subscription.findOne({ userId, status: 'active' });
-        if (existingSubscription) {
-            return res.status(400).json({ error: 'User already has an active subscription' });
-        }
-
-        // Calculate price based on the plan
-        const planPricing = {
-            individual: 49.99,
-            family: 89.99,
-            galactic: 2048,
+class SubscriptionController {
+    constructor() {
+        this.planPricing = {
+            individual: { price: 49.99, vrHours: 10, credits: 100, members: 1 },
+            family: { price: 89.99, vrHours: 50, credits: 250, members: 4 },
+            galactic: { price: 2048, vrHours: 0, credits: 1000, members: 1 }
         };
-        const price = planPricing[plan] || 0;
-
-        // Create subscription
-        const subscription = new Subscription({
-            userId,
-            plan,
-            price,
-            credits,
-            features: {
-                maxVRHours: plan === 'galactic' ? 0 : plan === 'family' ? 50 : 10,
-                aiCoach: true,
-                spaceCredits: plan === 'galactic' ? 1000 : plan === 'family' ? 250 : 100,
-                memberAccess: plan === 'family' ? 4 : 1,
-                privateFacility: plan === 'galactic',
-                priorityAccess: plan === 'galactic',
-            },
-            renewalInfo: {
-                nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days later
-            },
-        });
-
-        await subscription.save();
-        res.status(201).json({ message: 'Subscription created successfully', subscription });
-    } catch (error) {
-        console.error('Error creating subscription:', error.message);
-        res.status(500).json({ error: 'Failed to create subscription' });
-    }
-};
-
-exports.updatePaymentStatus = async (req, res) => {
-    const { subscriptionId, paymentStatus, transactionId, amount } = req.body;
-
-    if (!subscriptionId || !paymentStatus) {
-        return res.status(400).json({ error: 'Subscription ID and payment status are required' });
     }
 
-    try {
-        const subscription = await Subscription.findById(subscriptionId);
-        if (!subscription) {
-            return res.status(404).json({ error: 'Subscription not found' });
+    async createSubscription(req, res) {
+        const { userId, plan, paymentMethodId } = req.body;
+
+        try {
+            const existingSub = await Subscription.findOne({ 
+                userId, 
+                status: { $in: ['active', 'pending'] } 
+            });
+            
+            if (existingSub) {
+                return res.status(400).json({ error: 'Active subscription exists' });
+            }
+
+            const planDetails = this.planPricing[plan];
+            if (!planDetails) {
+                return res.status(400).json({ error: 'Invalid plan' });
+            }
+
+            const customer = await this.createOrGetStripeCustomer(userId);
+            const subscription = await this.createStripeSubscription(
+                customer.id,
+                paymentMethodId,
+                planDetails.price
+            );
+
+            const newSubscription = new Subscription({
+                userId,
+                plan,
+                stripeSubscriptionId: subscription.id,
+                price: planDetails.price,
+                features: this.getFeatures(plan),
+                renewalInfo: {
+                    nextBillingDate: new Date(subscription.current_period_end * 1000)
+                }
+            });
+
+            await newSubscription.save();
+            await User.findByIdAndUpdate(userId, { 
+                subscriptionId: newSubscription._id,
+                credits: planDetails.credits
+            });
+
+            res.status(201).json(newSubscription);
+        } catch (error) {
+            logger.error('Subscription creation failed:', error);
+            res.status(500).json({ error: error.message });
         }
+    }
 
-        // Add payment history
-        subscription.paymentHistory.push({
-            amount,
-            method: 'stripe', // Adjust if using multiple payment methods
-            transactionId,
-        });
+    async handleWebhook(req, res) {
+        const sig = req.headers['stripe-signature'];
+        let event;
 
-        // Update subscription status
-        if (paymentStatus === 'success') {
-            subscription.status = 'active';
-            subscription.renewalInfo.nextBillingDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // Extend 30 days
-        } else {
+        try {
+            event = stripe.webhooks.constructEvent(
+                req.body,
+                sig,
+                process.env.STRIPE_WEBHOOK_SECRET
+            );
+
+            switch (event.type) {
+                case 'invoice.payment_succeeded':
+                    await this.handleSuccessfulPayment(event.data.object);
+                    break;
+                case 'invoice.payment_failed':
+                    await this.handleFailedPayment(event.data.object);
+                    break;
+                case 'customer.subscription.deleted':
+                    await this.handleSubscriptionCancelled(event.data.object);
+                    break;
+            }
+
+            res.json({ received: true });
+        } catch (error) {
+            logger.error('Webhook handling failed:', error);
+            res.status(400).json({ error: error.message });
+        }
+    }
+
+    async upgradeSubscription(req, res) {
+        const { subscriptionId, newPlan } = req.body;
+
+        try {
+            const subscription = await Subscription.findById(subscriptionId);
+            if (!subscription) {
+                return res.status(404).json({ error: 'Subscription not found' });
+            }
+
+            const planDetails = this.planPricing[newPlan];
+            if (!planDetails) {
+                return res.status(400).json({ error: 'Invalid plan' });
+            }
+
+            await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
+                items: [{ price: planDetails.price }],
+                proration_behavior: 'always_invoice'
+            });
+
+            subscription.plan = newPlan;
+            subscription.price = planDetails.price;
+            subscription.features = this.getFeatures(newPlan);
+            await subscription.save();
+
+            await User.findByIdAndUpdate(subscription.userId, {
+                credits: planDetails.credits
+            });
+
+            res.json(subscription);
+        } catch (error) {
+            logger.error('Upgrade failed:', error);
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+    async pauseSubscription(req, res) {
+        const { subscriptionId } = req.body;
+
+        try {
+            const subscription = await Subscription.findById(subscriptionId);
+            if (!subscription?.stripeSubscriptionId) {
+                return res.status(404).json({ error: 'Subscription not found' });
+            }
+
+            await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
+                pause_collection: { behavior: 'void' }
+            });
+
             subscription.status = 'paused';
+            await subscription.save();
+
+            res.json(subscription);
+        } catch (error) {
+            logger.error('Pause failed:', error);
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+    getFeatures(plan) {
+        const planDetails = this.planPricing[plan];
+        return {
+            maxVRHours: planDetails.vrHours,
+            aiCoach: true,
+            spaceCredits: planDetails.credits,
+            memberAccess: planDetails.members,
+            privateFacility: plan === 'galactic',
+            priorityAccess: plan === 'galactic'
+        };
+    }
+
+    async createOrGetStripeCustomer(userId) {
+        const user = await User.findById(userId);
+        if (user.stripeCustomerId) {
+            return await stripe.customers.retrieve(user.stripeCustomerId);
         }
 
-        await subscription.save();
-        res.status(200).json({ message: 'Payment status updated successfully', subscription });
-    } catch (error) {
-        console.error('Error updating payment status:', error.message);
-        res.status(500).json({ error: 'Failed to update payment status' });
-    }
-};
+        const customer = await stripe.customers.create({
+            email: user.email,
+            metadata: { userId: user._id.toString() }
+        });
 
-exports.getSubscriptionStatus = async (req, res) => {
+        await User.findByIdAndUpdate(userId, { stripeCustomerId: customer.id });
+        return customer;
+    }
+
+    async createStripeSubscription(customerId, paymentMethodId, price) {
+        await stripe.paymentMethods.attach(paymentMethodId, {
+            customer: customerId
+        });
+
+        await stripe.customers.update(customerId, {
+            invoice_settings: {
+                default_payment_method: paymentMethodId
+            }
+        });
+
+        return await stripe.subscriptions.create({
+            customer: customerId,
+            items: [{ price }],
+            expand: ['latest_invoice.payment_intent']
+        });
+    }
+}
+// Replace the exports.createSubscription with:
+exports.createSubscription = async (req, res) => {
     try {
-        const subscription = await Subscription.findOne({ userId: req.user.id, status: 'active' });
-        if (!subscription) {
-            return res.status(404).json({ error: 'No active subscription found' });
-        }
-        res.status(200).json(subscription);
+        const subscription = await Subscription.create(req.body);
+        res.status(201).json(subscription);
     } catch (error) {
-        console.error('Error fetching subscription status:', error.message);
-        res.status(500).json({ error: 'Failed to fetch subscription status' });
+        res.status(500).json({ error: error.message });
     }
 };
 
-exports.getAllSubscriptions = async (req, res) => {
-    try {
-        const subscriptions = await Subscription.find().populate('userId', 'email roles');
-        res.status(200).json(subscriptions);
-    } catch (error) {
-        console.error('Error fetching all subscriptions:', error.message);
-        res.status(500).json({ error: 'Failed to fetch all subscriptions' });
-    }
-};
-
-exports.cancelSubscription = async (req, res) => {
-    const { subscriptionId } = req.body;
-
-    if (!subscriptionId) {
-        return res.status(400).json({ error: 'Subscription ID is required' });
-    }
-
-    try {
-        const subscription = await Subscription.findById(subscriptionId);
-        if (!subscription || subscription.status !== 'active') {
-            return res.status(400).json({ error: 'No active subscription found to cancel' });
-        }
-
-        subscription.status = 'cancelled';
-        subscription.endDate = new Date();
-        await subscription.save();
-
-        res.status(200).json({ message: 'Subscription cancelled successfully', subscription });
-    } catch (error) {
-        console.error('Error cancelling subscription:', error.message);
-        res.status(500).json({ error: 'Failed to cancel subscription' });
-    }
-};
-
-exports.renewSubscription = async (req, res) => {
-    const { subscriptionId } = req.body;
-
-    if (!subscriptionId) {
-        return res.status(400).json({ error: 'Subscription ID is required' });
-    }
-
-    try {
-        const subscription = await Subscription.findById(subscriptionId);
-        if (!subscription) {
-            return res.status(404).json({ error: 'Subscription not found' });
-        }
-
-        subscription.status = 'active';
-        subscription.startDate = new Date();
-        subscription.renewalInfo.nextBillingDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // Extend by 30 days
-        await subscription.save();
-
-        res.status(200).json({ message: 'Subscription renewed successfully', subscription });
-    } catch (error) {
-        console.error('Error renewing subscription:', error.message);
-        res.status(500).json({ error: 'Failed to renew subscription' });
-    }
-};
+module.exports = new SubscriptionController();
