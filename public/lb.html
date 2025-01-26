@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SharedStars Academy</title>
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- AOS CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@2.6.0/dist/full.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/main.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .space-gradient {
+            background: linear-gradient(to bottom, #0f172a, #1e293b);
+        }
+        .hero-text {
+            font-size: clamp(4rem, 15vw, 12rem);
+            line-height: 1;
+        }
+        .cosmic-hover {
+            transition: all 0.3s ease;
+        }
+        .cosmic-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <!-- AOS Initialization -->
+    <script>
+        AOS.init({
+            duration: 1000, // Animation duration in milliseconds
+            easing: 'ease', // Easing style for animations
+            once: true, // Whether animation should happen only once
+        });
+    </script>
+</body>
+</html>
+
+    <!-- Header -->
+    <header class="fixed w-full bg-gray-900/90 backdrop-blur-lg z-50">
+        <div class="bg-gradient-to-r from-blue-600/80 to-purple-600/80 text-center py-2">
+            <p class="text-white">
+                <span class="font-bold">Limited Time:</span> Get NASA-approved training modules at 50% off! 
+                <a href="/special-offer" class="underline hover:text-blue-200 ml-2">Claim Now →</a>
+            </p>
+        </div>
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="logo">
+                <a href="/index.html" aria-label="SharedStars Homepage">
+                <img src="/css/images/logo.svg" alt="SharedStars Logo" class="h-10">
+                </a>
+            </div>
+            <nav class="hidden md:flex gap-8">
+                <a href="/index.html" class="text-gray-300 hover:text-white font-medium transition-colors">Home</a>
+                <a href="/academy.html" class="text-gray-300 hover:text-white font-medium transition-colors">Academy</a>
+                <a href="/about.html" class="text-gray-300 hover:text-white font-medium transition-colors">About</a>
+                <a href="#store" class="text-gray-300 hover:text-white font-medium transition-colors">store</a>
+            </nav>
+          
+        </div>
+    </header>
+    <main class="relative min-h-screen bg-gradient-to-b from-blue-950 to-black">
+    <!-- Hero Section -->
+    <section id="hero" class="min-h-screen flex items-center justify-center relative bg-black">
+        <div class="absolute inset-0">
+            <video autoplay muted loop playsinline class="w-full h-full object-cover">
+                <source src="./videos/academy10.mp4" type="video/mp4">
+            </video>
+            <div class="absolute inset-0 bg-transparent"></div>
+        </div>
+        <div class="relative z-10 text-center text-white">
+           
+        <!-- Hero Content -->
+        <div class="relative z-10 text-center px-4 space-y-8 max-w-5xl mx-auto">
+            <!-- Main Title -->
+            <div class="space-y-4">
+                <h1 class="text-6xl md:text-8xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-blue-500 mb-6 glow-text animate-pulse-slow">
+                    Stellar Rankings
+                </h1>
+                <p class="text-xl md:text-2xl text-blue-200 animate-fade-in">Your Gateway to Space Leadership</p>
+            </div>
+
+            <!-- Stats Dashboard -->
+            <div class="stats shadow-xl bg-blue-950/30 backdrop-blur-md border border-blue-500/20 hover:border-blue-400/40 transition-all duration-500">
+                <div class="stat px-8 hover:bg-blue-900/20 transition-all duration-300">
+                    <div class="stat-title text-blue-300 text-lg">Elite Cadets</div>
+                    <div class="stat-value text-white text-5xl font-bold">2.6K</div>
+                    <div class="stat-desc text-blue-200">↗︎ 300 new this week</div>
+                </div>
+                
+                <div class="stat px-8 hover:bg-blue-900/20 transition-all duration-300">
+                    <div class="stat-title text-purple-300 text-lg">Credits Earned</div>
+                    <div class="stat-value text-white text-5xl font-bold">892M</div>
+                    <div class="stat-desc text-purple-200">↗︎ 23% increase</div>
+                </div>
+
+                <div class="stat px-8 hover:bg-blue-900/20 transition-all duration-300">
+                    <div class="stat-title text-blue-300 text-lg">Success Rate</div>
+                    <div class="stat-value text-white text-5xl font-bold">94%</div>
+                    <div class="stat-desc text-blue-200">In career placement</div>
+                </div>
+            </div>
+
+            <!-- Hero CTA -->
+            <div class="space-y-6 animate-fade-in-up">
+                <div class="max-w-2xl mx-auto bg-blue-900/20 backdrop-blur-md rounded-xl p-6 border border-blue-500/20">
+                    <p class="text-xl text-blue-100 mb-4">Join the ranks of space industry leaders. Your journey begins here.</p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <button class="btn btn-primary btn-lg group relative overflow-hidden">
+                            <span class="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 opacity-50 group-hover:opacity-70 transition-opacity"></span>
+                            <span class="relative">Start Free Trial</span>
+                        </button>
+                        <button class="btn btn-ghost btn-lg text-blue-300 hover:text-white">View Elite Rankings</button>
+                    </div>
+                </div>
+
+                <!-- Trust Indicators -->
+                <div class="flex justify-center gap-4 text-sm text-blue-300">
+                    <span class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        NASA Approved
+                    </span>
+                    <span class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        Industry Recognized
+                    </span>
+                    <span class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        SpaceX Partner
+                    </span>
+                </div>
+            </div>
+        </div>
+        </div>
+    </section>    
+</body>
+</html>
+<!-- Training Modules Section -->
+<section id="training-modules" class="relative min-h-screen py-20">
+    <!-- Training Video Background -->
+    <video autoplay muted loop playsinline class="absolute inset-0 w-full h-full object-cover opacity-60">
+        <source src="./videos/trainingmods1.mp4" type="video/mp4">
+    </video>
+    <div class="absolute inset-0 bg-gradient-to-b from-blue-950/90 via-blue-900/80 to-blue-950/90"></div>
+
+    <div class="text-center mb-16">
+        <h1 style="color: blue;">Elite Training Modules</h1>
+        <p style="color: blue;">Master real space mission skills with industry-certified training</p>
+    </div>
+
+    <div class="relative z-10 container mx-auto px-4">
+        
+
+        <!-- Training Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Zero-G Training -->
+            <div class="card glass hover:translate-y-[-10px] transition-all duration-300">
+                <div class="card-body">
+                    <div class="absolute top-4 right-4">
+                        <div class="badge badge-primary">Most Popular</div>
+                    </div>
+                    <h3 class="card-title text-2xl text-blue-400 mb-4">Zero-G Training</h3>
+                    <div class="radial-progress text-blue-500 mx-auto my-6" style="--value:70; --size:8rem;">
+                        <span class="text-2xl text-white">70%</span>
+                    </div>
+                    <p class="text-blue-100">Master essential zero gravity navigation used by real astronauts</p>
+                    <div class="card-actions justify-between items-center mt-4">
+                        <span class="text-sm text-blue-300">2,145 enrolled</span>
+                        <button class="btn btn-primary">Begin Module</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mission Control -->
+            <div class="card glass hover:translate-y-[-10px] transition-all duration-300">
+                <div class="card-body">
+                    <div class="absolute top-4 right-4">
+                        <div class="badge badge-secondary">Advanced</div>
+                    </div>
+                    <h3 class="card-title text-2xl text-purple-400 mb-4">Mission Control</h3>
+                    <div class="radial-progress text-purple-500 mx-auto my-6" style="--value:85; --size:8rem;">
+                        <span class="text-2xl text-white">85%</span>
+                    </div>
+                    <p class="text-blue-100">Professional mission control protocols and procedures</p>
+                    <div class="card-actions justify-between items-center mt-4">
+                        <span class="text-sm text-blue-300">1,876 enrolled</span>
+                        <button class="btn btn-primary">Unlock Module</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Space Navigation -->
+            <div class="card glass hover:translate-y-[-10px] transition-all duration-300">
+                <div class="card-body">
+                    <div class="absolute top-4 right-4">
+                        <div class="badge badge-accent">Expert</div>
+                    </div>
+                    <h3 class="card-title text-2xl text-blue-400 mb-4">Space Navigation</h3>
+                    <div class="radial-progress text-blue-500 mx-auto my-6" style="--value:55; --size:8rem;">
+                        <span class="text-2xl text-white">55%</span>
+                    </div>
+                    <p class="text-blue-100">Advanced interplanetary navigation and orbital mechanics</p>
+                    <div class="card-actions justify-between items-center mt-4">
+                        <span class="text-sm text-blue-300">987 enrolled</span>
+                        <button class="btn btn-primary">Start Training</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+         <!-- Premium Access CTA -->
+         
+    </div>
+    
+    <div class="mt-16 text-center">
+        <div class="bg-blue-900/30 backdrop-blur-md rounded-xl p-8 max-w-3xl mx-auto border border-blue-500/20">
+            <h3 class="text-2xl font-bold text-white mb-4">Unlock All Premium Modules</h3>
+            <p class="text-blue-200 mb-6" style="color: blue;">Get unlimited access to all training modules, exclusive missions, and earn industry-recognized credentials.</p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button class="btn btn-primary">Subscribe Now</button>
+                <button class="btn btn-outline text-blue-300">View All Modules</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- Footer -->
+<footer class="bg-gray-900 text-white py-12">
+    <div class="container mx-auto">
+        <!-- Grid Layout -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <!-- About -->
+            <div>
+                <h3 class="font-bold text-lg text-blue-400">About</h3>
+                <ul class="space-y-2 mt-4">
+                    <li><a href="/about.html" class="hover:text-blue-400 transition-colors">Our Story</a></li>
+                    <li><a href="/academy.html" class="hover:text-blue-400 transition-colors">Space Academy</a></li>
+                </ul>
+            </div>
+            <!-- Community -->
+            <div>
+                <h3 class="font-bold text-lg text-blue-400">Community</h3>
+                <ul class="space-y-2 mt-4">
+                    <li><a href="/events.html" class="hover:text-blue-400 transition-colors">Events</a></li>
+                    <li><a href="/forums.html" class="hover:text-blue-400 transition-colors">Forums</a></li>
+                </ul>
+            </div>
+            <!-- Resources -->
+            <div>
+                <h3 class="font-bold text-lg text-blue-400">Resources</h3>
+                <ul class="space-y-2 mt-4">
+                    <li><a href="/faq.html" class="hover:text-blue-400 transition-colors">FAQ</a></li>
+                    <li><a href="/support.html" class="hover:text-blue-400 transition-colors">Support</a></li>
+                </ul>
+            </div>
+            <!-- Legal -->
+            <div>
+                <h3 class="font-bold text-lg text-blue-400">Legal</h3>
+                <ul class="space-y-2 mt-4">
+                    <li><a href="/terms.html" class="hover:text-blue-400 transition-colors">Terms</a></li>
+                    <li><a href="/privacy.html" class="hover:text-blue-400 transition-colors">Privacy</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Social Media -->
+        <div class="mt-12 text-center">
+            <h4 class="text-lg font-bold text-blue-400">Follow Us</h4>
+            <div class="flex justify-center gap-6 mt-4">
+                <a href="#" class="hover:text-blue-400 transition-colors" aria-label="Twitter">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M24 4.557a9.995 9.995 0 01-2.827.775 4.932 4.932 0 002.165-2.724c-.957.567-2.016.978-3.127 1.198a4.918 4.918 0 00-8.38 4.482A13.941 13.941 0 011.671 3.149a4.917 4.917 0 001.523 6.573A4.897 4.897 0 01.96 9.3v.062a4.918 4.918 0 003.946 4.827 4.898 4.898 0 01-2.224.084 4.917 4.917 0 004.59 3.415A9.867 9.867 0 010 21.543a13.914 13.914 0 007.548 2.209c9.057 0 14.01-7.496 14.01-13.986 0-.213-.005-.425-.014-.636A10.025 10.025 0 0024 4.557z"/>
+                    </svg>
+                </a>
+                <a href="#" class="hover:text-blue-400 transition-colors" aria-label="Facebook">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M22.675 0H1.325C.593 0 0 .593 0 1.325v21.351C0 23.408.593 24 1.325 24H12.81V14.706h-3.141v-3.741h3.141V8.356c0-3.1 1.894-4.788 4.659-4.788 1.325 0 2.462.099 2.792.143v3.239l-1.917.001c-1.504 0-1.796.715-1.796 1.763v2.309h3.587l-.467 3.741h-3.12V24h6.116c.729 0 1.324-.592 1.324-1.324V1.325C24 .593 23.408 0 22.675 0z"/>
+                    </svg>
+                </a>
+                <a href="#" class="hover:text-blue-400 transition-colors" aria-label="Instagram">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M22 11.077v.82c0 4.842-3.705 10.423-10.423 10.423A10.386 10.386 0 010 18.9c.13.01.261.014.393.014 2.717 0 5.213-.913 7.204-2.449a3.677 3.677 0 01-3.434-2.553c.558.083 1.136.077 1.688-.027A3.675 3.675 0 012.68 9.9v-.047c.492.274 1.048.438 1.643.457a3.674 3.674 0 01-1.633-3.056c0-.014 0-.027.001-.041a3.65 3.65 0 001.667.46 3.671 3.671 0 01-1.144-4.901 10.428 10.428 0 007.571 3.841A3.675 3.675 0 0118.633 5.9a7.353 7.353 0 002.333-.894 3.673 3.673 0 01-1.612 2.025 7.308 7.308 0 002.102-.575A7.396 7.396 0 0122 11.077z"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+
+        <!-- Copyright -->
+        <div class="text-center mt-8">
+            <p class="text-gray-400 text-sm">© 2025 Celestial Technologies, LLC. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
