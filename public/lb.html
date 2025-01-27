@@ -34,6 +34,7 @@
             box-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
         }
     </style>
+    <script src="/js/leaderboard.js"></script>
 </head>
 <body>
     <!-- AOS Initialization -->
@@ -52,21 +53,49 @@
         <div class="bg-gradient-to-r from-blue-600/80 to-purple-600/80 text-center py-2">
             <p class="text-white">
                 <span class="font-bold">Limited Time:</span> Get NASA-approved training modules at 50% off! 
-                <a href="/special-offer" class="underline hover:text-blue-200 ml-2">Claim Now →</a>
+                <a href="/special-offer" class="underline hover:text-blue-200 ml-2">Claim Now →</a> <br>
+                <span class="font-bold" style="color: blue;">Join 2.6K+ Space Professionals, Including NASA & SpaceX Alumni !!!</span>
+
             </p>
+
+  
+
+
         </div>
         <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-            <div class="logo">
-                <a href="/index.html" aria-label="SharedStars Homepage">
-                <img src="/css/images/SharedStars.svg" alt="SharedStars Logo" class="h-10">
+            <div class="flex items-center space-x-8">
+                <a href="/" class="flex items-center space-x-3 group">
+                    <img src="/css/images/SharedStars.svg" alt="SharedStars Logo" 
+                         class="h-16 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)] group-hover:drop-shadow-[0_0_25px_rgba(59,130,246,0.7)] transition-all duration-300">
+                   
                 </a>
+                
             </div>
             <nav class="hidden md:flex gap-8">
                 <a href="/index.html" class="text-gray-300 hover:text-white font-medium transition-colors">Home</a>
                 <a href="/academy.html" class="text-gray-300 hover:text-white font-medium transition-colors">Academy</a>
                 <a href="/about.html" class="text-gray-300 hover:text-white font-medium transition-colors">About</a>
                 <a href="#store" class="text-gray-300 hover:text-white font-medium transition-colors">store</a>
+
+                 
             </nav>
+
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+          
+             <!-- User Actions -->
+             <div class="flex items-center space-x-6">
+                       
+                <!-- CTA Button -->
+                <a href="/subscribe.html" class="group">
+                    <div class="relative overflow-hidden px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full">
+                        <div class="relative z-10 flex flex-col items-center">
+                            <span class="text-lg font-bold text-white">Start Training Free</span>
+                            <span class="text-xs text-blue-200">30-Day Pro Access</span>
+                        </div>
+                        <div class="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    </div>
+                </a>
           
         </div>
     </header>
@@ -80,7 +109,12 @@
             <div class="absolute inset-0 bg-transparent"></div>
         </div>
         <div class="relative z-10 text-center text-white">
-           
+           <br>
+           <br>
+           <br>
+           <br>
+           <br>
+           <br>
         <!-- Hero Content -->
         <div class="relative z-10 text-center px-4 space-y-8 max-w-5xl mx-auto">
             <!-- Main Title -->
@@ -94,22 +128,24 @@
             <!-- Stats Dashboard -->
             <div class="stats shadow-xl bg-blue-950/30 backdrop-blur-md border border-blue-500/20 hover:border-blue-400/40 transition-all duration-500">
                 <div class="stat px-8 hover:bg-blue-900/20 transition-all duration-300">
-                    <div class="stat-title text-blue-300 text-lg">Elite Cadets</div>
-                    <div class="stat-value text-white text-5xl font-bold">2.6K</div>
-                    <div class="stat-desc text-blue-200">↗︎ 300 new this week</div>
+                    <div class="stat-title" style="color: #1f618d; font-size: 1.125rem;"><strong>Elite Cadets</strong></div>
+                    <div class="stat-value" style="color: blue; font-size: 3rem; font-weight: bold;">2.6K</div>
+                <div class="stat-desc" style="color:#6495ED ;">↗︎ 300 new this week</div>
+
                 </div>
                 
                 <div class="stat px-8 hover:bg-blue-900/20 transition-all duration-300">
-                    <div class="stat-title text-purple-300 text-lg">Credits Earned</div>
-                    <div class="stat-value text-white text-5xl font-bold">892M</div>
-                    <div class="stat-desc text-purple-200">↗︎ 23% increase</div>
+                    <div class="stat-title" style="color: purple; font-size: 1.125rem;"><strong>Credits Earned</strong></div>
+                    <div class="stat-value" style="color: blue; font-size: 3rem; font-weight: bold;">892M</div>
+                    <div class="stat-desc" style="color: blue;">↗︎ 23% increase</div>
                 </div>
-
+                
                 <div class="stat px-8 hover:bg-blue-900/20 transition-all duration-300">
-                    <div class="stat-title text-blue-300 text-lg">Success Rate</div>
-                    <div class="stat-value text-white text-5xl font-bold">94%</div>
-                    <div class="stat-desc text-blue-200">In career placement</div>
+                    <div class="stat-title" style="color: #93C5FD; font-size: 1.125rem;"><strong>Success Rate</strong></div>
+                    <div class="stat-value" style="color: blue; font-size: 3rem; font-weight: bold;">94%</div>
+                    <div class="stat-desc" style="color: blue;">In career placement</div>
                 </div>
+                
             </div>
 
             <!-- Hero CTA -->
@@ -239,6 +275,678 @@
         </div>
     </div>
 </section>
+
+<!-- Leaderboard Competition Section -->
+<section id="leaderboard-section" class="relative min-h-screen py-20">
+    <!-- Leaderboard Video Background -->
+    <video autoplay muted loop playsinline class="absolute inset-0 w-full h-full object-cover opacity-60">
+        <source src="./videos/leaderboard5.mp4" type="video/mp4">
+    </video>
+    <div class="absolute inset-0 bg-gradient-to-b from-blue-950/90 via-blue-900/80 to-blue-950/90"></div>
+
+    <div class="relative z-10 container mx-auto px-4">
+        <!-- Section Header -->
+        <div class="text-center mb-16">
+            <h2 class="text-4xl md:text-5xl font-bold text-white mb-6">Galactic Leaderboard</h2>
+            <p class="text-xl text-blue-200 max-w-2xl mx-auto">Compete with elite space cadets and get noticed by industry leaders</p>
+        </div>
+
+        <!-- Featured Player Spotlight -->
+        <div class="card bg-blue-900/30 backdrop-blur-md border border-blue-500/20 mb-12 hover:shadow-[0_0_15px_rgba(59,130,246,0.3)] transition-all duration-300">
+            <div class="card-body">
+                <div class="flex flex-col md:flex-row items-center gap-8">
+                    <div class="avatar">
+                        <div class="w-24 h-24 rounded-full ring ring-blue-500 ring-offset-2 ring-offset-blue-900">
+                            <img src="/api/placeholder/150/150" alt="Top Performer" />
+                        </div>
+                    </div>
+                    <div class="flex-1 text-center md:text-left">
+                        <h3 class="text-2xl font-bold text-white mb-2">Commander Alex</h3>
+                        <p class="text-blue-300">Current #1 Global Ranking</p>
+                        <div class="flex flex-wrap gap-2 mt-3 justify-center md:justify-start">
+                            <span class="badge badge-primary">248,920 Credits</span>
+                            <span class="badge badge-secondary">Level 42</span>
+                            <span class="badge badge-accent">NASA Certified</span>
+                        </div>
+                    </div>
+                    <div class="text-center md:text-right">
+                        <div class="stats stats-vertical bg-blue-950/50 backdrop-blur-sm">
+                            <div class="stat">
+                                <div class="stat-title text-blue-300">Missions Complete</div>
+                                <div class="stat-value text-white">89</div>
+                                <div class="stat-desc text-blue-200">↗︎ 14 this week</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ranking Controls -->
+        <div class="flex flex-col lg:flex-row gap-6 items-center justify-between mb-8">
+            <!-- Search Bar -->
+            <div class="relative flex-grow max-w-md w-full">
+                <input type="search" 
+                       id="searchCadets" 
+                       placeholder="Search elite cadets..." 
+                       class="w-full h-12 bg-blue-900/40 text-white pl-12 pr-4 rounded-xl border border-blue-400/30 hover:border-blue-400 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center text-blue-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"/>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="flex flex-wrap gap-4">
+                <select class="select select-primary bg-blue-900/40 border-blue-400/30">
+                    <option value="global">Global Elite</option>
+                    <option value="regional">Regional Champions</option>
+                    <option value="squad">Squadron Leaders</option>
+                    <option value="division">Division Masters</option>
+                </select>
+
+                <select class="select select-primary bg-blue-900/40 border-blue-400/30">
+                    <option value="allTime">All Time Legends</option>
+                    <option value="season">Season III Heroes</option>
+                    <option value="month">Monthly Stars</option>
+                    <option value="week">Weekly Risers</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Main Leaderboard Table -->
+        <div class="overflow-x-auto">
+            <table class="table w-full text-gray-300 bg-blue-950/20 rounded-xl">
+                <thead>
+                    <tr class="border-b border-blue-500/20 bg-blue-900/20">
+                        <th class="p-4">
+                            <div class="flex items-center space-x-2 text-blue-400 font-bold">
+                                <span>RANK</span>
+                                <div class="tooltip" data-tip="Updated every 24hrs">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </th>
+                        <th class="p-4 text-blue-400 font-bold">CADET</th>
+                        <th class="p-4 text-blue-400 font-bold">DIVISION</th>
+                        <th class="p-4 text-blue-400 font-bold">STAR CREDITS</th>
+                        <th class="p-4 text-blue-400 font-bold">LEVEL</th>
+                        <th class="p-4 text-blue-400 font-bold">STATUS</th>
+                    </tr>
+                </thead>
+<!-- Table Body -->
+<tbody class="divide-y divide-blue-500/10" id="leaderboardBody">
+    <!-- Top Performer Row -->
+    <tr class="hover:bg-blue-900/20 transition-all duration-300 cursor-pointer group">
+        <td class="p-4">
+            <div class="flex items-center space-x-3">
+                <span class="text-2xl font-bold text-yellow-400">#1</span>
+                <div class="avatar-group -space-x-2">
+                    <div class="avatar">
+                        <div class="w-6">
+                            <img src="/badges/elite.svg" alt="Elite Badge" class="tooltip" data-tip="Elite Status" />
+                        </div>
+                    </div>
+                    <div class="avatar">
+                        <div class="w-6">
+                            <img src="/badges/certified.svg" alt="Certified Badge" class="tooltip" data-tip="NASA Certified" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td class="p-4">
+            <div class="flex items-center space-x-3">
+                <div class="avatar">
+                    <div class="mask mask-hexagon w-12 h-12 bg-blue-500/20 ring-2 ring-blue-400/50">
+                        <img src="/images/default-avatar.png" alt="Avatar"/>
+                    </div>
+                </div>
+                <div>
+                    <div class="font-bold text-white group-hover:text-blue-400 transition-colors">Commander Alex</div>
+                    <div class="text-sm text-blue-300">Mission Specialist</div>
+                </div>
+            </div>
+        </td>
+        <td class="p-4">
+            <span class="badge badge-primary badge-outline gap-2">
+                <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+                Alpha Division
+            </span>
+        </td>
+        <td class="p-4">
+            <div class="font-mono text-white text-lg">248,920</div>
+            <div class="text-sm text-green-400 flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"/>
+                </svg>
+                +1,240 today
+            </div>
+        </td>
+        <td class="p-4">
+            <div class="flex flex-col gap-2">
+                <span class="text-white font-bold">Level 42</span>
+                <div class="w-full h-2 bg-blue-900/40 rounded-full">
+                    <div class="h-full bg-blue-500 rounded-full animate-pulse" style="width: 75%"></div>
+                </div>
+            </div>
+        </td>
+        <td class="p-4">
+            <span class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                <span class="text-green-400">Online</span>
+            </span>
+        </td>
+    </tr>
+
+    <!-- Add more similar rows with different data -->
+</tbody>
+</table>
+</div>
+
+<!-- Pagination and Stats -->
+<div class="mt-8 bg-blue-900/30 rounded-xl border border-blue-500/20 backdrop-blur-lg p-6">
+<div class="flex flex-col md:flex-row justify-between items-center gap-4">
+<div class="text-sm text-blue-300">
+    Showing <span class="font-medium text-white">1</span> - 
+    <span class="font-medium text-white">10</span> of 
+    <span class="font-medium text-white">100</span> cadets
+</div>
+<div class="join">
+    <button class="join-item btn btn-sm">«</button>
+    <button class="join-item btn btn-sm btn-active">1</button>
+    <button class="join-item btn btn-sm">2</button>
+    <button class="join-item btn btn-sm">3</button>
+    <button class="join-item btn btn-sm">...</button>
+    <button class="join-item btn btn-sm">10</button>
+    <button class="join-item btn btn-sm">»</button>
+</div>
+</div>
+</div>
+
+<!-- Competitive Edge Banner -->
+<div class="mt-12 p-8 bg-gradient-to-r from-blue-900/40 to-purple-900/40 rounded-xl border border-blue-500/20">
+<div class="flex flex-col md:flex-row items-center justify-between gap-6">
+<div>
+    <h3 class="text-2xl font-bold text-white mb-2">Ready to Rise Through the Ranks?</h3>
+    <p class="text-blue-200">Premium members get 2x credit multiplier and exclusive mission access!</p>
+    <ul class="mt-4 space-y-2">
+        <li class="flex items-center gap-2 text-blue-300">
+            <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"/>
+            </svg>
+            Priority Mission Selection
+        </li>
+        <li class="flex items-center gap-2 text-blue-300">
+            <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"/>
+            </svg>
+            Enhanced Credit Earnings
+        </li>
+    </ul>
+</div>
+<div class="flex flex-col gap-4">
+    <button class="btn btn-primary btn-lg gap-2">
+        Upgrade to Premium
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"/>
+        </svg>
+    </button>
+    <span class="text-sm text-blue-300 text-center">30-day money-back guarantee</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Quick Stats Section -->
+<section class="relative bg-blue-950/50 py-16">
+    <!-- Stats Background Effect -->
+    <div class="absolute inset-0 bg-[url('/images/grid.svg')] opacity-10"></div>
+
+    <div class="container mx-auto px-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Active Cadets -->
+            <div class="cosmic-card p-6 bg-blue-900/30 rounded-xl border border-blue-500/20 hover:border-blue-400/40 transition-all duration-300 hover:-translate-y-1">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="text-lg font-semibold text-blue-400">Active Cadets</h3>
+                        <p id="activeCadets" class="text-3xl font-bold text-white mt-2">2,647</p>
+                        <p class="text-sm text-blue-300/60 mt-2">↗︎ 12% increase</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                        <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" 
+                                stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Credits -->
+            <div class="cosmic-card p-6 bg-blue-900/30 rounded-xl border border-green-500/20 hover:border-green-400/40 transition-all duration-300 hover:-translate-y-1">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="text-lg font-semibold text-green-400">Total Credits</h3>
+                        <p id="totalCredits" class="text-3xl font-bold text-white mt-2">892M</p>
+                        <p class="text-sm text-green-300/60 mt-2">All time high</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
+                        <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Missions -->
+            <div class="cosmic-card p-6 bg-blue-900/30 rounded-xl border border-purple-500/20 hover:border-purple-400/40 transition-all duration-300 hover:-translate-y-1">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="text-lg font-semibold text-purple-400">Active Missions</h3>
+                        <p id="activeMissions" class="text-3xl font-bold text-white mt-2">147</p>
+                        <p class="text-sm text-purple-300/60 mt-2">24 premium missions</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                        <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M11.933 12.8a1 1 0 000-1.6L6.6 7.2A1 1 0 005 8v8a1 1 0 001.6.8l5.333-4zM19.933 12.8a1 1 0 000-1.6l-5.333-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.333-4z" 
+                                stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Success Rate -->
+            <div class="cosmic-card p-6 bg-blue-900/30 rounded-xl border border-yellow-500/20 hover:border-yellow-400/40 transition-all duration-300 hover:-translate-y-1">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="text-lg font-semibold text-yellow-400">Success Rate</h3>
+                        <p id="successRate" class="text-3xl font-bold text-white mt-2">94%</p>
+                        <p class="text-sm text-yellow-300/60 mt-2">Mission completion</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-lg bg-yellow-500/10 flex items-center justify-center">
+                        <svg class="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" 
+                                stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </section>
+    <section>
+        <!-- Final CTA Section -->
+        <div class="mt-16 text-center">
+            <div class="max-w-4xl mx-auto bg-blue-900/20 backdrop-blur-md rounded-xl p-8 border border-blue-500/20">
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Ready to Join the Elite?</h2>
+                <p class="text-xl text-blue-200 mb-8">Start your journey to becoming a certified space professional today.</p>
+                
+                <!-- Pricing Options -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="p-6 rounded-xl border border-blue-500/20 bg-blue-950/50">
+                        <h3 class="text-xl font-bold text-white mb-2">Basic Training</h3>
+                        <p class="text-3xl font-bold text-blue-400 mb-4">Free</p>
+                        <ul class="text-left space-y-2 mb-6">
+                            <li class="flex items-center gap-2 text-blue-200">
+                                <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                                </svg>
+                                Basic training modules
+                            </li>
+                            <li class="flex items-center gap-2 text-blue-200">
+                                <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                                </svg>
+                                Community access
+                            </li>
+                        </ul>
+                        <br>
+                        <button class="btn btn-primary btn-block">Start Free</button>
+                    </div>
+
+                    <div class="p-6 rounded-xl border border-blue-400/30 bg-blue-900/30 transform hover:-translate-y-1 transition-all duration-300">
+                        <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                            <span class="badge badge-primary">RECOMMENDED</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-2">Premium Access</h3>
+                        <p class="text-3xl font-bold text-blue-400 mb-4">$49<span class="text-lg">/month</span></p>
+                        <ul class="text-left space-y-2 mb-6">
+                            <li class="flex items-center gap-2 text-blue-200">
+                                <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                                </svg>
+                                All training modules
+                            </li>
+                            <li class="flex items-center gap-2 text-blue-200">
+                                <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                                </svg>
+                                Industry certification
+                            </li>
+                            <li class="flex items-center gap-2 text-blue-200">
+                                <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                                </svg>
+                                2x credit multiplier
+                            </li>
+                        </ul>
+                        <button class="btn btn-primary btn-block">Get Premium</button>
+                    </div>
+                </div>
+
+                <!-- Trust Badges -->
+                <div class="flex justify-center gap-8 mt-8">
+                    <div class="text-center">
+                        <div class="text-4xl font-bold text-white mb-2">30+</div>
+                        <div class="text-sm text-blue-300">Training Modules</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-4xl font-bold text-white mb-2">24/7</div>
+                        <div class="text-sm text-blue-300">Expert Support</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-4xl font-bold text-white mb-2">100%</div>
+                        <div class="text-sm text-blue-300">Satisfaction Guaranteed</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Custom Animations Style -->
+<style>
+    @keyframes float-slow {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-20px); }
+    }
+    @keyframes float-medium {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-15px); }
+    }
+    @keyframes float-fast {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+    .animate-float-slow {
+        animation: float-slow 6s ease-in-out infinite;
+    }
+    .animate-float-medium {
+        animation: float-medium 4s ease-in-out infinite;
+    }
+    .animate-float-fast {
+        animation: float-fast 3s ease-in-out infinite;
+    }
+    .animate-pulse-slow {
+        animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    .animate-fade-in {
+        animation: fadeIn 1s ease-out forwards;
+    }
+    .animate-fade-in-up {
+        animation: fadeInUp 1s ease-out forwards;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+</section>
+<!-- Achievement Showcase Section -->
+<section class="relative py-16 bg-blue-950/30">
+    <div class="absolute inset-0 bg-[url('/images/particles.svg')] opacity-10 animate-pulse-slow"></div>
+    
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl md:text-5xl font-bold text-white mb-6">Elite Achievements</h2>
+            <p class="text-xl text-blue-200 max-w-2xl mx-auto">Unlock prestigious badges and certifications</p>
+        </div>
+
+        <!-- Achievement Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+            <!-- NASA Certification -->
+            <div class="cosmic-card p-6 text-center bg-blue-900/30 rounded-xl border border-blue-500/20 hover:border-blue-400/40 transition-all duration-300 hover:-translate-y-1">
+                <div class="w-16 h-16 mx-auto mb-4 relative">
+                    <div class="absolute inset-0 bg-blue-500/20 rounded-full animate-ping"></div>
+                    <img src="/badges/nasa-cert.svg" alt="NASA Certification" class="relative z-10" />
+                </div>
+                <h3 class="text-lg font-bold text-white mb-2">NASA Certified</h3>
+                <p class="text-sm text-blue-300">Complete advanced training modules</p>
+            </div>
+
+            <!-- Mission Specialist -->
+            <div class="cosmic-card p-6 text-center bg-blue-900/30 rounded-xl border border-purple-500/20 hover:border-purple-400/40 transition-all duration-300 hover:-translate-y-1">
+                <div class="w-16 h-16 mx-auto mb-4">
+                    <img src="/badges/mission-specialist.svg" alt="Mission Specialist" />
+                </div>
+                <h3 class="text-lg font-bold text-white mb-2">Mission Specialist</h3>
+                <p class="text-sm text-blue-300">Lead 50+ successful missions</p>
+            </div>
+
+            <!-- Elite Commander -->
+            <div class="cosmic-card p-6 text-center bg-blue-900/30 rounded-xl border border-yellow-500/20 hover:border-yellow-400/40 transition-all duration-300 hover:-translate-y-1">
+                <div class="w-16 h-16 mx-auto mb-4">
+                    <img src="/badges/elite-commander.svg" alt="Elite Commander" />
+                </div>
+                <h3 class="text-lg font-bold text-white mb-2">Elite Commander</h3>
+                <p class="text-sm text-blue-300">Reach top 100 global ranking</p>
+            </div>
+
+            <!-- Innovation Pioneer -->
+            <div class="cosmic-card p-6 text-center bg-blue-900/30 rounded-xl border border-green-500/20 hover:border-green-400/40 transition-all duration-300 hover:-translate-y-1">
+                <div class="w-16 h-16 mx-auto mb-4">
+                    <img src="/badges/innovation.svg" alt="Innovation Pioneer" />
+                </div>
+                <h3 class="text-lg font-bold text-white mb-2">Innovation Pioneer</h3>
+                <p class="text-sm text-blue-300">Contribute to space research</p>
+            </div>
+        </div>
+
+        <!-- Next Achievement Tracker -->
+        <div class="max-w-3xl mx-auto bg-blue-900/30 rounded-xl p-8 border border-blue-500/20">
+            <h3 class="text-2xl font-bold text-white mb-4">Your Next Achievement</h3>
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-12 h-12">
+                    <img src="/badges/next-achievement.svg" alt="Next Achievement" />
+                </div>
+                <div class="flex-1">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-blue-200">Space Navigation Expert</span>
+                        <span class="text-blue-300">75/100</span>
+                    </div>
+                    <div class="w-full h-2 bg-blue-900/40 rounded-full">
+                        <div class="h-full w-3/4 bg-blue-500 rounded-full"></div>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-primary w-full">Continue Training</button>
+        </div>
+    </div>
+</section>
+
+<!-- Mission Control Center -->
+<section class="relative py-16">
+    <video autoplay muted loop playsinline class="absolute inset-0 w-full h-full object-cover opacity-30">
+        <source src="./videos/mission-control.mp4" type="video/mp4">
+    </video>
+    <div class="absolute inset-0 bg-gradient-to-t from-blue-950/90 via-blue-900/80 to-blue-950/90"></div>
+
+    <div class="relative z-10 container mx-auto px-4">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl md:text-5xl font-bold text-white mb-6">Mission Control Center</h2>
+            <p class="text-xl text-blue-200 max-w-2xl mx-auto">Real-time mission updates and opportunities</p>
+        </div>
+
+        <!-- Mission Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Active Mission -->
+            <div class="card glass hover:translate-y-[-10px] transition-all duration-300">
+                <div class="card-body">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="card-title text-blue-400">Mars Landing Simulation</h3>
+                        <span class="badge badge-primary">Live</span>
+                    </div>
+                    <p class="text-blue-100 mb-4">Practice landing procedures under various atmospheric conditions</p>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-blue-300">Participants</span>
+                            <span class="text-white">24/30</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-blue-300">Difficulty</span>
+                            <span class="text-yellow-400">Advanced</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-blue-300">Credits</span>
+                            <span class="text-green-400">5,000</span>
+                        </div>
+                    </div>
+                    <div class="card-actions justify-end mt-4">
+                        <button class="btn btn-primary">Join Mission</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upcoming Mission -->
+ <!-- Enhanced Footer with Space Theme -->
+<footer class="relative bg-blue-950/90 text-white py-16 overflow-hidden">
+    <!-- Animated Background Elements -->
+    <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute w-2 h-2 bg-blue-400/20 rounded-full animate-float-slow" style="top: 10%; left: 20%"></div>
+        <div class="absolute w-3 h-3 bg-purple-400/20 rounded-full animate-float-medium" style="top: 30%; right: 25%"></div>
+        <div class="absolute w-2 h-2 bg-blue-300/20 rounded-full animate-float-fast" style="bottom: 20%; left: 40%"></div>
+    </div>
+
+    <div class="container mx-auto px-4 relative z-10">
+        <!-- Footer Content Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+            <!-- About -->
+            <div class="space-y-4">
+                <h3 class="font-bold text-lg text-blue-400 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    About
+                </h3>
+                <ul class="space-y-2">
+                    <li><a href="/about.html" class="hover:text-blue-400 transition-all duration-300 flex items-center gap-2">
+                        <span class="w-1 h-1 bg-blue-400 rounded-full"></span>
+                        Our Story
+                    </a></li>
+                    <li><a href="/academy.html" class="hover:text-blue-400 transition-all duration-300 flex items-center gap-2">
+                        <span class="w-1 h-1 bg-blue-400 rounded-full"></span>
+                        Space Academy
+                    </a></li>
+                </ul>
+            </div>
+
+            <!-- Community -->
+            <div class="space-y-4">
+                <h3 class="font-bold text-lg text-blue-400 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                    </svg>
+                    Community
+                </h3>
+                <ul class="space-y-2">
+                    <li><a href="/events.html" class="hover:text-blue-400 transition-all duration-300 flex items-center gap-2">
+                        <span class="w-1 h-1 bg-blue-400 rounded-full"></span>
+                        Events
+                    </a></li>
+                    <li><a href="/forums.html" class="hover:text-blue-400 transition-all duration-300 flex items-center gap-2">
+                        <span class="w-1 h-1 bg-blue-400 rounded-full"></span>
+                        Forums
+                    </a></li>
+                </ul>
+            </div>
+
+            <!-- Resources with Enhanced Styling -->
+            <div class="space-y-4">
+                <h3 class="font-bold text-lg text-blue-400 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                    </svg>
+                    Resources
+                </h3>
+                <ul class="space-y-2">
+                    <li><a href="/faq.html" class="hover:text-blue-400 transition-all duration-300 flex items-center gap-2">
+                        <span class="w-1 h-1 bg-blue-400 rounded-full"></span>
+                        FAQ
+                    </a></li>
+                    <li><a href="/support.html" class="hover:text-blue-400 transition-all duration-300 flex items-center gap-2">
+                        <span class="w-1 h-1 bg-blue-400 rounded-full"></span>
+                        Support
+                    </a></li>
+                </ul>
+            </div>
+
+            <!-- Legal with Badge -->
+            <div class="space-y-4">
+                <h3 class="font-bold text-lg text-blue-400 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                    </svg>
+                    Legal
+                </h3>
+                <ul class="space-y-2">
+                    <li><a href="/terms.html" class="hover:text-blue-400 transition-all duration-300 flex items-center gap-2">
+                        <span class="w-1 h-1 bg-blue-400 rounded-full"></span>
+                        Terms
+                        <span class="badge badge-sm badge-primary">Updated</span>
+                    </a></li>
+                    <li><a href="/privacy.html" class="hover:text-blue-400 transition-all duration-300 flex items-center gap-2">
+                        <span class="w-1 h-1 bg-blue-400 rounded-full"></span>
+                        Privacy
+                    </a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Social Media Links with Enhanced Hover Effects -->
+        <div class="mt-12 text-center">
+            <h4 class="text-lg font-bold text-blue-400 mb-6">Connect With Us</h4>
+            <div class="flex justify-center gap-6">
+                <a href="#" class="btn btn-ghost btn-circle hover:bg-blue-900/50" aria-label="Twitter">
+                    <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M24 4.557a9.995 9.995 0 01-2.827.775 4.932 4.932 0 002.165-2.724c-.957.567-2.016.978-3.127 1.198a4.918 4.918 0 00-8.38 4.482A13.941 13.941 0 011.671 3.149a4.917 4.917 0 001.523 6.573A4.897 4.897 0 01.96 9.3v.062a4.918 4.918 0 003.946 4.827 4.898 4.898 0 01-2.224.084 4.917 4.917 0 004.59 3.415A9.867 9.867 0 010 21.543a13.914 13.914 0 007.548 2.209c9.057 0 14.01-7.496 14.01-13.986 0-.213-.005-.425-.014-.636A10.025 10.025 0 0024 4.557z"/>
+                    </svg>
+                </a>
+                <a href="#" class="btn btn-ghost btn-circle hover:bg-blue-900/50" aria-label="Facebook">
+                    <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M22.675 0H1.325C.593 0 0 .593 0 1.325v21.351C0 23.408.593 24 1.325 24H12.81V14.706h-3.141v-3.741h3.141V8.356c0-3.1 1.894-4.788 4.659-4.788 1.325 0 2.462.099 2.792.143v3.239l-1.917.001c-1.504 0-1.796.715-1.796 1.763v2.309h3.587l-.467 3.741h-3.12V24h6.116c.729 0 1.324-.592 1.324-1.324V1.325C24 .593 23.408 0 22.675 0z"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+
+        <!-- Newsletter Signup -->
+        <div class="mt-12 max-w-md mx-auto">
+            <div class="join w-full">
+                <input type="email" placeholder="Enter your email" class="join-item input input-bordered w-full bg-blue-900/40 border-blue-400/30" />
+                <button class="join-item btn btn-primary">Subscribe</button>
+            </div>
+        </div>
+
+        <!-- Copyright with Separator -->
+        <div class="mt-12 pt-8 border-t border-blue-500/20 text-center">
+            <p class="text-blue-200 text-sm">© 2025 SharedStars Academy. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
 
 
 <!-- Footer -->
