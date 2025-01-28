@@ -150,14 +150,26 @@ body {
 /* Header styles */
 .header {
   position: fixed;
+
   top: 0;
   left: 0;
   right: 0;
   z-index: 1000;
   padding: 1.5rem 0;
-  background: transparent;
-  transition: all 0.3s ease;
+   transition: all 0.3s ease;
 }
+
+/* START Header styles Added AF for lb page */
+header {
+  position: fixed; /* Keeps the header at the top of the page */
+  top: 0;
+  left: 0; 
+  width: 100%; /* Full width */
+  background-color: #1f2937; /* Dark background (Tailwind Gray-900) */
+  z-index: 50; /* Ensures it's above other content */
+  padding: 16px; /* Adds space around the header content */
+}
+/* END  Header styles Added AF for lb page */
 
 .container {
   max-width: 1200px;
@@ -200,10 +212,16 @@ body {
   width: 200px;
 }
 
-.logo-image {
+.logo-image3 {
   height: 100%;
   width: auto;
   filter: brightness(1.2);  /* Makes logo more visible against dark background */
+}
+
+
+
+.group:hover .logo-image {
+  filter: drop-shadow(0 0 25px rgba(59, 130, 246, 0.7)); /* Hover glow effect */
 }
 
 /* Menu trigger button */
@@ -2671,4 +2689,50 @@ p {
   border-radius: 50%;
   object-fit: cover;
   border: 3px solid rgba(0, 255, 255, 0.2);
+}
+
+
+/* START AF */
+
+ /* Header Styling */
+ header {
+  position: fixed; /* Keeps the header at the top */
+  top: 0;
+  left: 0;
+  width: 100%; /* Full width */
+  background-color: #1f2937; /* Dark background (Tailwind Gray-900) */
+  z-index: 50; /* Ensures it's above other content */
+  display: flex; /* Flexbox layout for alignment */
+  justify-content: space-between; /* Space between logo and navbar */
+  align-items: center; /* Vertically center items */
+  padding: 16px 32px; /* Adds space around header content */
+}
+
+/* Logo Styling */
+.logo-image {
+  height: 4rem; /* Adjust logo size */
+  filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.5)); /* Initial glow effect */
+  transition: all 0.3s ease-in-out; /* Smooth hover transition */
+}
+
+.group:hover .logo-image {
+  filter: drop-shadow(0 0 25px rgba(59, 130, 246, 0.7)); /* Hover glow effect */
+}
+
+/* Navbar Styling */
+nav {
+  position: absolute; /* Center using absolute positioning */
+  left: 40%; /* Start from the center */
+  transform: translateX(-50%); /* Adjust back by half the width */
+}
+
+nav a {
+  text-decoration: none; /* Remove underline */
+  color: #d1d5db; /* Tailwind Gray-300 */
+  font-weight: 500; /* Medium weight */
+  transition: color 0.3s ease-in-out; /* Smooth hover transition */
+}
+
+nav a:hover {
+  color: #ffffff; /* White on hover */
 }
