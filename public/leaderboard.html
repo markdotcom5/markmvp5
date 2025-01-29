@@ -49,45 +49,50 @@
 </html>
 
     <!-- Header -->
-    <header class="flex items-center justify-between">
+    <header class="fixed top-0 left-0 w-full bg-gray-900 flex items-center justify-between px-8 py-4 z-50">
         <!-- Logo Section -->
         <div class="flex items-center">
-          <a href="/" class="flex items-center space-x-3 group">
-            <img src="/css/images/SharedStars.svg" alt="SharedStars Logo" class="logo-image">
-          </a>
+            <a href="/" class="flex items-center space-x-3 group">
+                <img src="/css/images/SharedStars.svg" alt="SharedStars Logo" 
+                     class="h-16 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)] group-hover:drop-shadow-[0_0_25px_rgba(59,130,246,0.7)] transition-all duration-300">
+            </a>
         </div>
-
-         
-        <header class="fixed top-0 left-0 w-full bg-gray-900 flex items-center justify-between px-8 py-4 z-50">
-            <!-- Logo Section -->
-            <div class="flex items-center">
-                <a href="/" class="flex items-center space-x-3 group">
-                    <img src="/css/images/SharedStars.svg" alt="SharedStars Logo" 
-                         class="h-16 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)] group-hover:drop-shadow-[0_0_25px_rgba(59,130,246,0.7)] transition-all duration-300">
-                </a>
-            </div>
-        
-            <!-- Centered Navigation -->
-            <nav class="absolute left-1/2 transform -translate-x-1/2 hidden md:flex gap-8">
-                <a href="/index.html" class="text-gray-300 hover:text-white font-medium transition-colors">Home</a>
-                <a href="/subscribe.html" class="text-gray-300 hover:text-white font-medium transition-colors">Subscribe</a>
-                <a href="/academy.html" class="text-gray-300 hover:text-white font-medium transition-colors">Academy</a>
-                <a href="/about.html" class="text-gray-300 hover:text-white font-medium transition-colors">About</a>
-                <a href="#store" class="text-gray-300 hover:text-white font-medium transition-colors">Store</a>
-            </nav>
-        </header>
-       <!-- <a href="/subscribe.html" class="group">
-            <div class="relative overflow-hidden px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full">
-                <div class="relative z-10 flex flex-col items-center">
-                    <span class="text-lg font-bold text-white">Start Training</span>
-                    <span class="text-xs text-blue-200">30-Day Pro Access</span>
-                </div>
-                <div class="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            </div>
-        </a> --> 
-
-        
-      </header>
+    
+        <!-- Desktop Navigation (Hidden on Mobile) -->
+        <nav class="absolute left-1/2 transform -translate-x-1/2 hidden md:flex gap-8">
+            <a href="/index.html" class="text-gray-300 hover:text-white font-medium transition-colors">Home</a>
+            <a href="/subscribe.html" class="text-gray-300 hover:text-white font-medium transition-colors">Subscribe</a>
+            <a href="/academy.html" class="text-gray-300 hover:text-white font-medium transition-colors">Academy</a>
+            <a href="/about.html" class="text-gray-300 hover:text-white font-medium transition-colors">About</a>
+            <a href="#store" class="text-gray-300 hover:text-white font-medium transition-colors">Store</a>
+        </nav>
+    
+        <!-- Mobile Menu Button (Hamburger) -->
+        <button id="menu-toggle" class="md:hidden text-white focus:outline-none">
+            <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+            </svg>
+        </button>
+    
+        <!-- Mobile Menu (Hidden by Default) -->
+        <div id="mobile-menu" class="hidden absolute top-full left-0 w-full bg-gray-800 flex flex-col items-center py-4 space-y-4 md:hidden">
+            <a href="/index.html" class="text-gray-300 hover:text-white font-medium transition-colors">Home</a>
+            <a href="/subscribe.html" class="text-gray-300 hover:text-white font-medium transition-colors">Subscribe</a>
+            <a href="/academy.html" class="text-gray-300 hover:text-white font-medium transition-colors">Academy</a>
+            <a href="/about.html" class="text-gray-300 hover:text-white font-medium transition-colors">About</a>
+            <a href="#store" class="text-gray-300 hover:text-white font-medium transition-colors">Store</a>
+        </div>
+    </header>
+    
+    <script>
+        // Mobile Menu Toggle
+        const menuToggle = document.getElementById('menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+    
+        menuToggle.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+    </script>
     <main class="relative min-h-screen bg-gradient-to-b from-blue-950 to-black">
     <!-- Hero Section -->
     <section id="hero" class="min-h-screen flex items-center justify-center relative bg-black">
