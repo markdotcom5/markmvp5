@@ -178,5 +178,14 @@ class DashboardController {
         // Implement your error UI here
     }
 }
-
+// In your controller (e.g., DashboardController.js)
+exports.renderDashboard = async (req, res) => {
+    try {
+      const userData = await getUserData(req.user.id); // your service call
+      res.render('dashboard', { title: 'Dashboard', user: userData });
+    } catch (error) {
+      res.status(500).send('Error rendering dashboard');
+    }
+  };
+  
 export default DashboardController;

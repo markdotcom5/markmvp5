@@ -1,13 +1,81 @@
-<header class="header">
-    <div class="logo">
+<header class="bg-white shadow">
+    <div class="container mx-auto flex items-center justify-between py-4 px-4">
+      <!-- Logo (Top Left) -->
+      <div class="logo">
         <a href="/">
-            <svg width="150" height="40" viewBox="0 0 150 40">
-                <!-- Logo Shape -->
-                <path d="M0 20 L30 5 L60 20 L30 35 Z" fill="white"/>
-                <!-- Logo Text -->
-                <text x="70" y="25" fill="white" font-family="Arial" font-size="18" font-weight="bold">STELTREK</text>
-            </svg>
+          <img src="/css/images/SharedStars.svg" alt="SharedStars Logo" class="h-10">
         </a>
+      </div>
+      <!-- Navigation (Center) -->
+      <nav class="hidden md:block">
+        <ul class="flex space-x-6">
+          <li><a href="/" class="text-gray-700 hover:text-blue-400 transition-colors">Home</a></li>
+          <li><a href="/academy" class="text-gray-700 hover:text-blue-400 transition-colors">Academy</a></li>
+          <li><a href="/ai-guidance" class="text-gray-700 hover:text-blue-400 transition-colors">AI Guidance</a></li>
+          <li><a href="/ai-coaching" class="text-gray-700 hover:text-blue-400 transition-colors">AI Coaching</a></li>
+          <li><a href="/dashboard" class="text-gray-700 hover:text-blue-400 transition-colors">Dashboard</a></li>
+        </ul>
+      </nav>
+      <!-- Menu Button (Top Right) -->
+      <div class="md:hidden">
+        <button id="menuToggle" class="focus:outline-none">
+          <!-- Hamburger Icon -->
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
     </div>
-    <div class="menu-trigger" onclick="toggleMenu()">Menu</div>
+  
+    <!-- Mobile Menu Overlay (only on index.ejs) -->
+    <% if (typeof showOverlay !== 'undefined' && showOverlay) { %>
+    <div id="menuOverlay" class="fixed inset-0 bg-white z-50 transform translate-x-full transition-transform duration-300">
+      <div class="container mx-auto p-6">
+        <div class="flex justify-between items-center mb-8">
+          <h2 class="text-2xl font-bold text-blue-400">Menu</h2>
+          <button id="closeMenu" class="focus:outline-none text-gray-700">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <nav class="mb-8">
+          <ul class="space-y-4">
+            <li><a href="/" class="text-gray-700 hover:text-blue-400 transition-colors">Home</a></li>
+            <li><a href="/academy" class="text-gray-700 hover:text-blue-400 transition-colors">Academy</a></li>
+            <li><a href="/ai-guidance" class="text-gray-700 hover:text-blue-400 transition-colors">AI Guidance</a></li>
+            <li><a href="/ai-coaching" class="text-gray-700 hover:text-blue-400 transition-colors">AI Coaching</a></li>
+            <li><a href="/dashboard" class="text-gray-700 hover:text-blue-400 transition-colors">Dashboard</a></li>
+          </ul>
+        </nav>
+        <!-- Language Selector -->
+        <div class="flex justify-center gap-4">
+          <button class="language-option" data-lang="en">🇺🇸 English</button>
+          <button class="language-option" data-lang="zh">🇨🇳 中文</button>
+          <button class="language-option" data-lang="ko">🇰🇷 한국어</button>
+          <button class="language-option" data-lang="es">🇪🇸 Español</button>
+        </div>
+      </div>
+    </div>
+    <% } %>
+  
 </header>
+
+<!-- JavaScript for Mobile Menu -->
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+      const menuToggle = document.getElementById("menuToggle");
+      const mobileMenu = document.getElementById("mobileMenu");
+      const closeMenu = document.getElementById("closeMenu");
+
+      if (menuToggle && mobileMenu && closeMenu) {
+          menuToggle.addEventListener("click", () => {
+              mobileMenu.classList.remove("hidden");
+          });
+
+          closeMenu.addEventListener("click", () => {
+              mobileMenu.classList.add("hidden");
+          });
+      }
+  });
+</script>

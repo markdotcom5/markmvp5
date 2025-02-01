@@ -1,0 +1,39 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- DaisyUI CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@2.6.0/dist/full.css" rel="stylesheet">
+    <!-- Google Fonts (Inter and Space Grotesk) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <!-- AOS CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
+    <!-- Your custom CSS -->
+    <link rel="stylesheet" href="/css/main.css">
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+        scroll-behavior: smooth;
+      }
+      .space-gradient {
+        background: linear-gradient(to bottom, #0f172a, #1e293b);
+      }
+      .hero-text {
+        font-size: clamp(4rem, 15vw, 12rem);
+        line-height: 1;
+      }
+      .cosmic-hover {
+        transition: all 0.3s ease;
+      }
+      .cosmic-hover:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
+      }
+    </style>
+    <!-- Optionally, you can include your leaderboard.js if it's needed in the head -->
+    <script src="/js/leaderboard.js" defer></script>
+  </head>
+  

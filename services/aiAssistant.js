@@ -276,4 +276,4 @@ class AIAssistant {
 }
 
 // Export a singleton instance
-module.exports = new AIAssistant();
+module.exports = AIAssistant;

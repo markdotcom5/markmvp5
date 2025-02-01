@@ -3,173 +3,261 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SharedStars - AI-Guided Space Training</title>
+    <title>SharedStars</title>
     <link rel="stylesheet" href="/css/main.css">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png">
+    
+    <!-- CSS Dependencies -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@2.6.0/dist/full.css" rel="stylesheet">
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- AOS CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
+    <!-- Space Grotesk Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .space-gradient {
+            background: linear-gradient(to bottom, #0f172a, #1e293b);
+        }
+        .hero-text {
+            font-size: clamp(4rem, 15vw, 12rem);
+            line-height: 1;
+        }
+        .cosmic-hover {
+            transition: all 0.3s ease;
+        }
+        .cosmic-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
+        }
+    </style>
+    <script src="/js/leaderboard.js"></script>
 </head>
-<body>
+<body class="bg-black">
     <!-- Header -->
-    <header class="header">
+    <header class="fixed w-full bg-gray-900/90 backdrop-blur-lg z-50">
+        <!-- Top Banner -->
+        <div class="bg-gradient-to-r from-blue-600/80 to-purple-600/80 text-center py-2">
+            <p class="text-white">
+                <span class="font-bold">Limited Time:</span> Get training modules at 50% off! 
+                <a href="/special-offer" class="underline hover:text-blue-200 ml-2">Claim Now →</a> <br>
+                <span class="font-bold" style="color: blue;">Join 2.6K+ Space Professionals !!!</span>
+            </p>
+        </div>
         <div class="container">
-            <div class="header-content">
-                <div class="logo">
-                    <a href="/index.html" aria-label="SharedStars Homepage">
-                        <img src="/css/images/SharedStars.svg" alt="SharedStars" class="logo-image" width="150" height="40">
-                    </a>
-                </div>
-                <button class="menu-trigger" aria-label="Open Menu" aria-expanded="false">
-                    <span class="menu-icon"></span>
-                    <span class="menu-text">Menu</span>
-                </button>
+            <h1 data-i18n="heroTitle">From Earth to Space in 36 Months</h1>
+            <p data-i18n="subtitle">Like Tesla's FSD for Space Training: Intelligent, Adaptive, Revolutionary</p>
+        </div>
+        <!-- Navigation Bar -->
+        <div class="container mx-auto px-4 py-4 flex items-center">
+            <!-- Logo (Left) -->
+            <div class="flex-shrink-0">
+                <a href="/" class="group">
+                    <img src="/css/images/SharedStars.svg" alt="SharedStars Logo" 
+                         class="h-16 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)] group-hover:drop-shadow-[0_0_25px_rgba(59,130,246,0.7)] transition-all duration-300">
+                </a>
             </div>
+
+            <!-- Navigation (Center) -->
+            <nav class="hidden md:flex flex-1 justify-center gap-8">
+                <a href="/" class="text-gray-300 hover:text-white font-medium transition-colors">Home</a>
+                <a href="/academy" class="text-gray-300 hover:text-white font-medium transition-colors">Academy</a>
+                <a href="/about" class="text-gray-300 hover:text-white font-medium transition-colors">About</a>
+                <a href="/subscribe" class="text-gray-300 hover:text-white font-medium transition-colors">Subscribe</a>
+            </nav>
+
+            <!-- Menu Toggle (Right) -->
+            <button id="menuToggle" class="text-white p-2">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
         </div>
     </header>
 
     <!-- Menu Overlay -->
-    <div id="menuOverlay" class="menu-overlay hidden" aria-hidden="true">
-        <div class="container">
-            <div class="menu-content">
-                <button class="close-button" aria-label="Close Menu">&times;</button>
-                <nav aria-label="Main navigation">
-                    <ul class="menu-items">
-                        <li><a href="/" aria-current="page">Home</a></li>
-                        <li><a href="/about.html">About</a></li>
-                        <li><a href="/why-steltrek.html">Why StelTrek</a></li>
-                        <li><a href="/leaderboard.html">Leaderboard</a></li>
-                        <li><a href="/training.html">Training</a></li>
-                        <li><a href="/academy.html">StelTrek Academy</a></li>
-                        <li><a href="/subscribe.html">Subscribe</a></li>
-                        <li><a href="/shop.html">Shop</a></li>
-                        <li><a href="/profile.html">Profile</a></li>
-                        <li><a href="/signup.html">Sign Up</a></li>
-                        <li><a href="/login.html">Login</a></li>
-                    </ul>
-                </nav>
+    <div id="menuOverlay" class="fixed inset-0 bg-white z-50 transform translate-x-full transition-transform duration-300">
+        <div class="container mx-auto px-6 py-12 min-h-screen flex flex-col">
+            <!-- Close Button -->
+            <button id="closeMenu" class="absolute top-8 right-8 text-gray-800 p-2 hover:bg-gray-100 rounded-full transition-all duration-300">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
 
-                <!-- Language Selector -->
-                <div class="language-selector">
-                    <h3>Select Your Language</h3>
-                    <div class="language-options" role="radiogroup" aria-label="Language selection">
-                        <button class="language-option" data-lang="en" aria-pressed="true">
-                            <span class="flag-icon usa"></span>USA - English
-                        </button>
-                        <button class="language-option" data-lang="zh" aria-pressed="false">
-                            <span class="flag-icon china"></span>中国 - 中文
-                        </button>
-                        <button class="language-option" data-lang="ko" aria-pressed="false">
-                            <span class="flag-icon korea"></span>한국 - 한국어
-                        </button>
-                        <button class="language-option" data-lang="es" aria-pressed="false">
-                            <span class="flag-icon spain"></span>España - Español
-                        </button>
-                    </div>
+            <!-- Navigation Links -->
+            <nav class="flex-grow flex flex-col items-center justify-center space-y-6">
+                <a href="/about" class="text-3xl text-gray-800 hover:text-blue-600 transition-all">About</a>
+                <a href="/academy" class="text-3xl text-gray-800 hover:text-blue-600 transition-all">Academy</a>
+                <a href="/dashboard" class="text-3xl text-gray-800 hover:text-blue-600 transition-all">Dashboard</a>
+                <a href="/" class="text-3xl text-gray-800 hover:text-blue-600 transition-all">Homepage</a>
+                <a href="/leaderboard" class="text-3xl text-gray-800 hover:text-blue-600 transition-all">Leaderboard</a>
+                <a href="/merchandise" class="text-3xl text-gray-800 hover:text-blue-600 transition-all">Merchandise</a>
+                <a href="/profile" class="text-3xl text-gray-800 hover:text-blue-600 transition-all">Profile</a>
+                <a href="/welcome" class="text-3xl text-gray-800 hover:text-blue-600 transition-all">Welcome</a>
+                
+                <!-- Action Buttons -->
+                <div class="flex gap-4 mt-4">
+                    <a href="/login" class="text-xl px-8 py-3 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition-all">Login</a>
+                    <a href="/signup" class="text-xl px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all">Sign Up</a>
+                </div>
+                <a href="/subscribe" class="text-xl px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all mt-4">
+                    Subscribe Now
+                </a>
+            </nav>
+
+            <!-- Language Selector -->
+            <div class="mt-8 text-center">
+                <h3 class="text-gray-800 text-xl mb-4">Select Language</h3>
+                <div class="grid grid-cols-2 gap-4 max-w-md mx-auto">
+                    <button class="language-option text-gray-800 hover:text-blue-600 p-4 rounded-lg transition-all" data-lang="en">
+                        <span class="text-2xl">🇺🇸</span> English
+                    </button>
+                    <button class="language-option text-gray-800 hover:text-blue-600 p-4 rounded-lg transition-all" data-lang="zh">
+                        <span class="text-2xl">🇨🇳</span> 中文
+                    </button>
+                    <button class="language-option text-gray-800 hover:text-blue-600 p-4 rounded-lg transition-all" data-lang="ko">
+                        <span class="text-2xl">🇰🇷</span> 한국어
+                    </button>
+                    <button class="language-option text-gray-800 hover:text-blue-600 p-4 rounded-lg transition-all" data-lang="es">
+                        <span class="text-2xl">🇪🇸</span> Español
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Main Content -->
-    <main id="main">
-        <!-- Hero Section -->
-        <section id="hero" class="hero-section">
-            <div class="video-container">
-                <video id="heroVideo" class="video-background" autoplay muted loop playsinline aria-hidden="true">
-                    <source src="/videos/stelacktop.mp4" type="video/mp4">
-                </video>
-            </div>
-            
-            <div class="container">
-                <div class="hero-content">
-                    <h1 class="hero-title">Become Space-Ready in 36 Months</h1>
-                    <p class="hero-subtitle">AI-Powered Space Training - Like Tesla FSD for Astronauts</p>
+<!-- Hero Section -->
+<section class="hero-section min-h-screen flex items-center justify-center relative">
+    <!-- Video Background -->
+    <div class="video-container">
+        <video id="heroVideo" class="video-background" autoplay muted loop playsinline>
+            <source src="./videos/academy10.mp4" type="video/mp4">
+        </video>
+    </div>
+    <div id="progressDisplay">Progress: 0%</div>
+
+    <!-- Content Overlay -->
+    <div class="hero-content text-center text-white max-w-4xl px-4">
+        <!-- Hero Title and Subtitle -->
+        <h1 class="hero-title mb-4" data-i18n="heroTitle">From Earth to Space in 36 Months</h1>
+        <p class="text-xl mb-4" data-i18n="subtitle">Like Tesla's FSD for Space Training: Intelligent, Adaptive, Revolutionary</p>
+        <p class="text-lg mb-8">Join 1,000+ certified space professionals on their journey to the stars</p>
+        
+        <!-- Enhanced AI/Self-Paced Toggle Container -->
+        <div class="ai-toggle-container bg-black/30 backdrop-blur-md p-8 rounded-2xl border border-blue-500/20 hover:border-blue-400/40 transition-all duration-500">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Self-Paced Option -->
+                <button class="toggle-option manual relative overflow-hidden group" data-mode="manual">
+                    <div class="absolute inset-0 bg-gradient-to-br from-gray-900/90 to-blue-900/90 transition-all duration-300"></div>
+                    <div class="absolute inset-0 opacity-0 group-hover:opacity-100 bg-[url('/images/stars-pattern.svg')] mix-blend-overlay transition-opacity duration-500"></div>
                     
-                    <!-- AI Toggle Section -->
-                    <div class="ai-toggle-section">
-                        <div class="ai-toggle-box">
-                            <div class="ai-toggle-container" role="group" aria-label="Training Mode Selection">
-                                <button class="toggle-option manual active" data-mode="manual" aria-pressed="true">
-                                    <h3>Self-Paced Training</h3>
-                                    <p>Traditional space training with structured modules</p>
-                                </button>
-                                <button class="toggle-option ai" data-mode="ai" aria-pressed="false">
-                                    <h3>AI Accelerated Path</h3>
-                                    <p>Get to space sooner with AI-guided personalized training</p>
-                                </button>
-                            </div>
+                    <div class="relative p-8 rounded-xl border border-blue-500/20 hover:border-blue-400/40 transition-all duration-300">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl transform -translate-y-12 translate-x-12"></div>
+                        
+                        <h3 class="text-2xl font-bold mb-3 text-white group-hover:text-blue-300 transition-colors">Self-Paced Training</h3>
+                        <p class="text-gray-300 text-sm mb-4">Learn at your own speed with structured modules</p>
+                        
+                        <div class="inline-flex items-center space-x-2 text-blue-400 group-hover:text-blue-300">
+                            <span>Start Journey</span>
+                            <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                            </svg>
                         </div>
                     </div>
-                </div>
+                </button>
+
+                <!-- AI-Guided Option -->
+                <button class="toggle-option ai relative overflow-hidden group" data-mode="ai">
+                    <div class="absolute inset-0 bg-gradient-to-br from-blue-900/90 to-purple-900/90 transition-all duration-300"></div>
+                    <div class="absolute inset-0 opacity-0 group-hover:opacity-100 bg-[url('/images/constellation-pattern.svg')] mix-blend-overlay transition-opacity duration-500"></div>
+                    
+                    <div class="relative p-8 rounded-xl border border-purple-500/20 hover:border-purple-400/40 transition-all duration-300">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl transform -translate-y-16 translate-x-16"></div>
+                        
+                        <h3 class="text-2xl font-bold mb-3 text-white group-hover:text-purple-300 transition-colors">AI-Guided Path</h3>
+                        <p class="text-gray-300 text-sm mb-4">Accelerated learning with AI coaching & feedback</p>
+                        
+                        <div class="inline-flex items-center space-x-2 text-purple-400 group-hover:text-purple-300">
+                            <span>Launch AI Training</span>
+                            <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                            </svg>
+                        </div>
+                    </div>
+                </button>
             </div>
-        </section>
-    </main>
+        </div>
+    </div>
+</section>
+
+<!-- AI Training Section -->
+<section id="training-dashboard" class="py-16 bg-gray-900 text-center text-white relative overflow-hidden">
+    <!-- Background Effects -->
+    <div class="absolute inset-0 bg-gradient-to-b from-black/50 to-blue-900/30"></div>
+    <div class="absolute inset-0 bg-[url('/images/constellation-pattern.svg')] opacity-10"></div>
+    
+    <!-- Content -->
+    <div class="relative z-10">
+        <h2 class="text-4xl font-bold">Ready to Start AI Training?</h2>
+        <p class="mt-4 text-lg text-gray-400">Begin your interactive AI-powered space training today.</p>
+        <div class="mt-6">
+            <button class="begin-training-btn bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-4 px-8 rounded-lg 
+                          shadow-lg text-lg hover:from-blue-500 hover:to-purple-500 transform hover:scale-105 
+                          transition-all duration-300 cosmic-hover">
+                BEGIN TRAINING
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- Call-to-Action Section -->
+<section class="py-16 bg-gray-900 text-center text-white relative overflow-hidden">
+    <!-- Background Effects -->
+    <div class="absolute inset-0 bg-gradient-to-b from-black/50 to-blue-900/30"></div>
+    <div class="absolute inset-0 bg-[url('/images/constellation-pattern.svg')] opacity-10"></div>
+    
+    <!-- Content -->
+    <div class="relative z-10">
+        <h2 class="text-4xl font-bold">Still Exploring? Get More Information</h2>
+        <p class="mt-4 text-lg text-gray-400">Join SharedStars Academy and access training previews, astronaut tips, and more.</p>
+        <div class="mt-6">
+            <a href="/signup.html" 
+               class="inline-block bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-4 px-8 rounded-lg shadow-lg text-lg 
+                      hover:from-blue-500 hover:to-purple-500 transform hover:scale-105 transition-all duration-300
+                      cosmic-hover relative overflow-hidden group">
+                <span class="relative z-10">SIGN UP NOW</span>
+                <div class="absolute inset-0 bg-[url('/images/stars-pattern.svg')] opacity-0 group-hover:opacity-20 transition-opacity duration-500"></div>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Signup Dialog -->
+<div id="signupDialog" class="fixed inset-0 bg-black/50 z-50 hidden">
+    <div class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-8 rounded-xl max-w-md w-full mx-4">
+        <h2 class="text-2xl font-bold mb-4">Start Your Self-Paced Journey</h2>
+        <p class="text-gray-600 mb-6">Create your account to begin structured training modules at your own pace.</p>
+        <div class="flex gap-4">
+            <button onclick="window.location.href='/signup'" 
+                    class="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg 
+                           hover:from-blue-500 hover:to-purple-500 transform hover:scale-105 transition-all duration-300">
+                Sign Up Now
+            </button>
+            <button onclick="closeSignupDialog()" 
+                    class="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
 </body>
 </html>
-
-<!-- Price Evolution & Sign-up Section -->
-<section id="price-evolution" class="section price-evolution-section">
-    <div class="section-background">
-        <!-- Title -->
-        <h2 class="price-title">Space Faster -- Subscribe Now</h2>
-
-        <!-- Graph Container -->
-        <div class="graph-container">
-            <canvas id="priceEvolutionChart"></canvas>
-        </div>
-        <div class="disclaimer">
-            <p>*Based on current market trends and industry projections</p>
-        </div>
-
-<!-- Price Evolution & Countdown Section -->
-<div class="bg-white rounded-xl shadow-lg p-8 max-w-4xl mx-auto mt-8">
-    <!-- Chart Section -->
-    <div class="mb-12">
-        <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Your Path to Space</h2>
-        <div class="graph-container h-[400px]">
-            <canvas id="priceEvolutionChart"></canvas>
-        </div>
-        <p class="text-sm text-gray-500 mt-4 text-center italic">
-            *Based on market projections and subscription plan
-        </p>
-    </div>
-
-    <!-- Base Timeline Section -->
-    <div class="countdown-section bg-gray-50 rounded-xl p-6 mb-8">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-bold text-gray-800">BASELINE PATH TO SPACE</h3>
-            <div class="flex gap-4 text-sm text-gray-600">
-                <span>Current: $450,000</span>
-                <span>→</span>
-                <span>Target: $5,000</span>
-            </div>
-        </div>
-        
-        <div class="grid grid-cols-6 gap-4">
-            <div class="countdown-box bg-white p-4 rounded-lg text-center shadow">
-                <span data-base-countdown="years" class="number text-3xl font-bold text-gray-800">13</span>
-                <span class="label text-sm text-gray-600 mt-1 block">YEARS</span>
-            </div>
-            <div class="countdown-box bg-white p-4 rounded-lg text-center shadow">
-                <span data-base-countdown="months" class="number text-3xl font-bold text-gray-800">11</span>
-                <span class="label text-sm text-gray-600 mt-1 block">MONTHS</span>
-            </div>
-            <div class="countdown-box bg-white p-4 rounded-lg text-center shadow">
-                <span data-base-countdown="days" class="number text-3xl font-bold text-gray-800">11</span>
-                <span class="label text-sm text-gray-600 mt-1 block">DAYS</span>
-            </div>
-            <div class="countdown-box bg-white p-4 rounded-lg text-center shadow">
-                <span data-base-countdown="hours" class="number text-3xl font-bold text-gray-800">23</span>
-                <span class="label text-sm text-gray-600 mt-1 block">HOURS</span>
-            </div>
-            <div class="countdown-box bg-white p-4 rounded-lg text-center shadow">
-                <span data-base-countdown="minutes" class="number text-3xl font-bold text-gray-800">47</span>
-                <span class="label text-sm text-gray-600 mt-1 block">MINUTES</span>
-            </div>
-            <div class="countdown-box bg-white p-4 rounded-lg text-center shadow">
-                <span data-base-countdown="seconds" class="number text-3xl font-bold text-gray-800">22</span>
-                <span class="label text-sm text-gray-600 mt-1 block">SECONDS</span>
-            </div>
-        </div>
-    </div>
 
     <!-- Personal Timeline Section (hidden by default) -->
     <div id="personal-countdown" class="countdown-section bg-blue-50 rounded-xl p-6 hidden">
@@ -279,7 +367,7 @@
     <!-- Video Background -->
     <div class="video-container">
         <video class="video-background" autoplay muted loop playsinline aria-hidden="true">
-            <source src="/videos/academy.mp4" type="video/mp4">
+            <source src="/videos/academy10.mp4" type="video/mp4">
         </video>
     </div>
 
@@ -412,62 +500,64 @@
     </div>
 </section>
 <!-- Board Preview Section -->
-<section id="board-preview" class="board-preview-section">
-    <div class="section-content">
-        <span class="board-label">BOARD OF ADVISORS</span>
-        <h2>Backed by Industry Leaders</h2>
-        <p class="section-subtitle">Our mission is supported by experts from NASA, SpaceX, and leading space organizations</p>
+<section id="board-preview" class="relative min-h-screen bg-black text-white">
+    <!-- Video Background -->
+    <div class="absolute inset-0">
+        <video autoplay muted loop playsinline class="w-full h-full object-cover">
+            <source src="./videos/BOA1.mp4" type="video/mp4">
+        </video>
+        <!-- Gradient Overlay -->
+        <div class="absolute inset-0 bg-gradient-to-b from-black via-black/70 to-transparent"></div>
+    </div>
 
-        <!-- Featured Advisors Grid -->
-        <div class="featured-advisors">
-            <!-- NASA Advisor -->
-            <div class="advisor-card">
-                <div class="advisor-header">
-                    <div class="advisor-company">NASA ARMSTRONG</div>
-                    <img src="/css/images/dr mark.png" alt="Dr. Mark R. Prele" class="advisor-image">
-                </div>
-                <div class="advisor-content">
-                    <h3>Dr. Mark R. Prele</h3>
-                    <p class="title">Chief Medical Officer & Flight Surgeon</p>
-                    <div class="expertise-tags">
-                        <span>Space Medicine</span>
-                        <span>Flight Safety</span>
-                    </div>
-                </div>
+    <!-- Content Overlay -->
+    <div class="relative z-10 container mx-auto px-4 py-16">
+        <h2 class="text-4xl md:text-5xl font-extrabold text-center text-blue-400 mb-12">Meet Our Advisors</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Advisor 1 -->
+            <div class="p-6 bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-transform transform hover:scale-105">
+                <img src="/images/drmark.png" alt="Dr. Mark">
+                <p class="text-center text-gray-300">Chief Medical Officer & Pilot</p>
+                <p class="text-sm text-center text-gray-300">NASA Medicine & Flight Safety</p>
             </div>
-
-            <!-- SpaceX Advisor -->
-            <div class="advisor-card featured">
-                <div class="advisor-header">
-                    <div class="advisor-company">Former SpaceX</div>
-                    <img src="/css/images/travis.png" alt="Travis Talbot" class="advisor-image">
-                </div>
-                <div class="advisor-content">
-                    <h3>Travis Talbot</h3>
-                    <p class="title">Senior Manufacturing Engineer</p>
-                    <div class="expertise-tags">
-                        <span>Propulsion Systems</span>
-                        <span>Spacecraft Design</span>
-                    </div>
-                </div>
+            <!-- Advisor 2 -->
+            <div class="p-6 bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-transform transform hover:scale-105">
+                <img src="/images/travis.png" alt="Travis">
+                <h3 class="text-2xl font-bold text-purple-400 text-center">Travis Talbot</h3>
+                <p class="text-center text-gray-300">Senior Manufacturing Engineer</p>
+                <p class="text-sm text-center text-gray-300">Built the Raptor Rocket</p>
             </div>
-
-            <!-- NASA Datanaut -->
-            <div class="advisor-card">
-                <div class="advisor-header">
-                    <div class="advisor-company">NASA DATANAUT</div>
-                    <img src="/css/images/laura.png" alt="Laura Anne Edwards" class="advisor-image">
-                </div>
-                <div class="advisor-content">
-                    <h3>Laura Anne Edwards</h3>
-                    <p class="title">Global Innovation Executive</p>
-                    <div class="expertise-tags">
-                        <span>Space Tech</span>
-                        <span>Innovation</span>
-                    </div>
-                </div>
+            <!-- Advisor 3 -->
+            <div class="p-6 bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-transform transform hover:scale-105">
+                <img src="/images/laura.png" alt="Laura">
+                <h3 class="text-2xl font-bold text-green-400 text-center">Laura Anne Edwards</h3>
+                <p class="text-center text-gray-300">Global Innovation Leader</p>
+                <p class="text-sm text-center text-gray-300">NASA Datanaut & NSA Innovator</p>
+            </div>
+            <!-- Advisor 4 -->
+            <div class="p-6 bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-transform transform hover:scale-105">
+                <img src="/images/edward.png" alt="Edward">
+                <h3 class="text-2xl font-bold text-red-400 text-center">Edward Moleam</h3>
+                <p class="text-center text-gray-300">Founder & CEO</p>
+                <p class="text-sm text-center text-gray-300">Aerospace Engineer & Space Systems Expert</p>
+            </div>
+            <!-- Advisor 5 (Erich Spangenberg) -->
+            <div class="p-6 bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-transform transform hover:scale-105">
+                <img src="/images/erich.png" alt="Erich">
+                <h3 class="text-2xl font-bold text-yellow-400 text-center">Erich Spangenberg</h3>
+                <p class="text-center text-gray-300">Chief Innovation Officer</p>
+                <p class="text-sm text-center text-gray-300">Pioneer in Rocket Propulsion Technologies</p>
             </div>
         </div>
+
+        <!-- Button: Ask to Join the BOA -->
+        <div class="mt-12 text-center">
+            <a href="/join-boa.html" class="bg-blue-500 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:bg-blue-600 transition">
+                Ask to Join the BOA
+            </a>
+        </div>
+    </div>
+</section>
 
         <!-- Credentials Summary -->
         <div class="credentials-bar">
@@ -930,11 +1020,30 @@
         <p class="location">Delaware, United States</p>
     </div>
 </footer>
-       <!-- Scripts -->
-       <script src="js/animations.js"></script>
-       <script src="js/main.js"></script>
-       <script src="js/trialFlow.js"></script>
-       <script src="js/training.js"></script>
-       <script src="/js/countdown.js"></script>
-   </body>
-   </html>
+    <!-- Core Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+
+    <!-- Syntax Highlighter (Ensure JavaScript is supported) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    
+    <!-- Module System -->
+    <script type="module">
+      import '/js/modules/core/index.js';
+      import '/js/modules/ui/index.js';
+      import '/js/modules/training/index.js';
+      import '/js/modules/auth/index.js';
+    </script>
+
+    <!-- Legacy Scripts (Defer to Load After Modules) -->
+    <script src="/js/animations.js" defer></script>
+    <script src="/js/trialFlow.js" defer></script>
+    <script src="/js/leaderboard.js" defer></script>
+    <script src="/js/visualizations/ModuleHighlight.js" defer></script>
+
+    <!-- Ensure Highlight.js Works (If Needed) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+
+  </body>
+</html>

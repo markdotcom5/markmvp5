@@ -10,6 +10,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- AOS CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@2.6.0/dist/full.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/main.css">
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -30,6 +34,7 @@
             box-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
         }
     </style>
+    <script src="/js/academy.js"></script>
 </head>
 <body>
     <!-- AOS Initialization -->
@@ -42,7 +47,16 @@
     </script>
 </body>
 </html>
-
+    <!-- AOS Initialization -->
+    <script>
+        AOS.init({
+            duration: 1000, // Animation duration in milliseconds
+            easing: 'ease', // Easing style for animations
+            once: true, // Whether animation should happen only once
+        });
+    </script>
+</body>
+</html>
     <!-- Header -->
     <header class="fixed w-full bg-gray-900/90 backdrop-blur-lg z-50">
         <div class="container mx-auto px-4 py-4 flex justify-between items-center">

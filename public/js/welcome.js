@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = '/dashboard.html';
         } else {
             alert('Redirecting to the sign-up page...');
-            window.location.href = '/signup.html';
+            window.location.href = '/signup.html'; // or whatever your correct signup page path is
         }
     }
 

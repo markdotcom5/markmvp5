@@ -34,7 +34,40 @@ const authenticate = async (req, res, next) => {
         res.status(401).json({ error: 'Authentication failed' });
     }
 };
+// 🔹 Signup Route (MongoDB)
+router.post("/signup", async (req, res) => {
+    try {
+        const { username, email, password } = req.body;
 
+        // Check if user already exists
+        let user = await User.findOne({ email });
+        if (user) {
+            return res.status(400).json({ success: false, message: "User already exists" });
+        }
+
+        // Hash password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        // Create new user
+        user = new User({
+            username,
+            email,
+            password: hashedPassword
+        });
+
+        await user.save();
+
+        // Generate JWT Token
+        const payload = { userId: user.id };
+        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "7d" });
+
+        res.json({ success: true, token, user });
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+});
 // =======================
 // Login Route
 // =======================
@@ -128,6 +161,7 @@ router.post('/reset-password', async (req, res) => {
     }
 });
 
+
 router.post('/join', async (req, res) => {
     try {
         const { username, email, password } = req.body;
@@ -158,6 +192,7 @@ router.post('/join', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
 // =======================
 // Admin Creation Route
 // =======================
@@ -201,5 +236,27 @@ router.post('/create-admin', async (req, res) => {
     }
 });
 
+// Test endpoints in your Express routes
+router.post('/api/test/progress', (req, res) => {
+    const { progress } = req.body;
+    wss.clients.forEach(client => {
+        client.send(JSON.stringify({
+            type: 'progress_update',
+            progress
+        }));
+    });
+    res.json({ success: true });
+});
+
+router.post('/api/test/achievement', (req, res) => {
+    const { achievement } = req.body;
+    wss.clients.forEach(client => {
+        client.send(JSON.stringify({
+            type: 'achievement_unlocked',
+            achievement
+        }));
+    });
+    res.json({ success: true });
+});
 
 module.exports = router;

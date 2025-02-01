@@ -1,8 +1,11 @@
-// services/AISpaceCoach.js
 const OpenAI = require('openai');
+const EventEmitter = require('events');
+const Achievement = require('../models/Achievement');
+const UserProgress = require('../models/UserProgress');
 
-class AISpaceCoach {
+class AISpaceCoach extends EventEmitter {
     constructor() {
+        super();
         // Initialize OpenAI with enhanced configuration
         this.openai = new OpenAI({
             apiKey: process.env.OPENAI_API_KEY,
@@ -13,61 +16,56 @@ class AISpaceCoach {
         this.defaultTemperature = 0.7;
         this.defaultMaxTokens = 500;
 
-        // AI Guidance Mode Constants - Preserving original modes
+        // AI Guidance Mode Constants
         this.AI_MODES = {
             MANUAL: 'manual',
             ASSIST: 'assist',
             FULL_GUIDANCE: 'full_guidance',
         };
 
-        // Performance Tracking
+        // Enhanced Performance Tracking
         this.performanceMetrics = {
             trainingModulesCompleted: 0,
             skillProgressTracking: {},
             userEngagementScore: 0,
+            achievements: new Map(),
+            progressHistory: new Map(),
+            realTimeMetrics: new Map()
+        };
+        this.achievementTriggers = {
+            SKILL_MASTERY: this.checkSkillMastery,
+            PERFORMANCE_STREAK: this.checkPerformanceStreak,
+            TIME_MILESTONE: this.checkTimeMilestone,
+            DIFFICULTY_BREAKTHROUGH: this.checkDifficultyBreakthrough
+        };
+
+        this.initializeAchievementSystem();
+    }
+    
+    // Achievement System
+    initializeAchievementSystem() {
+        this.achievementTypes = {
+            ASSESSMENT_MASTER: {
+                id: 'assessment_master',
+                threshold: 90,
+                description: 'Score 90% or higher on assessments',
+                icon: '🎯'
+            },
+            QUICK_LEARNER: {
+                id: 'quick_learner',
+                threshold: 5,
+                description: 'Complete 5 modules in record time',
+                icon: '⚡'
+            },
+            CONSISTENCY_KING: {
+                id: 'consistency_king',
+                threshold: 7,
+                description: '7-day training streak',
+                icon: '👑'
+            }
         };
     }
-// Add this after the constructor in AISpaceCoach.js
-async generateInitialGuidance(userId) {
-    try {
-        const messages = [
-            {
-                role: 'system',
-                content: 'You are an expert space training coach providing initial guidance for new trainees.',
-            },
-            {
-                role: 'user',
-                content: `Generate initial training guidance for user ${userId}. Include welcome message, initial steps, and recommendations.`
-            }
-        ];
 
-        const response = await this.createCompletion(messages, {
-            maxTokens: 500,
-            temperature: 0.7
-        });
-
-        // Parse the AI response or provide a structured fallback
-        try {
-            return JSON.parse(response);
-        } catch (parseError) {
-            return {
-                welcome: "Welcome to your space training program",
-                initialSteps: [
-                    "Review your module objectives",
-                    "Complete the initial assessment",
-                    "Follow the guided exercises"
-                ],
-                recommendations: {
-                    pace: "Take each step at your own pace",
-                    focus: "Focus on understanding core concepts"
-                }
-            };
-        }
-    } catch (error) {
-        console.error('Error generating initial guidance:', error);
-        throw error;
-    }
-}
     // Get Initial Assessment
     async getInitialAssessment() {
         try {
@@ -87,109 +85,119 @@ async generateInitialGuidance(userId) {
                 temperature: 0.7,
             });
     
-            try {
-                // Attempt to parse the response
-                const parsedQuestions = JSON.parse(response);
-                return {
-                    questions: parsedQuestions,
-                    timestamp: new Date(),
-                    assessmentType: 'initial',
-                };
-            } catch (parseError) {
-                console.error('Failed to parse OpenAI response:', response);
-                // Return a fallback set of questions if parsing fails
-                return {
-                    questions: [
-                        {
-                            id: 1,
-                            text: "What is your current fitness level?",
-                            type: "multiple_choice"
-                        },
-                        {
-                            id: 2,
-                            text: "Do you have any previous space training experience?",
-                            type: "multiple_choice"
-                        },
-                        {
-                            id: 3,
-                            text: "What are your primary goals for space training?",
-                            type: "open_ended"
-                        }
-                    ],
-                    timestamp: new Date(),
-                    assessmentType: 'initial',
-                };
-            }
+            return this.parseAssessmentResponse(response);
         } catch (error) {
             console.error('Error generating initial assessment:', error);
-            throw new Error('Failed to generate initial assessment questions');
+            return this.getFallbackAssessment();
         }
     }
 
-    // In services/AISpaceCoach.js - Add this method
+    // Analyze a Response
+    async analyzeResponse(question, answer) {
+        try {
+            const completion = await this.openai.chat.completions.create({
+                model: this.defaultModel,
+                messages: [
+                    {
+                        role: "system",
+                        content: "You are an expert evaluator of space training assessments."
+                    },
+                    {
+                        role: "user",
+                        content: `Analyze the following response to the question: "${question}". The answer is: "${answer}". Provide a score out of 100, constructive feedback, and immediate guidance.`
+                    }
+                ],
+                temperature: 0.7
+            });
 
-async processAssessmentAnswer(userId, questionIndex, answer) {
-    try {
-        const completion = await this.openai.chat.completions.create({
-            model: this.defaultModel,
-            messages: [{
-                role: "system",
-                content: "You are an expert space training evaluator. Analyze the trainee's answer and provide constructive feedback."
-            }, {
-                role: "user",
-                content: `Question Index: ${questionIndex}
-                         Answer: ${answer}
-                         Evaluate this response for accuracy, completeness, and understanding.
-                         Provide:
-                         1. Score (0-100)
-                         2. Feedback
-                         3. Areas for improvement`
-            }],
-            temperature: 0.7
-        });
-
-        const analysis = {
-            feedback: completion.choices[0]?.message?.content,
-            score: this.calculateScore(completion.choices[0]?.message?.content),
-            immediateGuidance: this.generateImmediateGuidance(completion.choices[0]?.message?.content)
-        };
-
-        return {
-            success: true,
-            analysis,
-            nextQuestionIndex: questionIndex + 1
-        };
-    } catch (error) {
-        console.error('Error processing assessment answer:', error);
-        throw new Error('Failed to process assessment answer');
+            const content = completion.choices[0]?.message?.content;
+            const analysis = {
+                feedback: content,
+                score: this.calculateScore(content),
+                immediateGuidance: this.generateImmediateGuidance(content)
+            };
+            return analysis;
+        } catch (error) {
+            console.error('Error in analyzeResponse:', error);
+            throw error;
+        }
     }
-}
 
-// Helper method to extract a numerical score from AI feedback
-calculateScore(feedback) {
-    try {
-        // Simple score extraction - you can make this more sophisticated
-        const scoreMatch = feedback.match(/(\d+)/);
-        return scoreMatch ? Math.min(parseInt(scoreMatch[1]), 100) : 70;
-    } catch (error) {
-        return 70; // Default score if parsing fails
+    // Generate Training Plan based on assessment responses
+    async generateTrainingPlan(responses) {
+        try {
+            const messages = [
+                {
+                    role: 'system',
+                    content: 'You are an expert space training coach who generates personalized training plans based on assessment responses.'
+                },
+                {
+                    role: 'user',
+                    content: `Based on these assessment responses: ${JSON.stringify(responses)}, generate a detailed training plan that includes an overall score, recommended modules, focus areas, timeline, and next steps. Return the result in JSON format.`
+                }
+            ];
+    
+            const response = await this.createCompletion(messages, {
+                maxTokens: 700,
+                temperature: 0.7,
+            });
+    
+            // Try to parse the response as JSON; if it fails, return the raw text
+            try {
+                const plan = JSON.parse(response);
+                return plan;
+            } catch (parseError) {
+                return { planText: response };
+            }
+        } catch (error) {
+            console.error('Error generating training plan:', error);
+            throw error;
+        }
     }
-}
 
-generateImmediateGuidance(feedback) {
-    try {
-        // Extract key points for immediate guidance
-        const sentences = feedback.split('.');
-        return sentences.length > 1 ? sentences[1].trim() : feedback;
-    } catch (error) {
-        return 'Continue to the next question.';
+    // Process an Assessment Answer (used elsewhere)
+    async processAssessmentAnswer(userId, questionIndex, answer) {
+        try {
+            const completion = await this.openai.chat.completions.create({
+                model: this.defaultModel,
+                messages: [{
+                    role: "system",
+                    content: "You are an expert space training evaluator. Analyze the trainee's answer and provide constructive feedback."
+                }, {
+                    role: "user",
+                    content: `Question Index: ${questionIndex}\nAnswer: ${answer}\nEvaluate this response for accuracy, completeness, and understanding.`
+                }],
+                temperature: 0.7
+            });
+
+            const analysis = {
+                feedback: completion.choices[0]?.message?.content,
+                score: this.calculateScore(completion.choices[0]?.message?.content),
+                guidance: this.generateImmediateGuidance(completion.choices[0]?.message?.content)
+            };
+
+            await this.trackProgress(userId, {
+                type: 'ASSESSMENT',
+                score: analysis.score,
+                questionIndex
+            });
+
+            return {
+                success: true,
+                analysis,
+                nextQuestionIndex: questionIndex + 1
+            };
+        } catch (error) {
+            console.error('Error processing assessment answer:', error);
+            throw error;
+        }
     }
-}
-    // Helper: Create OpenAI Completion - Preserving original helper
+
+    // Helper: Create OpenAI Completion
     async createCompletion(messages, options = {}) {
         try {
             if (!process.env.OPENAI_API_KEY) {
-                throw new Error('OpenAI API Key is missing. Check environment variables.');
+                throw new Error('OpenAI API Key is missing');
             }
 
             const response = await this.openai.chat.completions.create({
@@ -204,7 +212,7 @@ generateImmediateGuidance(feedback) {
 
             const result = response.choices[0]?.message?.content?.trim();
             if (!result) {
-                throw new Error('OpenAI API returned no content.');
+                throw new Error('OpenAI API returned no content');
             }
 
             return result;
@@ -217,7 +225,7 @@ generateImmediateGuidance(feedback) {
     // Generate Training Content
     async generateTrainingContent(module, level, userProfile = {}) {
         if (!module || !level) {
-            throw new Error('Module and level are required to generate training content.');
+            throw new Error('Module and level are required');
         }
 
         const messages = [
@@ -227,8 +235,7 @@ generateImmediateGuidance(feedback) {
             },
             {
                 role: 'user',
-                content: `Generate advanced training content for the ${module} module at the ${level} level.
-                          Consider user profile details: ${JSON.stringify(userProfile)}`,
+                content: `Generate advanced training content for the ${module} module at ${level} level. Consider user profile: ${JSON.stringify(userProfile)}`,
             },
         ];
 
@@ -251,8 +258,7 @@ generateImmediateGuidance(feedback) {
             },
             {
                 role: 'user',
-                content: `Generate a problem-solving scenario for the ${module} module. 
-                          Adjust complexity based on user skill level: ${userSkillLevel}`,
+                content: `Generate a problem-solving scenario for the ${module} module. Adjust complexity based on user skill level: ${userSkillLevel}`,
             },
         ];
 
@@ -271,115 +277,16 @@ generateImmediateGuidance(feedback) {
         const messages = [
             {
                 role: 'system',
-                content: `Provide comprehensive, multi-dimensional coaching suggestions 
-                          that address physical, mental, and technical space training aspects.`,
+                content: 'Provide comprehensive, multi-dimensional coaching suggestions that address physical, mental, and technical space training aspects.',
             },
             {
                 role: 'user',
-                content: `Analyze and generate personalized coaching suggestions based on: 
-                          ${JSON.stringify(userProfile)}`,
+                content: `Analyze and generate personalized coaching suggestions based on: ${JSON.stringify(userProfile)}`,
             },
         ];
 
         return this.createCompletion(messages, {
             maxTokens: 700,
-            temperature: 0.7,
-        });
-    }
-
-    // Recommend Plan Upgrade
-    async recommendPlanUpgrade(userProgress, currentPlan) {
-        if (!userProgress || !currentPlan) {
-            throw new Error('User progress and current plan are required to recommend upgrades.');
-        }
-
-        const messages = [
-            {
-                role: 'system',
-                content: `Provide strategic recommendations for subscription plan upgrades, 
-                          considering user's progress, goals, and potential space travel opportunities.`,
-            },
-            {
-                role: 'user',
-                content: `Evaluate plan upgrade potential. Current plan: ${currentPlan}, 
-                          Progress details: ${JSON.stringify(userProgress)}`,
-            },
-        ];
-
-        return this.createCompletion(messages, {
-            maxTokens: 500,
-            temperature: 0.6,
-        });
-    }
-
-    // Analyze Progress
-    async analyzeProgress(trainingData) {
-        if (!trainingData) {
-            throw new Error('Training data is required for progress analysis.');
-        }
-
-        const messages = [
-            {
-                role: 'system',
-                content: `Perform comprehensive progress analysis with predictive insights, 
-                          identifying strengths, improvement areas, and future potential.`,
-            },
-            {
-                role: 'user',
-                content: `Analyze training progression: ${JSON.stringify(trainingData)}`,
-            },
-        ];
-
-        return this.createCompletion(messages, {
-            maxTokens: 600,
-            temperature: 0.7,
-        });
-    }
-
-    // Generate Daily Motivational Tip
-    async generateDailyTip(userProfile) {
-        if (!userProfile) {
-            throw new Error('User profile is required for generating a daily tip.');
-        }
-
-        const messages = [
-            {
-                role: 'system',
-                content: `Generate highly personalized, motivational tips that 
-                          inspire and guide the user's space training journey.`,
-            },
-            {
-                role: 'user',
-                content: `Create a motivational tip tailored to: ${JSON.stringify(userProfile)}`,
-            },
-        ];
-
-        return this.createCompletion(messages, {
-            maxTokens: 200,
-            temperature: 0.8,
-        });
-    }
-
-    // Recommend Next Module
-    async recommendNextModule(trainingData) {
-        if (!trainingData) {
-            throw new Error('Training data is required to recommend the next module.');
-        }
-
-        const messages = [
-            {
-                role: 'system',
-                content: `Intelligently recommend the optimal next training module 
-                          based on the user's current skills, progress, and space readiness goals.`,
-            },
-            {
-                role: 'user',
-                content: `Analyze training data and suggest next module: ${JSON.stringify(trainingData)}`,
-            },
-        ];
-
-        return this.createCompletion(messages, {
-            maxTokens: 300,
             temperature: 0.7,
         });
     }
@@ -393,8 +300,7 @@ generateImmediateGuidance(feedback) {
         const messages = [
             {
                 role: 'system',
-                content: `Calculate a holistic space readiness score, considering 
-                          physical, mental, technical, and psychological preparedness.`,
+                content: 'Calculate a holistic space readiness score, considering physical, mental, technical, and psychological preparedness.',
             },
             {
                 role: 'user',
@@ -408,34 +314,234 @@ generateImmediateGuidance(feedback) {
         });
     }
 
-    // Select AI Mode
-    async selectAIMode(userPreferences) {
-        const modeSelectionContext = {
-            availableModes: Object.values(this.AI_MODES),
-            userPreferences,
+    async checkAchievements(userId) {
+        try {
+            const userProgress = await UserProgress.findOne({ userId }).populate('achievements.achievementId');
+    
+            for (const [triggerType, checker] of Object.entries(this.achievementTriggers)) {
+                const newAchievements = await checker(userProgress);
+                if (newAchievements.length > 0) {
+                    await this.grantAchievements(userId, newAchievements);
+                }
+            }
+        } catch (error) {
+            console.error('Achievement check error:', error);
+            throw error;
+        }
+    }
+    
+    // Progress Tracking
+    async trackProgress(userId, data) {
+        try {
+            const userMetrics = this.performanceMetrics.realTimeMetrics.get(userId) || {
+                moduleProgress: {},
+                skillLevels: {},
+                achievements: []
+            };
+    
+            userMetrics.lastUpdate = new Date();
+            userMetrics.currentProgress = data;
+    
+            // ✅ Check for achievements
+            await this.checkAchievements(userId);
+    
+            this.performanceMetrics.realTimeMetrics.set(userId, userMetrics);
+            this.emit('progress-update', { userId, progress: data, timestamp: new Date() });
+    
+            return userMetrics;
+        } catch (error) {
+            console.error('Progress tracking error:', error);
+            throw error;
+        }
+    }
+    
+    // Achievement Tracking
+    async trackAchievements(userId, action) {
+        try {
+            const userMetrics = this.performanceMetrics.realTimeMetrics.get(userId);
+            if (!userMetrics) return;
+
+            const unlockedAchievements = [];
+
+            for (const [type, criteria] of Object.entries(this.achievementTypes)) {
+                if (this.hasMetCriteria(userMetrics, criteria, action)) {
+                    const achievement = await this.unlockAchievement(userId, type);
+                    if (achievement) {
+                        unlockedAchievements.push(achievement);
+                    }
+                }
+            }
+
+            if (unlockedAchievements.length > 0) {
+                this.emit('achievements-unlocked', {
+                    userId,
+                    achievements: unlockedAchievements
+                });
+            }
+
+            return unlockedAchievements;
+        } catch (error) {
+            console.error('Achievement tracking error:', error);
+        }
+    }
+    
+    async grantAchievements(userId, achievements) {
+        try {
+            const userProgress = await UserProgress.findOne({ userId });
+    
+            for (const achievement of achievements) {
+                userProgress.achievements.push({
+                    achievementId: achievement._id,
+                    unlockedAt: new Date(),
+                    currentTier: achievement.tier
+                });
+    
+                // Emit achievement event for frontend
+                this.emit('achievement-unlocked', {
+                    userId,
+                    achievement: {
+                        title: achievement.details.title,
+                        description: achievement.details.description,
+                        icon: achievement.details.icon,
+                        tier: achievement.tier
+                    }
+                });
+            }
+    
+            await userProgress.save();
+        } catch (error) {
+            console.error('Achievement grant error:', error);
+            throw error;
+        }
+    }
+    
+    async checkSkillMastery(userProgress) {
+        return userProgress?.trainingScore >= 95 ? [await Achievement.findOne({ type: 'SKILL_MASTERY' })] : [];
+    }
+    
+    async checkPerformanceStreak(userProgress) {
+        return userProgress?.trainingDays >= 10 ? [await Achievement.findOne({ type: 'PERFORMANCE_STREAK' })] : [];
+    }
+    
+    async checkTimeMilestone(userProgress) {
+        return userProgress?.totalTrainingTime >= 100 ? [await Achievement.findOne({ type: 'TIME_MILESTONE' })] : [];
+    }
+    
+    async checkDifficultyBreakthrough(userProgress) {
+        return userProgress?.completedHardModules >= 3 ? [await Achievement.findOne({ type: 'DIFFICULTY_BREAKTHROUGH' })] : [];
+    }
+    
+    // Helper Methods
+    calculateScore(feedback) {
+        try {
+            const scoreMatch = feedback.match(/(\d+)/);
+            return scoreMatch ? Math.min(parseInt(scoreMatch[1]), 100) : 70;
+        } catch (error) {
+            return 70;
+        }
+    }
+
+    generateImmediateGuidance(feedback) {
+        try {
+            const sentences = feedback.split('.');
+            return sentences.length > 1 ? sentences[1].trim() : feedback;
+        } catch (error) {
+            return 'Continue to the next question.';
+        }
+    }
+
+    parseAssessmentResponse(response) {
+        try {
+            const parsedQuestions = JSON.parse(response);
+            return {
+                questions: parsedQuestions,
+                timestamp: new Date(),
+                assessmentType: 'initial'
+            };
+        } catch (error) {
+            return this.getFallbackAssessment();
+        }
+    }
+
+    getFallbackAssessment() {
+        return {
+            questions: [
+                {
+                    id: 1,
+                    text: "What is your current fitness level?",
+                    type: "multiple_choice"
+                },
+                {
+                    id: 2,
+                    text: "Do you have any previous space training experience?",
+                    type: "multiple_choice"
+                },
+                {
+                    id: 3,
+                    text: "What are your primary goals for space training?",
+                    type: "open_ended"
+                }
+            ],
+            timestamp: new Date(),
+            assessmentType: 'initial'
         };
+    }
 
-        const messages = [
-            {
-                role: 'system',
-                content: 'Intelligently recommend the most appropriate AI guidance mode.',
-            },
-            {
-                role: 'user',
-                content: `Analyze and select optimal AI mode: ${JSON.stringify(modeSelectionContext)}`,
-            },
-        ];
+    hasMetCriteria(userMetrics, criteria, action) {
+        switch (criteria.id) {
+            case 'assessment_master':
+                return action.type === 'ASSESSMENT' && action.score >= criteria.threshold;
+            case 'quick_learner':
+                return userMetrics.moduleProgress >= criteria.threshold;
+            case 'consistency_king':
+                return this.checkConsistencyStreak(userMetrics) >= criteria.threshold;
+            default:
+                return false;
+        }
+    }
 
-        const recommendedMode = await this.createCompletion(messages, {
-            maxTokens: 100,
-            temperature: 0.5,
-        });
+    async unlockAchievement(userId, achievementType) {
+        const achievement = this.achievementTypes[achievementType];
+        if (!achievement) return null;
 
-        return Object.values(this.AI_MODES).includes(recommendedMode.toLowerCase())
-            ? recommendedMode.toLowerCase()
-            : this.AI_MODES.ASSIST;
+        const userAchievements = this.performanceMetrics.achievements.get(userId) || new Set();
+        
+        if (!userAchievements.has(achievementType)) {
+            userAchievements.add(achievementType);
+            this.performanceMetrics.achievements.set(userId, userAchievements);
+            
+            return {
+                ...achievement,
+                unlockedAt: new Date(),
+                userId
+            };
+        }
+
+        return null;
+    }
+
+    async handleProgressUpdate(userId, progressData) {
+        try {
+            const metrics = this.performanceMetrics.realTimeMetrics.get(userId) || {};
+            metrics.lastUpdate = new Date();
+            metrics.currentProgress = progressData;
+
+            await this.trackAchievements(userId, {
+                type: 'PROGRESS_UPDATE',
+                data: progressData
+            });
+
+            this.emit('progress-update', {
+                userId,
+                progress: progressData,
+                timestamp: new Date()
+            });
+        } catch (error) {
+            console.error('Progress update handling error:', error);
+        }
     }
 }
 
+// Export the singleton instance
 const aiCoachInstance = new AISpaceCoach();
 module.exports = aiCoachInstance;

@@ -1,11 +1,32 @@
-const EventEmitter = require('events');
+// Browser-compatible Event Emitter implementation
+if (typeof window.CustomEventEmitter === 'undefined') {
+    window.CustomEventEmitter = class {
+        constructor() {
+            this.events = {};
+        }
 
+        on(event, listener) {
+            if (!this.events[event]) {
+                this.events[event] = [];
+            }
+            this.events[event].push(listener);
+            return this;
+        }
+
+        emit(event, ...args) {
+            if (!this.events[event]) return;
+            this.events[event].forEach(listener => listener.apply(this, args));
+        }
+    }
+}
+// Configuration
 const CONFIG = {
     REFRESH_INTERVAL: 30000,
     ANIMATION_DURATION: 300,
     WEBSOCKET_URL: `wss://${window.location.host}/ws`
 };
 
+// UI Elements and Animations
 const UI = {
     elements: {
         filters: {
@@ -36,7 +57,8 @@ const UI = {
     }
 };
 
-class LeaderboardManager extends EventEmitter {
+// Leaderboard Manager Class
+class LeaderboardManager extends window.CustomEventEmitter {
     constructor(webSocketService) {
         super();
         this.ws = webSocketService;
@@ -54,227 +76,168 @@ class LeaderboardManager extends EventEmitter {
     }
 
     async handleRankUpdate({ userId, newRank }) {
-        await this.broadcastUpdate('rank_change', { userId, newRank });
-        this.clearCache();
+        try {
+            await this.broadcastUpdate('rank_change', { userId, newRank });
+            this.clearCache();
+        } catch (error) {
+            console.error('Error handling rank update:', error);
+        }
     }
 
     async handleScoreUpdate({ userId, newScore }) {
-        const rankings = await this.calculateNewRankings(userId, newScore);
-        await this.broadcastUpdate('score_update', { userId, newScore, rankings });
+        try {
+            const rankings = await this.calculateNewRankings(userId, newScore);
+            await this.broadcastUpdate('score_update', { userId, newScore, rankings });
+        } catch (error) {
+            console.error('Error handling score update:', error);
+        }
+    }
+
+    clearCache() {
+        this.cache.data.clear();
+    }
+
+    showAchievementNotification(achievement) {
+        console.log("🏆 Achievement Unlocked:", achievement);
+        const notification = createNotification('Achievement Unlocked!', achievement);
+        AnimationController.fadeIn(notification);
+        setTimeout(() => notification.remove(), 5000);
+    }
+
+    showLevelUpNotification(level, rewards) {
+        console.log("⬆️ Level Up:", { level, rewards });
+        const notification = createNotification('Level Up!', { level, rewards });
+        AnimationController.fadeIn(notification);
+        setTimeout(() => notification.remove(), 5000);
     }
 }
 
+// WebSocket Manager
 const WebSocketManager = {
     socket: null,
     retryAttempts: 0,
     maxRetries: 5,
-     
+
     connect() {
-        this.socket = new WebSocket(`wss://${window.location.host}/ws/leaderboard`);
-        this.setupEventHandlers();
-    },
-     
-    setupEventHandlers() {
-        this.socket.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            switch(data.type) {
-                case 'score_update':
-                    this.handleScoreUpdate(data);
-                    break;
-                case 'rank_change':
-                    this.handleRankChange(data);
-                    break;
-                case 'achievement_unlocked':
-                    this.handleAchievement(data);
-                    break;
-                case 'tournament_update':
-                    this.handleTournamentUpdate(data);
-                    break;
-                case 'squadron_update':
-                    this.handleSquadronUpdate(data);
-                    break;
-                case 'level_up':
-                    this.handleLevelUp(data);
-                    break;
-                case 'status_change':
-                    this.handleStatusChange(data);
-                    break;
-            }
-        };
-        this.socket.onclose = () => this.handleDisconnect();
-    },
-
-    handleScoreUpdate(data) {
-        const row = document.querySelector(`tr[data-user-id="${data.userId}"]`);
-        if (!row) return;
-        
-        const scoreCell = row.querySelector('.font-mono');
-        const oldValue = parseInt(scoreCell.textContent.replace(/,/g, ''));
-        AnimationController.animateValue(scoreCell, oldValue, data.newScore, 500);
-        
-        const changeCell = row.querySelector('.text-sm');
-        changeCell.textContent = formatChange(data.change);
-        AnimationController.pulseElement(changeCell);
-    },
-
-    handleRankChange(data) {
-        const row = document.querySelector(`tr[data-user-id="${data.userId}"]`);
-        if (!row) return;
-
-        const targetPosition = data.newRank - 1;
-        const tbody = row.parentElement;
-        const currentIndex = Array.from(tbody.children).indexOf(row);
-        
-        if (currentIndex !== targetPosition) {
-            AnimationController.animateElement(row, [
-                { transform: 'translateX(0)' },
-                { transform: 'translateX(10px)' },
-                { transform: 'translateX(0)' }
-            ]);
-            
-            setTimeout(() => {
-                tbody.insertBefore(row, tbody.children[targetPosition]);
-                AnimationController.updateRankNumbers(tbody);
-            }, 300);
+        try {
+            this.socket = new WebSocket(CONFIG.WEBSOCKET_URL);
+            this.setupEventHandlers();
+            console.log('🔗 WebSocket connection initialized');
+        } catch (error) {
+            console.error('❌ WebSocket connection error:', error);
+            this.handleDisconnect();
         }
     },
 
-    handleAchievement(data) {
-        const { achievement, userId } = data;
-        const row = document.querySelector(`tr[data-user-id="${userId}"]`);
-        if (!row) return;
+    setupEventHandlers() {
+        if (!this.socket) return;
 
-        const achievementsCell = row.querySelector('.achievements-container');
-        const achievementEl = document.createElement('div');
-        achievementEl.className = 'achievement-badge';
-        achievementEl.innerHTML = achievement.icon;
-        
-        AnimationController.fadeIn(achievementEl);
-        achievementsCell.appendChild(achievementEl);
-        this.showAchievementNotification(achievement);
+        this.socket.onopen = () => {
+            console.log('✅ WebSocket connected');
+            this.retryAttempts = 0;
+        };
+
+        this.socket.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                this.handleMessage(data);
+            } catch (error) {
+                console.error('❌ Error handling message:', error);
+            }
+        };
+
+        this.socket.onclose = () => this.handleDisconnect();
+        this.socket.onerror = (error) => {
+            console.error('❌ WebSocket error:', error);
+            this.handleDisconnect();
+        };
     },
 
-    handleTournamentUpdate(data) {
-        const tournamentSection = document.getElementById('tournament-section');
-        if (!tournamentSection) return;
-
-        const { standings, timeLeft } = data;
-        const tournamentContent = createTournamentContent(standings, timeLeft);
-        tournamentSection.innerHTML = tournamentContent;
-        AnimationController.fadeIn(tournamentSection);
-    },
-
-    handleSquadronUpdate(data) {
-        const { squadronId, stats } = data;
-        document.querySelectorAll(`tr[data-squadron="${squadronId}"]`)
-            .forEach(row => {
-                updateSquadronStats(row, stats);
-                AnimationController.pulseElement(row);
-            });
-    },
-
-    handleLevelUp(data) {
-        const { userId, newLevel, rewards } = data;
-        const row = document.querySelector(`tr[data-user-id="${userId}"]`);
-        if (!row) return;
-
-        const levelEl = row.querySelector('.level-container');
-        levelEl.querySelector('.level-text').textContent = `Level ${newLevel}`;
-        AnimationController.pulseElement(levelEl);
-        
-        this.showLevelUpNotification(newLevel, rewards);
+    handleMessage(data) {
+        console.log("📩 Received WebSocket Message:", data);
     },
 
     handleDisconnect() {
         if (this.retryAttempts < this.maxRetries) {
             this.retryAttempts++;
-            setTimeout(() => this.connect(), 1000 * Math.pow(2, this.retryAttempts));
+            const delay = Math.min(1000 * Math.pow(2, this.retryAttempts), 30000);
+            console.warn(`⚠️ WebSocket disconnected. Reconnecting in ${delay / 1000} seconds...`);
+            setTimeout(() => this.connect(), delay);
+        } else {
+            console.error("❌ Max WebSocket reconnection attempts reached.");
         }
-    },
+    }
+};
 
+// ✅ Initialize when the DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    try {
+        window.webSocketManager = WebSocketManager;
+        window.webSocketManager.connect();
+        
+        window.leaderboardManager = new LeaderboardManager(window.webSocketManager);
+        console.log('✅ Leaderboard system initialized');
+    } catch (error) {
+        console.error('❌ Error initializing leaderboard:', error);
+    }
+});
+
+// ✅ Achievement Notification System
+const NotificationManager = {
     showAchievementNotification(achievement) {
+        console.log("🏆 Achievement Unlocked:", achievement);
         const notification = createNotification('Achievement Unlocked!', achievement);
         AnimationController.fadeIn(notification);
         setTimeout(() => notification.remove(), 5000);
     },
 
     showLevelUpNotification(level, rewards) {
+        console.log("⬆️ Level Up:", { level, rewards });
         const notification = createNotification('Level Up!', { level, rewards });
         AnimationController.fadeIn(notification);
         setTimeout(() => notification.remove(), 5000);
     }
 };
 
+// ✅ Animation Controller for UI Effects
 const AnimationController = {
     animateElement(element, keyframes, options = {}) {
+        if (!element) {
+            console.warn("⚠️ Animation skipped: Element not found.");
+            return;
+        }
+        
         const defaultOptions = {
             duration: CONFIG.ANIMATION_DURATION,
             easing: 'ease-out',
             fill: 'forwards'
         };
+
         return element.animate(keyframes, { ...defaultOptions, ...options });
     },
-    
-    animateValue(element, start, end, duration) {
-        const startTime = performance.now();
-        const updateValue = (currentTime) => {
-            const elapsed = currentTime - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-            const value = Math.floor(start + (end - start) * this.easeOutCubic(progress));
-            element.textContent = value.toLocaleString();
-            if (progress < 1) requestAnimationFrame(updateValue);
+
+    fadeIn(element, duration = CONFIG.ANIMATION_DURATION) {
+        if (!element) return;
+        element.style.opacity = 0;
+        element.style.display = "block";
+        this.animateElement(element, [
+            { opacity: 0 },
+            { opacity: 1 }
+        ], { duration });
+    },
+
+    fadeOut(element, duration = CONFIG.ANIMATION_DURATION) {
+        if (!element) return;
+        this.animateElement(element, [
+            { opacity: 1 },
+            { opacity: 0 }
+        ], { duration }).onfinish = () => {
+            element.style.display = "none";
         };
-        requestAnimationFrame(updateValue);
-    },
- 
-    updateRankNumbers(tbody) {
-        Array.from(tbody.children).forEach((row, index) => {
-            const rankCell = row.querySelector('.rank-number');
-            if (rankCell) {
-                rankCell.textContent = `#${index + 1}`;
-                rankCell.className = `rank-number ${this.getRankColorClass(index + 1)}`;
-            }
-        });
-    },
- 
-    getRankColorClass(rank) {
-        const colors = {
-            1: 'text-yellow-400',
-            2: 'text-gray-300',
-            3: 'text-amber-600'
-        };
-        return colors[rank] || 'text-blue-400';
-    },
- 
-    pulseElement(element) {
-        return this.animateElement(element, [
-            { transform: 'scale(1)' },
-            { transform: 'scale(1.05)' },
-            { transform: 'scale(1)' }
-        ], { duration: 500 });
-    },
- 
-    fadeIn(element) {
-        return this.animateElement(element, [
-            { opacity: 0, transform: 'translateY(20px)' },
-            { opacity: 1, transform: 'translateY(0)' }
-        ]);
-    },
- 
-    slideSort(element, fromY, toY) {
-        return this.animateElement(element, [
-            { transform: `translateY(${fromY}px)` },
-            { transform: `translateY(${toY}px)` }
-        ]);
-    },
- 
-    easeOutCubic(x) {
-        return 1 - Math.pow(1 - x, 3);
     }
- };
+};
 
-
- const TournamentManager = {
+const TournamentManager = {
     active: null,
     rankings: new Map(),
  
@@ -346,28 +309,37 @@ const AnimationController = {
  const AchievementSystem = {
     badges: new Map(),
     unlocked: new Set(),
- 
-    initialize(achievements) {
-        achievements.forEach(achievement => {
-            this.badges.set(achievement.id, achievement);
-        });
-        this.checkPendingAchievements();
+
+    showAchievementNotification(achievement) {
+        const notification = this.createNotification('Achievement Unlocked!', achievement);
+        AnimationController.fadeIn(notification);
+        setTimeout(() => notification.remove(), 5000);
     },
- 
+
+    showLevelUpNotification(level, rewards) {
+        const notification = this.createNotification('Level Up!', { level, rewards });
+        AnimationController.fadeIn(notification);
+        setTimeout(() => notification.remove(), 5000);
+    },
+
     async checkPendingAchievements() {
-        const response = await fetch('/api/achievements/pending');
-        const pending = await response.json();
-        
-        pending.forEach(achievement => {
-            if (!this.unlocked.has(achievement.id)) {
-                this.unlockAchievement(achievement);
-            }
-        });
+        try {
+            const response = await fetch('/api/achievements/pending');
+            const pending = await response.json();
+
+            pending.forEach(achievement => {
+                if (!this.unlocked.has(achievement.id)) {
+                    this.unlockAchievement(achievement);
+                }
+            });
+        } catch (error) {
+            console.error("Error fetching pending achievements:", error);
+        }
     },
- 
+
     unlockAchievement(achievement) {
         this.unlocked.add(achievement.id);
-        
+
         const notification = document.createElement('div');
         notification.className = 'achievement-notification';
         notification.innerHTML = `
@@ -382,26 +354,49 @@ const AnimationController = {
                 </div>
             </div>
         `;
-        
-        document.getElementById('achievementContainer').appendChild(notification);
-        AnimationController.fadeIn(notification);
-        setTimeout(() => notification.remove(), 5000);
+
+        const container = document.getElementById('achievementContainer');
+        if (container) {
+            container.appendChild(notification);
+            AnimationController.fadeIn(notification);
+            setTimeout(() => notification.remove(), 5000);
+        } else {
+            console.error("Error: `achievementContainer` not found in the DOM.");
+        }
     },
- 
+
     getProgressBar(achievementId) {
         const achievement = this.badges.get(achievementId);
         if (!achievement) return '';
- 
+
         return `
             <div class="w-full h-2 bg-gray-700 rounded-full mt-2">
                 <div class="h-full bg-blue-500 rounded-full" 
                      style="width: ${achievement.progress}%"></div>
             </div>
         `;
-    }
- };
+    },
 
- const LeaderboardAPI = {
+    createNotification(title, data) {
+        const notification = document.createElement('div');
+        notification.className = 'achievement-notification';
+        notification.innerHTML = `
+            <div class="flex items-center space-x-4 bg-gray-800/90 p-4 rounded-lg border border-blue-500/30">
+                <div class="w-12 h-12 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                    ${data.icon || '🏆'}
+                </div>
+                <div>
+                    <h4 class="text-blue-400 font-bold">${title}</h4>
+                    <p class="text-white">${data.name || "Unknown Achievement"}</p>
+                    <p class="text-sm text-gray-400">${data.description || "No description available."}</p>
+                </div>
+            </div>
+        `;
+        return notification;
+    }
+};
+
+const LeaderboardAPI = {
     async getGlobalRankings(page, filter, timeRange, search) {
         const params = new URLSearchParams({ 
             page, 
@@ -446,7 +441,7 @@ const AnimationController = {
     }
  };
  
- const state = {
+const state = {
     currentPage: 1,
     pageSize: 10,
     totalPages: 1,
@@ -503,14 +498,15 @@ const AnimationController = {
         }
     }
  };
- function initializeState() {
+
+function initializeState() {
     const params = new URLSearchParams(window.location.search);
     state.currentPage = parseInt(params.get('page')) || 1;
     state.filter = params.get('filter') || 'global';
     state.timeRange = params.get('timeRange') || 'allTime';
     state.squadronFilter = params.get('squadron') || null;
     state.selectedDivision = params.get('division') || null;
- }
+}
 
 // Event Handlers
 const EventHandlers = {
@@ -525,17 +521,16 @@ const EventHandlers = {
         UI.elements.pagination.next?.addEventListener('click', () => this.handlePageChange('next'));
  
         // Video Section Handlers
-        const videoSections = document.querySelectorAll('.video-section video');
-        videoSections.forEach(video => {
-            video.addEventListener('error', this.handleVideoError);
-            video.addEventListener('canplay', () => this.handleVideoLoad(video));
-        });
- 
-        // Tournament Events
+const videoSections = document.querySelectorAll('.video-section video');
+videoSections.forEach(video => {
+    video.addEventListener('error', this.handleVideoError);
+    video.addEventListener('canplay', () => this.handleVideoLoad(video));
+});
+            // Tournament Events
         document.addEventListener('tournament:update', this.handleTournamentUpdate);
         document.addEventListener('achievement:unlock', this.handleAchievementUnlock);
     },
- 
+
     handleFilterChange(e) {
         state[e.target.id] = e.target.value;
         state.currentPage = 1;
@@ -543,111 +538,80 @@ const EventHandlers = {
         updateURL();
         refreshLeaderboard();
     },
- 
+
     handleSearch: debounce((e) => {
         state.searchQuery = e.target.value.trim();
         state.currentPage = 1;
         refreshLeaderboard();
-    }, 300),
- 
-    handlePageChange(direction) {
-        if (direction === 'prev' && state.currentPage > 1) {
-            state.currentPage--;
-        } else if (direction === 'next' && state.currentPage < state.totalPages) {
-            state.currentPage++;
-        }
-        updateURL();
-        refreshLeaderboard();
-    },
- 
-    handleVideoError(e) {
-        console.error('Video loading error:', e);
-        const section = e.target.closest('.video-section');
-        if (section) {
-            section.style.backgroundColor = '#1a1a1a';
-            e.target.style.display = 'none';
-        }
-    },
- 
-    handleVideoLoad(video) {
-        AnimationController.fadeIn(video.closest('.video-section'));
-    },
- 
-    handleTournamentUpdate(e) {
-        TournamentManager.updateStandings(e.detail.standings);
-    },
- 
-    handleAchievementUnlock(e) {
-        AchievementSystem.unlockAchievement(e.detail);
+    }, 300)
+};
+
+// Initialize everything when the DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    try {
+        // Initialize managers
+        window.webSocketManager = WebSocketManager;
+        window.webSocketManager.connect();
+        
+        window.leaderboardManager = new LeaderboardManager(window.webSocketManager);
+        
+        // Initialize state and event listeners
+        initializeState();
+        EventHandlers.setupEventListeners();
+
+        // Initial data load
+        Promise.all([
+            refreshLeaderboard(),
+            LeaderboardAPI.getUserStats()
+        ]).then(([leaderboardData, userStats]) => {
+            updateUI(leaderboardData);
+            updateUserStats(userStats);
+        }).catch(error => {
+            console.error('Initialization error:', error);
+            showError('Failed to initialize leaderboard');
+        });
+
+        // Start periodic updates
+        setInterval(refreshLeaderboard, CONFIG.REFRESH_INTERVAL);
+        
+        console.log('Leaderboard system initialized successfully');
+    } catch (error) {
+        console.error('Error during initialization:', error);
+        showError('Failed to initialize leaderboard system');
     }
- };
- 
- // Initialization
- function initializeApp() {
-    initializeState();
-    EventHandlers.setupEventListeners();
-    WebSocketManager.connect();
-    
-    // Initialize Managers
-    TournamentManager.initialize({
-        id: 'current-tournament',
-        name: 'Weekly Challenge',
-        startTime: new Date(),
-        endTime: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-    });
- 
-    AchievementSystem.initialize([
-        // Add initial achievements
-    ]);
- 
-    // Initial data load
-    Promise.all([
-        refreshLeaderboard(),
-        LeaderboardAPI.getUserStats()
-    ]).then(([leaderboardData, userStats]) => {
-        updateUI(leaderboardData);
-        updateUserStats(userStats);
-    }).catch(error => {
-        console.error('Initialization error:', error);
-        showError('Failed to initialize leaderboard');
-    });
- 
-    // Start periodic updates
-    setInterval(refreshLeaderboard, CONFIG.REFRESH_INTERVAL);
- }
- 
- // Helper Functions
- function updateURL() {
-    const params = new URLSearchParams({
-        page: state.currentPage,
-        filter: state.filter,
-        timeRange: state.timeRange
-    });
-    if (state.squadronFilter) params.set('squadron', state.squadronFilter);
-    if (state.selectedDivision) params.set('division', state.selectedDivision);
-    
-    window.history.replaceState(
-        {}, 
-        '', 
-        `${window.location.pathname}?${params.toString()}`
-    );
- }
- 
- function debounce(fn, delay) {
+});
+
+// Helper Functions
+function updateURL() {
+    const params = new URLSearchParams();
+    for (const [key, value] of Object.entries(state)) {
+        if (value !== null && value !== undefined) {
+            params.set(key, value);
+        }
+    }
+    window.history.replaceState({}, '', `${window.location.pathname}?${params}`);
+}
+
+function debounce(fn, delay) {
     let timeoutId;
     return function (...args) {
         clearTimeout(timeoutId);
         timeoutId = setTimeout(() => fn.apply(this, args), delay);
     };
- }
- 
- function showError(message) {
+}
+function handlePageChange(direction) {
+  }
+      if (direction === 'prev' && state.currentPage > 1) {
+        state.currentPage--;
+    } else if (direction === 'next' && state.currentPage < state.totalPages) {
+        state.currentPage++;
+    }
+    refreshLeaderboard();
+
+function showError(message) {
     const notification = document.createElement('div');
     notification.className = 'fixed top-4 right-4 bg-red-500/90 text-white px-6 py-3 rounded-lg shadow-lg z-50';
     notification.textContent = message;
     document.body.appendChild(notification);
     setTimeout(() => notification.remove(), 5000);
- }
- 
- // Start the application
- document.addEventListener('DOMContentLoaded', initializeApp);
+}

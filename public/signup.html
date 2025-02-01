@@ -3,148 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="StelTrek Academy - Sign Up">
-    <title>Sign Up - StelTrek Academy</title>
-    <meta http-equiv="Content-Security-Policy" content="
-        default-src 'self'; 
-        script-src 'self'; 
-        style-src 'self'; 
-        frame-src 'self' https://www.sora.com; 
-        child-src 'self' https://www.sora.com;
-    ">
-    <link rel="stylesheet" href="/css/main.css">
+    <title>SharedStars Academy</title>
+
+    <!-- Tailwind CSS and DaisyUI -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@2.6.0/dist/full.css" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+
+    <!-- AOS CSS (For Animations) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+    </style>
 </head>
 
-<body>
-    <!-- Skip to Main Content -->
-    <a href="#signup-form" class="skip-link">Skip to sign-up form</a>
+<body class="bg-slate-900 font-inter flex flex-col min-h-screen">
 
-    <!-- Header -->
-    <header class="site-header">
-        <nav>
-            <ul>
-                <li><a href="/index.html">Home</a></li>
-                <li><a href="/why-steltrek.html">Why StelTrek</a></li>
-                <li><a href="/about.html">About</a></li>
-                <li><a href="/leaderboard.html">Leaderboard</a></li>
-                <li><a href="/login.html">Login</a></li>
-                <li><a href="/merchandise.html">Retail Store</a></li>
-                <li><a href="/profile.html">Profile</a></li>
-                <li><a href="/signup.html" aria-current="page">Sign Up</a></li>
-                <li><a href="/academy.html">StelTrek Academy</a></li>
-                <li><a href="/welcome.html">Welcome</a></li>
-                <li><a href="/subscribe.html">Subscribe</a></li>
-            </ul>
+<!-- 🔹 Background Video Section -->
+<section class="fixed inset-0 w-full h-full overflow-hidden -z-10">
+    <video id="heroVideo" autoplay muted loop playsinline class="w-full h-full object-cover">
+        <source src="/videos/signup1.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+    <!-- Dark Overlay for Readability -->
+    <div class="absolute inset-0 bg-black/60"></div>
+</section>
 
-            <!-- Language Selector -->
-            <div class="language-selector">
-                <button class="language-flag" data-lang="en" aria-label="Select English">🇺🇸 English</button>
-                <button class="language-flag" data-lang="zh" aria-label="Select Simplified Chinese">🇨🇳 简体中文</button>
-                <button class="language-flag" data-lang="ko" aria-label="Select Korean">🇰🇷 한국어</button>
-                <button class="language-flag" data-lang="es" aria-label="Select Spanish">🇪🇸 Español</button>
+<!-- 🔹 Header (Centered Navigation) -->
+<header class="fixed top-0 left-0 w-full bg-gray-900/95 backdrop-blur-lg flex flex-col items-center py-4 z-50 border-b border-white/10">
+    <a href="/" class="flex items-center space-x-3 mb-2">
+        <img src="/css/images/SharedStars.svg" alt="SharedStars Logo" class="h-16 transition-all duration-300">
+    </a>
+    <nav class="flex flex-wrap justify-center space-x-6">
+        <a href="/index.html" class="text-white text-xl hover:text-blue-400 transition-colors">Home</a>
+        <a href="/why-sharedstars.html" class="text-white text-xl hover:text-blue-400 transition-colors">Why SharedStars</a>
+        <a href="/about.html" class="text-white text-xl hover:text-blue-400 transition-colors">About</a>
+        <a href="/leaderboard.html" class="text-white text-xl hover:text-blue-400 transition-colors">Leaderboard</a>
+        <a href="/login.html" class="text-white text-xl hover:text-blue-400 transition-colors">Login</a>
+        <a href="/merchandise.html" class="text-white text-xl hover:text-blue-400 transition-colors">Retail Store</a>
+        <a href="/academy.html" class="text-white text-xl hover:text-blue-400 transition-colors">Academy</a>
+    </nav>
+</header>
+
+<!-- 🔹 Signup Section (Now Allows Scrolling) -->
+<main class="flex-grow flex flex-col items-center justify-center px-4 pt-32 pb-20">
+    <div class="bg-gray-800/90 p-12 rounded-lg shadow-2xl max-w-xl w-full backdrop-blur-md">
+        <h2 class="text-3xl font-bold text-center mb-8 text-blue-400">Create Your Account</h2>
+
+        <!-- Hardcoded Signup Form -->
+        <form id="signupForm" method="POST" class="space-y-6">
+            <div class="form-control">
+                <label for="username" class="block text-lg font-medium">Username</label>
+                <input type="text" id="username" name="username" class="w-full h-12 p-3 rounded bg-gray-700 border border-gray-600 text-white text-lg" required autocomplete="username">
             </div>
-        </nav>
-    </header>
 
-    <!-- Main Content -->
-    <main class="signup-page" role="main">
-        <section class="signup-container">
-            <h1 id="signup-title">Sign Up for StelTrek Academy</h1>
-            <p id="signup-instructions">Join StelTrek Academy to prepare for your journey to the stars.</p>
+            <div class="form-control">
+                <label for="email" class="block text-lg font-medium">Email Address</label>
+                <input type="email" id="email" name="email" class="w-full h-12 p-3 rounded bg-gray-700 border border-gray-600 text-white text-lg" required autocomplete="email">
+            </div>
 
-            <form id="signup-form" class="signup-form" novalidate>
-                <!-- Full Name -->
-                <div class="form-group">
-                    <label for="signup-name">Full Name: <span class="required">*</span></label>
-                    <input type="text" id="signup-name" name="name" required aria-required="true" autocomplete="name">
-                    <span id="name-error" class="error-message" role="alert"></span>
-                </div>
+            <div class="form-control">
+                <label for="password" class="block text-lg font-medium">Password</label>
+                <input type="password" id="password" name="password" class="w-full h-12 p-3 rounded bg-gray-700 border border-gray-600 text-white text-lg" required autocomplete="new-password">
+            </div>
 
-                <!-- Email -->
-                <div class="form-group">
-                    <label for="signup-email">Email: <span class="required">*</span></label>
-                    <input type="email" id="signup-email" name="email" required aria-required="true" autocomplete="email">
-                    <span id="email-error" class="error-message" role="alert"></span>
-                </div>
+            <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded text-lg mt-6">
+                Sign Up
+            </button>
+        </form>
+    </div>
+</main>
 
-                <!-- Password -->
-                <div class="form-group">
-                    <label for="signup-password">Password: <span class="required">*</span></label>
-                    <div class="password-container">
-                        <input type="password" id="signup-password" name="password" required minlength="8" aria-required="true" autocomplete="new-password">
-                        <button type="button" class="toggle-password" aria-label="Toggle password visibility">👁️</button>
-                    </div>
-                    <div id="password-requirements">
-                        Password must contain:
-                        <ul>
-                            <li>At least 8 characters</li>
-                            <li>One uppercase letter</li>
-                            <li>One lowercase letter</li>
-                            <li>One number</li>
-                        </ul>
-                    </div>
-                    <span id="password-error" class="error-message" role="alert"></span>
-                </div>
+<!-- 🔹 Footer (Now Displays Correctly) -->
+<footer class="bg-gray-900 text-white py-12 mt-auto">
+    <div class="container mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center md:text-left">
+        <div>
+            <h3 class="font-bold text-lg text-blue-400">About</h3>
+            <ul class="space-y-2 mt-4">
+                <li><a href="/about.html" class="hover:text-blue-400 transition-colors">Our Story</a></li>
+                <li><a href="/academy.html" class="hover:text-blue-400 transition-colors">Space Academy</a></li>
+            </ul>
+        </div>
+        <div>
+            <h3 class="font-bold text-lg text-blue-400">Community</h3>
+            <ul class="space-y-2 mt-4">
+                <li><a href="/events.html" class="hover:text-blue-400 transition-colors">Events</a></li>
+                <li><a href="/forums.html" class="hover:text-blue-400 transition-colors">Forums</a></li>
+            </ul>
+        </div>
+    </div>
+</footer>
 
-                <!-- Terms and Conditions -->
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" id="terms-checkbox" required aria-required="true">
-                        I agree to the <a href="terms.html" target="_blank" rel="noopener noreferrer">Terms and Conditions</a>
-                    </label>
-                    <span id="terms-error" class="error-message" role="alert"></span>
-                </div>
+<!-- ✅ Load AOS Properly -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        console.log("✅ JavaScript Loaded - Ensuring Full Functionality");
 
-                <!-- Submit Button -->
-                <button type="submit" class="submit-button" aria-label="Sign up for StelTrek Academy">Sign Up</button>
-                <div id="form-error" class="error-message" role="alert"></div>
-            </form>
-
-            <p class="login-link">
-                Already have an account? <a href="login.html">Log in here</a>
-            </p>
-        </section>
-    </main>
-
-    <!-- Footer -->
-    <footer role="contentinfo">
-        <p>&copy; 2025 StelTrek Academy. All rights reserved.</p>
-    </footer>
-
-    <!-- Scripts -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const savedLang = localStorage.getItem('preferredLanguage') || 'en';
-            document.documentElement.lang = savedLang;
-
-            const elements = document.querySelectorAll('.language-flag');
-            elements.forEach(button => {
-                button.addEventListener('click', () => {
-                    const lang = button.dataset.lang;
-                    localStorage.setItem('preferredLanguage', lang);
-                    document.documentElement.lang = lang;
-                    applyTranslations(lang);
-                });
+        if (typeof AOS !== "undefined") {
+            AOS.init({
+                duration: 1000,
+                easing: 'ease',
+                once: true,
             });
-        });
-
-        function applyTranslations(lang) {
-            const translations = {
-                en: {
-                    signupTitle: "Sign Up for StelTrek Academy",
-                    signupInstructions: "Join StelTrek Academy to prepare for your journey to the stars."
-                },
-                zh: {
-                    signupTitle: "斯特尔特雷克学院注册",
-                    signupInstructions: "加入斯特尔特雷克学院，准备好您的星际之旅。"
-                },
-                // Add other languages here...
-            };
-
-            document.getElementById('signup-title').textContent = translations[lang]?.signupTitle || translations['en'].signupTitle;
-            document.getElementById('signup-instructions').textContent = translations[lang]?.signupInstructions || translations['en'].signupInstructions;
+        } else {
+            console.error("❌ AOS failed to load.");
         }
-    </script>
-    <script src="/js/menu.js"></script>
+
+        document.getElementById("signupForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            alert("✅ Signup Successful! Redirecting...");
+            window.location.href = "/dashboard.html";
+        });
+    });
+</script>
+
 </body>
 </html>

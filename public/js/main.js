@@ -1,422 +1,201 @@
-class UIHandler {
-    constructor() {
-        console.log('Initializing UI Handler');
-        this.initializeAuthToken();
-        this.initializeToggleButtons();
-        this.initializeMenuControls();
-        this.currentAssessmentQuestion = 0;
-        this.assessmentAnswers = [];
-        this.isShowingAI = false; // Prevent multiple AI windows
-    }
+// In js/main.js
+import { initAPI } from './modules/core/dashboard.js';
+import { initAuth } from './modules/auth/signup.js';
 
-    initializeAuthToken() {
-        const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMjM0NSIsImVtYWlsIjoidXNlckBleGFtcGxlLmNvbSIsImlhdCI6MTczNjIxMjcwNSwiZXhwIjoxNzUxNzY0NzA1fQ.PbmVxu6wMiuM7FWQcGpKDp5Y8UzSWAqqJsAI3-j0u1U';
-        if (!localStorage.getItem('authToken')) {
-            localStorage.setItem('authToken', token);
-        }
-        console.log('Auth token initialized:', localStorage.getItem('authToken'));
-    }
+document.addEventListener('DOMContentLoaded', () => {
+  initAPI();
+  initAuth();
+  // other initialization code...
+});
+// js/main.js
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Initializing UI Handler');
 
-    initializeMenuControls() {
-        // Menu elements
-        const menuTrigger = document.querySelector('.menu-trigger');
-        const menuOverlay = document.getElementById('menuOverlay');
-        const closeButton = document.querySelector('.close-button');
+    // Cache DOM elements
+    const ui = {
+        video: document.getElementById('heroVideo'),
+        menuToggle: document.getElementById('menuToggle'),
+        menuOverlay: document.getElementById('menuOverlay'),
+        closeMenu: document.getElementById('closeMenu'),
+        toggleOptions: document.querySelectorAll('.toggle-option'),
+        signupDialog: document.getElementById('signupDialog')
+    };
 
-        if (menuTrigger && menuOverlay && closeButton) {
-            menuTrigger.addEventListener('click', () => {
-                menuOverlay.classList.remove('hidden');
-                menuOverlay.classList.add('visible');
-                document.body.style.overflow = 'hidden'; // Prevent scrolling when menu is open
-            });
-
-            closeButton.addEventListener('click', () => {
-                menuOverlay.classList.remove('visible');
-                menuOverlay.classList.add('hidden');
-                document.body.style.overflow = ''; // Restore scrolling
-            });
-
-            // Close menu on escape key
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && menuOverlay.classList.contains('visible')) {
-                    closeButton.click();
-                }
-            });
-        }
-
-        // Language selector with improved handling
-        const languageButtons = document.querySelectorAll('.language-option');
-        const savedLanguage = localStorage.getItem('selectedLanguage') || 'en';
-
-        languageButtons.forEach(button => {
-            // Set initial active state
-            if (button.dataset.lang === savedLanguage) {
-                button.classList.add('active');
-            }
-
-            button.addEventListener('click', (event) => {
-                languageButtons.forEach(btn => btn.classList.remove('active'));
-                event.target.classList.add('active');
-                
-                const selectedLanguage = event.target.dataset.lang;
-                localStorage.setItem('selectedLanguage', selectedLanguage);
-                this.handleLanguageChange(selectedLanguage);
-            });
+    // Menu functionality
+    if (ui.menuToggle && ui.menuOverlay) {
+        ui.menuToggle.addEventListener('click', () => {
+            ui.menuOverlay.classList.remove('translate-x-full');
+            document.body.style.overflow = 'hidden';
         });
 
-        // Header background on scroll
-        const header = document.querySelector('.header');
-        let lastScroll = 0;
-        
-        window.addEventListener('scroll', () => {
-            const currentScroll = window.scrollY;
-            
-            if (currentScroll > 50) {
-                header.style.background = 'rgba(0, 0, 0, 0.8)';
-                if (currentScroll > lastScroll) {
-                    // Scrolling down
-                    header.style.transform = 'translateY(-100%)';
-                } else {
-                    // Scrolling up
-                    header.style.transform = 'translateY(0)';
-                }
+        ui.closeMenu.addEventListener('click', () => {
+            ui.menuOverlay.classList.add('translate-x-full');
+            document.body.style.overflow = '';
+        });
+    }
+
+    // Video initialization
+    if (ui.video) {
+        ui.video.play().catch(error => {
+            console.error('❌ Video error:', error);
+            ui.video.closest('.video-container').style.backgroundColor = '#000';
+        });
+    }
+
+    // Training Toggle: Example of mode selection
+    document.querySelectorAll('.toggle-option').forEach(option => {
+        option.addEventListener('click', function() {
+            const mode = this.getAttribute('data-mode');
+            localStorage.setItem('trainingMode', mode);
+            if (mode === 'ai') {
+                window.location.href = '/ai-training';
             } else {
-                header.style.background = 'transparent';
-                header.style.transform = 'translateY(0)';
+                openSignupPopup();
             }
-            
-            lastScroll = currentScroll;
         });
-    }
+    });
 
-    handleLanguageChange(language) {
-        console.log(`Changing language to: ${language}`);
-        // Implement language change logic here
-    }
+     // Function definitions for AI Welcome Experience, Assessment, Signup Popup, etc.
+     async function showAIWelcomeExperience() {
+        console.log('Initializing AI Welcome Experience...');
 
-    initializeToggleButtons() {
-        console.log('Initializing toggle buttons');
-        const selfPacedButton = document.querySelector('.toggle-option.manual');
-        const aiCoachButton = document.querySelector('.toggle-option.ai');
-    
-        if (!selfPacedButton || !aiCoachButton) {
-            console.warn('Toggle buttons not found in DOM');
-            return;
-        }
-    
-        selfPacedButton.addEventListener('click', (e) => {
-            e.preventDefault(); // Prevent navigation
-            e.stopPropagation(); // Stop event bubbling
-            if (selfPacedButton.classList.contains('active')) return;
-            console.log('Self-paced clicked');
-            this.handleSelfPacedMode(selfPacedButton, aiCoachButton);
-        });
-    
-        aiCoachButton.addEventListener('click', (e) => {
-            e.preventDefault(); // Prevent navigation
-            e.stopPropagation(); // Stop event bubbling
-            if (aiCoachButton.classList.contains('active')) return;
-            console.log('AI coach clicked');
-            this.handleAICoachMode(selfPacedButton, aiCoachButton);
-        });
-    }
-    
-    async showAIWelcomeExperience() {
-        try {
-            console.log('Initializing AI Welcome Experience...');
-            
-            // Create modal overlay
-            const modalOverlay = document.createElement('div');
-            modalOverlay.className = 'ai-modal-overlay';
-            
-            const modalContent = document.createElement('div');
-            modalContent.className = 'ai-modal-content';
-            
-            modalContent.innerHTML = `
-                <div class="ai-welcome-steps">
-                    <h2>Initializing Your AI Personal Coach</h2>
-                    <div class="ai-initialization-steps">
-                        <div class="step">
-                            <div class="step-icon">⚡</div>
-                            <p>Connecting to AI Training Systems</p>
-                        </div>
-                        <div class="step">
-                            <div class="step-icon">🔍</div>
-                            <p>Building Your Personal Training Profile</p>
-                        </div>
-                        <div class="step">
-                            <div class="step-icon">🎯</div>
-                            <p>Preparing Customized Training Path</p>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            modalOverlay.appendChild(modalContent);
-            document.body.appendChild(modalOverlay);
-    
-            // Animate initialization steps
-            const steps = modalOverlay.querySelectorAll('.step');
-            for (let i = 0; i < steps.length; i++) {
-                steps[i].classList.add('active');
-                await new Promise(resolve => setTimeout(resolve, 1000));
-            }
-    
-            // Wait a moment after last step
-            await new Promise(resolve => setTimeout(resolve, 500));
-    
-            // Transition to assessment
-            const assessmentQuestions = [
-                {
-                    question: "What is your primary motivation for space training?",
-                    options: [
-                        "Space Tourism",
-                        "Professional Development",
-                        "Research & Science",
-                        "Space Colonization"
-                    ]
-                }
-            ];
-    
-            // Fade out initialization content
-            modalContent.style.opacity = '0';
-            await new Promise(resolve => setTimeout(resolve, 300));
-            
-            // Show first question
-            this.showAssessmentQuestion(modalContent, assessmentQuestions[0]);
-            modalContent.style.opacity = '1';
-    
-        } catch (error) {
-            console.error('Error in AI Welcome Experience:', error);
-            this.handleAIInitializationError(error.message);
-        }
-    }
-    
-    async showAssessmentQuestion(modalContent, questionData) {
+        
+        const modalOverlay = document.createElement('div');
+        modalOverlay.className = 'ai-modal-overlay fixed inset-0 bg-black/50 flex justify-center items-center z-50';
+
+        const modalContent = document.createElement('div');
+        modalContent.className = 'ai-modal-content bg-white p-6 rounded-lg shadow-lg max-w-md mx-auto text-center';
+        
         modalContent.innerHTML = `
-            <div class="assessment-interface">
-                <h2>Space Training Assessment</h2>
-                <div class="assessment-section">
-                    <h3>Question ${this.currentAssessmentQuestion + 1} of 3</h3>
-                    <p>${questionData.question}</p>
-                    <div class="options">
-                        ${questionData.options.map(option => 
-                            `<button class="option-btn" type="button">${option}</button>`
-                        ).join('')}
-                    </div>
-                </div>
-                <div class="assessment-progress">
-                    <div class="progress-bar">
-                        <div class="progress" style="width: ${(this.currentAssessmentQuestion / 3) * 100}%"></div>
-                    </div>
-                </div>
+            <h2 class="text-2xl font-bold text-gray-900">Initializing Your AI Personal Coach</h2>
+            <div class="ai-initialization-steps">
+                <div class="step"><div class="step-icon">⚡</div> Connecting to AI Training Systems</div>
+                <div class="step"><div class="step-icon">🔍</div> Building Your Personal Training Profile</div>
+                <div class="step"><div class="step-icon">🎯</div> Preparing Customized Training Path</div>
             </div>
+            <button class="close-ai-modal bg-gray-300 mt-4 px-4 py-2 rounded-lg hover:bg-gray-400">Close</button>
         `;
-    
-        // Add click handlers to option buttons
-        const optionButtons = modalContent.querySelectorAll('.option-btn');
-        optionButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                this.handleAssessmentAnswer(button.textContent, modalContent);
-            });
-        });
-    }
-    async animateInitializationSteps(overlay) {
-        const steps = overlay.querySelectorAll('.step');
+
+        modalOverlay.appendChild(modalContent);
+        document.body.appendChild(modalOverlay);
+
+        // Animate steps
+        const steps = modalContent.querySelectorAll('.step');
         for (let i = 0; i < steps.length; i++) {
-            steps[i].style.opacity = '0';
-            steps[i].style.transform = 'translateY(20px)';
-            await new Promise(resolve => setTimeout(resolve, 500));
-            steps[i].style.opacity = '1';
-            steps[i].style.transform = 'translateY(0)';
             steps[i].classList.add('active');
             await new Promise(resolve => setTimeout(resolve, 1000));
         }
+
+        modalContent.querySelector(".close-ai-modal").addEventListener("click", () => {
+            modalOverlay.remove();
+        });
     }
 
-    async startAssessment() {
+    // ✅ Initialize Training Assessment
+    async function startAssessment() {
         console.log('Starting assessment...');
         const overlay = document.querySelector('.mode-overlay');
-        
+
         const assessmentQuestions = [
-            {
-                question: "What is your primary motivation for space training?",
-                options: [
-                    "Space Tourism",
-                    "Professional Development",
-                    "Research & Science",
-                    "Space Colonization"
-                ]
-            },
-            {
-                question: "What's your current fitness level?",
-                options: [
-                    "Beginner",
-                    "Intermediate",
-                    "Advanced",
-                    "Professional Athlete"
-                ]
-            },
-            {
-                question: "What's your background in space-related studies?",
-                options: [
-                    "No Prior Experience",
-                    "Self-Taught Enthusiast",
-                    "Academic Background",
-                    "Industry Professional"
-                ]
-            }
+            { question: "What is your primary motivation for space training?", options: ["Space Tourism", "Professional Development", "Research & Science", "Space Colonization"] },
+            { question: "What's your current fitness level?", options: ["Beginner", "Intermediate", "Advanced", "Professional Athlete"] },
+            { question: "What's your background in space-related studies?", options: ["No Experience", "Self-Taught Enthusiast", "Academic Background", "Industry Professional"] }
         ];
 
-        this.showAssessmentQuestion(overlay, assessmentQuestions[0]);
+        showAssessmentQuestion(overlay, assessmentQuestions[0]);
     }
 
-    async showAssessmentQuestion(modalContent, questionData) {
-        // Fade out current content
-        await this.fadeContent(modalContent);
-        
+    async function showAssessmentQuestion(modalContent, questionData) {
         modalContent.innerHTML = `
             <div class="assessment-interface">
                 <h2>Space Training Assessment</h2>
-                <div class="assessment-section">
-                    <h3>Question ${this.currentAssessmentQuestion + 1} of 3</h3>
-                    <p>${questionData.question}</p>
-                    <div class="options">
-                        ${questionData.options.map(option => 
-                            `<button class="option-btn">${option}</button>`
-                        ).join('')}
-                    </div>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress" style="width: ${(this.currentAssessmentQuestion / 3) * 100}%"></div>
-                </div>
-            </div>
-        `;
-    
-        // Fade in new content
-        await this.fadeContent(modalContent, 'in');
-    }
-    
-    async fadeContent(element, direction = 'out') {
-        element.style.opacity = direction === 'out' ? '0' : '1';
-        await new Promise(resolve => setTimeout(resolve, 300));
-    }
-    
-    async animateTransition(element, direction = 'out') {
-        return new Promise(resolve => {
-            element.style.opacity = direction === 'out' ? '0' : '1';
-            element.style.transition = 'opacity 0.3s ease';
-            setTimeout(resolve, 300);
-        });
-    }
-
-    getNextQuestion() {
-        const questions = [
-            "What's your current fitness level?",
-            "What's your background in space-related studies?",
-            "What's your availability for training per week?"
-        ];
-        return questions[this.currentAssessmentQuestion - 1];
-    }
-
-    getOptionsForQuestion(questionIndex) {
-        const allOptions = [
-            ["Beginner", "Intermediate", "Advanced", "Professional Athlete"],
-            ["No Experience", "Self-Taught", "Academic Background", "Professional"],
-            ["5-10 hours", "10-15 hours", "15-20 hours", "20+ hours"]
-        ];
-        return allOptions[questionIndex - 1];
-    }
-
-    async handleAssessmentAnswer(answer) {
-        this.assessmentAnswers.push(answer);
-        this.currentAssessmentQuestion++;
-
-        const overlay = document.querySelector('.mode-overlay');
-        
-        if (this.currentAssessmentQuestion >= 3) {
-            await this.animateTransition(overlay);
-            this.showTrainingPlan();
-        } else {
-            const nextQuestion = {
-                question: this.getNextQuestion(),
-                options: this.getOptionsForQuestion(this.currentAssessmentQuestion)
-            };
-            await this.animateTransition(overlay);
-            this.showAssessmentQuestion(overlay, nextQuestion);
-        }
-    }
-
-    async animateTransition(element) {
-        element.style.opacity = '0';
-        await new Promise(resolve => setTimeout(resolve, 300));
-        element.style.opacity = '1';
-    }
-
-    async showTrainingPlan() {
-        const overlay = document.querySelector('.mode-overlay');
-        overlay.innerHTML = `
-            <div class="training-plan">
-                <h2>Your Customized Training Plan</h2>
-                <div class="plan-sections">
-                    <div class="plan-section">
-                        <h3>Core Training Modules</h3>
-                        <ul>
-                            <li>Basic Space Science</li>
-                            <li>Physical Conditioning</li>
-                            <li>Space Safety Protocols</li>
-                        </ul>
-                    </div>
-                    <div class="plan-section">
-                        <h3>Specialized Focus</h3>
-                        <p>Based on your interests in ${this.assessmentAnswers[0]}</p>
-                    </div>
-                    <div class="plan-section">
-                        <h3>Weekly Schedule</h3>
-                        <p>Recommended: ${this.assessmentAnswers[2] || '10 hours/week'}</p>
-                    </div>
-                </div>
-                <button class="begin-training-btn">Begin Your Training</button>
-            </div>
-        `;
-
-        const beginButton = overlay.querySelector('.begin-training-btn');
-        beginButton.addEventListener('click', () => {
-            this.beginTrainingJourney();
-        });
-    }
-
-    async beginTrainingJourney() {
-        console.log('Beginning training journey...');
-        const overlay = document.querySelector('.mode-overlay');
-        overlay.innerHTML = `
-            <div class="training-interface">
-                <h2>Module 1: Introduction to Space</h2>
-                <div class="training-content">
-                    <div class="lesson-progress">
-                        <div class="progress-bar">
-                            <div class="progress" style="width: 0%"></div>
-                        </div>
-                        <p>Progress: 0/5 Lessons Complete</p>
-                    </div>
-                    <div class="current-lesson">
-                        <h3>Lesson 1: Basic Space Concepts</h3>
-                        <div class="lesson-content">
-                            <p>Let's start with fundamental concepts about space...</p>
-                            <button class="next-lesson-btn">Start Lesson</button>
-                        </div>
-                    </div>
+                <p>${questionData.question}</p>
+                <div class="options">
+                    ${questionData.options.map(option => `<button class="option-btn">${option}</button>`).join('')}
                 </div>
             </div>
         `;
 
-        const nextLessonBtn = overlay.querySelector('.next-lesson-btn');
-        nextLessonBtn.addEventListener('click', () => {
-            this.startLesson(1);
+        modalContent.querySelectorAll('.option-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                handleAssessmentAnswer(button.textContent, modalContent);
+            });
         });
     }
 
-    async startLesson(lessonNumber) {
+    async function handleAssessmentAnswer(answer, modalContent) {
+        console.log(`User selected: ${answer}`);
+        modalContent.innerHTML = `<h2>Thank you for completing the assessment!</h2>`;
+    }
+
+    // ✅ Initialize Signup Popup
+    function openSignupPopup() {
+        const signupPopup = document.createElement("div");
+        signupPopup.innerHTML = `
+            <div class="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
+                <div class="bg-white p-6 rounded-lg shadow-lg max-w-md mx-auto text-center">
+                    <h2 class="text-2xl font-bold text-gray-900">Join Our Training Program</h2>
+                    <p class="text-gray-600 mt-2">Sign up to start your journey!</p>
+                    <div class="flex gap-4 mt-4 justify-center">
+                        <a href="/signup" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">Signup Now</a>
+                        <button class="close-signup bg-gray-300 px-6 py-3 rounded-lg hover:bg-gray-400">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(signupPopup);
+
+        signupPopup.querySelector(".close-signup").addEventListener("click", () => {
+            signupPopup.remove();
+        });
+    }
+
+        // WebSocket initialization example:
+        const socket = new WebSocket("ws://localhost:3000"); 
+        socket.onopen = () => console.log("✅ Connected to WebSocket Server");
+        socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            console.log("Received data:", data);
+        };
+        socket.onerror = (error) => console.error("❌ WebSocket Error:", error);
+        socket.onclose = () => console.warn("⚠️ WebSocket Disconnected!");
+    
+
+async beginTrainingJourney() {
+    console.log('🚀 Beginning training journey...');
+    const overlay = document.querySelector('.mode-overlay');
+
+    overlay.innerHTML = `
+        <div class="training-interface">
+            <h2 class="text-xl font-bold text-gray-900">Module 1: Introduction to Space</h2>
+            <div class="training-content p-4">
+                <div class="lesson-progress mb-4">
+                    <div class="progress-bar w-full bg-gray-200 rounded">
+                        <div class="progress bg-blue-600 h-2 rounded transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                    <p class="text-gray-600 mt-2">Progress: <span id="lessonProgressCount">0</span>/5 Lessons Complete</p>
+                </div>
+                <div class="current-lesson p-4 bg-white shadow rounded">
+                    <h3 class="text-lg font-semibold text-gray-800">Lesson 1: Basic Space Concepts</h3>
+                    <div class="lesson-content mt-2">
+                        <p>Let's start with fundamental concepts about space...</p>
+                        <button class="next-lesson-btn bg-blue-500 text-white px-4 py-2 mt-4 rounded hover:bg-blue-700 transition">Start Lesson</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Attach event listener to Start Lesson button
+    overlay.querySelector('.next-lesson-btn').addEventListener('click', () => {
+        this.startLesson(1);
+    });
+}
+
+async startLesson(lessonNumber) {
+    try {
+        console.log(`📖 Starting Lesson ${lessonNumber}...`);
+
         const lessons = {
             1: {
                 title: "Basic Space Concepts",
@@ -433,12 +212,7 @@ class UIHandler {
                     {
                         type: "interactive",
                         question: "At what height does space begin?",
-                        options: [
-                            "50 kilometers",
-                            "100 kilometers (Kármán line)",
-                            "150 kilometers",
-                            "200 kilometers"
-                        ],
+                        options: ["50 kilometers", "100 kilometers (Kármán line)", "150 kilometers", "200 kilometers"],
                         correct: 1
                     },
                     {
@@ -455,6 +229,214 @@ class UIHandler {
                 nextLesson: "Space Environment Challenges"
             }
         };
+
+        // ✅ Validate lesson existence
+        if (!lessons[lessonNumber]) {
+            console.error(`❌ Error: Lesson ${lessonNumber} not found.`);
+            return;
+        }
+
+        const lesson = lessons[lessonNumber];
+
+        console.log(`📝 Lesson Loaded: ${lesson.title}`);
+        console.log(`⏳ Duration: ${lesson.duration}`);
+
+        // ✅ Display lesson sections
+        lesson.sections.forEach((section, index) => {
+            console.log(`📌 Section ${index + 1}: ${section.type}`);
+            
+            if (section.type === "content") {
+                console.log(`📖 ${section.title}: ${section.content}`);
+            } else if (section.type === "interactive") {
+                console.log(`❓ ${section.question}`);
+                section.options.forEach((option, i) => {
+                    console.log(`   ${i + 1}. ${option}`);
+                });
+            } else if (section.type === "video_placeholder") {
+                console.log(`🎥 ${section.description}: ${section.content}`);
+            }
+        });
+
+        console.log(`➡️ Next Lesson: ${lesson.nextLesson}`);
+        
+    } catch (error) {
+        console.error("❌ Error in startLesson:", error);
+    }
+}
+
+// Language handling in main.js
+const languageSystem = {
+    translations: {
+        en: {
+            heroTitle: "From Earth to Space in 36 Months",
+            subtitle: "Like Tesla's FSD for Space Training: Intelligent, Adaptive, Revolutionary"
+        },
+        zh: {
+            heroTitle: "36个月从地球到太空",
+            subtitle: "像特斯拉FSD一样的太空训练：智能、适应性、革命性"
+        },
+        ko: {
+            heroTitle: "지구에서 우주까지 36개월",
+            subtitle: "테슬라 FSD와 같은 우주 훈련: 지능적, 적응적, 혁명적"
+        },
+        es: {
+            heroTitle: "De la Tierra al Espacio en 36 Meses",
+            subtitle: "Como el FSD de Tesla para el entrenamiento espacial: Inteligente, Adaptativo, Revolucionario"
+        }
+    },
+
+    init() {
+        this.buttons = document.querySelectorAll('.language-option');
+        this.contentElements = document.querySelectorAll('[data-i18n]');
+        this.setupListeners();
+        this.loadSavedLanguage();
+    },
+
+    setupListeners() {
+        this.buttons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                const lang = e.target.closest('button').dataset.lang;
+                this.setLanguage(lang);
+                this.updateActiveButton(button);
+                document.getElementById('menuOverlay').classList.add('translate-x-full');
+            });
+        });
+    },
+
+    setLanguage(lang) {
+        this.contentElements.forEach(el => {
+            const key = el.dataset.i18n;
+            if (this.translations[lang]?.[key]) {
+                el.textContent = this.translations[lang][key];
+            }
+        });
+        localStorage.setItem('preferredLanguage', lang);
+    },
+
+    updateActiveButton(activeButton) {
+        this.buttons.forEach(btn => btn.classList.remove('active'));
+        activeButton.classList.add('active');
+    },
+
+    loadSavedLanguage() {
+        const saved = localStorage.getItem('preferredLanguage') || 'en';
+        const button = document.querySelector(`[data-lang="${saved}"]`);
+        if (button) {
+            this.setLanguage(saved);
+            this.updateActiveButton(button);
+        }
+    }
+};
+
+// Initialize language system
+languageSystem.init();
+    const lesson = lessons[lessonNumber];
+    if (!lesson) {
+        console.error(`❌ Lesson ${lessonNumber} not found!`);
+        return;
+    }
+
+    const overlay = document.querySelector('.mode-overlay');
+    overlay.innerHTML = `
+        <div class="lesson-interface p-6 bg-white rounded shadow-lg max-w-lg mx-auto">
+            <h2 class="text-xl font-bold text-gray-900">${lesson.title}</h2>
+            <div id="lessonContent" class="lesson-content mt-4"></div>
+            <button id="nextSectionBtn" class="hidden bg-blue-500 text-white px-4 py-2 mt-4 rounded hover:bg-blue-700 transition">Next</button>
+        </div>
+    `;
+
+    const contentContainer = overlay.querySelector("#lessonContent");
+    const nextBtn = overlay.querySelector("#nextSectionBtn");
+
+    let currentSectionIndex = 0;
+
+    function loadSection() {
+        if (currentSectionIndex >= lesson.sections.length) {
+            overlay.innerHTML = `
+                <div class="lesson-complete p-6 bg-green-100 text-green-800 rounded shadow-md text-center">
+                    <h2 class="text-xl font-bold">🎉 Lesson Complete!</h2>
+                    <p class="mt-2">You've completed <strong>${lesson.title}</strong>. Your next lesson is: <strong>${lesson.nextLesson}</strong>.</p>
+                    <button class="continue-btn bg-green-500 text-white px-4 py-2 mt-4 rounded hover:bg-green-700 transition">Continue</button>
+                </div>
+            `;
+
+            // Progress bar update
+            const progressElement = document.querySelector(".progress");
+            const progressCount = document.querySelector("#lessonProgressCount");
+            if (progressElement && progressCount) {
+                progressElement.style.width = `100%`;
+                progressCount.textContent = "5"; // Mark lesson complete
+            }
+
+            // Continue button event
+            overlay.querySelector(".continue-btn").addEventListener("click", () => {
+                this.beginTrainingJourney();
+            });
+            return;
+        }
+
+        const section = lesson.sections[currentSectionIndex];
+        contentContainer.innerHTML = "";
+
+        if (section.type === "intro" || section.type === "content") {
+            contentContainer.innerHTML = `
+                <h3 class="text-lg font-semibold">${section.title || ""}</h3>
+                <p class="text-gray-700 mt-2">${section.content}</p>
+            `;
+        } else if (section.type === "interactive") {
+            contentContainer.innerHTML = `
+                <h3 class="text-lg font-semibold">${section.question}</h3>
+                <div class="options mt-2">
+                    ${section.options.map((option, index) => 
+                        `<button class="option-btn bg-gray-200 px-4 py-2 rounded m-1 hover:bg-gray-300" data-index="${index}">${option}</button>`
+                    ).join("")}
+                </div>
+            `;
+
+            contentContainer.querySelectorAll(".option-btn").forEach(button => {
+                button.addEventListener("click", () => {
+                    const selected = parseInt(button.dataset.index);
+                    if (selected === section.correct) {
+                        button.classList.add("bg-green-500", "text-white");
+                        console.log("✅ Correct Answer!");
+                    } else {
+                        button.classList.add("bg-red-500", "text-white");
+                        console.log("❌ Incorrect Answer!");
+                    }
+
+                    // Move to the next section after 2 seconds
+                    setTimeout(() => {
+                        currentSectionIndex++;
+                        loadSection();
+                    }, 2000);
+                });
+            });
+
+            return;
+        } else if (section.type === "video_placeholder") {
+            contentContainer.innerHTML = `
+                <h3 class="text-lg font-semibold">${section.description}</h3>
+                <p class="text-gray-700 mt-2">${section.content}</p>
+                <div class="video-placeholder bg-gray-300 h-40 flex items-center justify-center mt-2">
+                    🎥 Video Placeholder
+                </div>
+            `;
+        } else if (section.type === "summary") {
+            contentContainer.innerHTML = `
+                <h3 class="text-lg font-semibold">Lesson Summary</h3>
+                <p class="text-gray-700 mt-2">${section.content}</p>
+            `;
+        }
+
+        nextBtn.classList.remove("hidden");
+        nextBtn.onclick = () => {
+            currentSectionIndex++;
+            loadSection();
+        };
+    }
+
+    loadSection();
+}
 
         const overlay = document.querySelector('.mode-overlay');
         const lesson = lessons[lessonNumber];
@@ -488,199 +470,369 @@ class UIHandler {
             </div>
         `;
 
-        this.initializeLessonControls(lesson);
+        document.addEventListener("DOMContentLoaded", function () {
+            console.log("✅ JavaScript Loaded - Ensuring all buttons work properly...");
+        
+            class TrainingHandler {
+                constructor() {
+                    this.currentSectionIndex = 0;
+                    this.isShowingAI = false;
+                }
+        
+                initializeLessonControls(lesson) {
+                    const nextBtn = document.querySelector('.next-btn');
+                    const prevBtn = document.querySelector('.prev-btn');
+                    const progressBar = document.querySelector('.progress');
+        
+                    if (!nextBtn || !prevBtn || !progressBar) {
+                        console.warn("⚠️ Lesson controls not found. Skipping initialization.");
+                        return;
+                    }
+        
+                    const updateButtons = () => {
+                        prevBtn.disabled = this.currentSectionIndex === 0;
+                        nextBtn.textContent = this.currentSectionIndex === lesson.sections.length - 1 ? 'Complete Lesson' : 'Next';
+                    };
+        
+                    nextBtn.addEventListener('click', () => {
+                        if (this.currentSectionIndex < lesson.sections.length - 1) {
+                            this.currentSectionIndex++;
+                            this.updateSection(lesson.sections[this.currentSectionIndex], this.currentSectionIndex, lesson.sections.length);
+                            updateButtons();
+                        } else {
+                            this.completeLessonAndShowNext(lesson);
+                        }
+                    });
+        
+                    prevBtn.addEventListener('click', () => {
+                        if (this.currentSectionIndex > 0) {
+                            this.currentSectionIndex--;
+                            this.updateSection(lesson.sections[this.currentSectionIndex], this.currentSectionIndex, lesson.sections.length);
+                            updateButtons();
+                        }
+                    });
+        
+                    updateButtons();
+                }
+        
+                updateSection(section, currentIndex, totalSections) {
+                    const contentArea = document.querySelector('.lesson-content .section');
+                    if (!contentArea) {
+                        console.error("❌ Lesson content area not found!");
+                        return;
+                    }
+                    contentArea.innerHTML = this.renderSection(section);
+        
+                    const progress = ((currentIndex + 1) / totalSections) * 100;
+                    document.querySelector('.progress').style.width = `${progress}%`;
+                    document.querySelector('.lesson-info span:last-child').textContent = `Progress: ${currentIndex + 1}/${totalSections}`;
+                }
+        
+                async completeLessonAndShowNext(lesson) {
+                    const overlay = document.querySelector('.mode-overlay');
+                    if (!overlay) {
+                        console.error("❌ Mode overlay not found!");
+                        return;
+                    }
+        
+                    overlay.innerHTML = `
+                        <div class="lesson-complete">
+                            <h2>🎉 Congratulations!</h2>
+                            <p>You've completed: <strong>${lesson.title}</strong></p>
+                            <div class="completion-stats">
+                                <div class="stat">
+                                    <span class="label">Time Spent</span>
+                                    <span class="value">${lesson.duration}</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="label">Next Topic</span>
+                                    <span class="value">${lesson.nextLesson}</span>
+                                </div>
+                            </div>
+                            <button class="next-lesson-btn">Continue to Next Lesson</button>
+                        </div>
+                    `;
+        
+                    const nextLessonBtn = overlay.querySelector('.next-lesson-btn');
+                    if (nextLessonBtn) {
+                        nextLessonBtn.addEventListener('click', () => {
+                            const nextLessonId = lesson.nextLessonId || 2;
+                            this.startLesson(nextLessonId);
+                        });
+                    }
+                }
+        
+                handleAIInitializationError(message) {
+                    console.error('❌ AI Initialization Error:', message);
+                    const errorMessage = document.createElement('div');
+                    errorMessage.className = 'ai-error-message';
+        
+                    errorMessage.innerHTML = `
+                        <div class="error-content">
+                            <h3>Error</h3>
+                            <p>${message}</p>
+                            <button class="retry-button">Retry</button>
+                        </div>
+                    `;
+        
+                    document.body.appendChild(errorMessage);
+        
+                    const retryButton = errorMessage.querySelector('.retry-button');
+                    if (retryButton) {
+                        retryButton.addEventListener('click', () => {
+                            errorMessage.remove();
+                            this.showAIWelcomeExperience();
+                        });
+                    }
+                }
+        
+                showSelfPacedWelcome() {
+                    console.log('📚 Showing Self-Paced Welcome');
+        
+                    const overlay = document.createElement('div');
+                    overlay.className = 'mode-overlay';
+        
+                    overlay.innerHTML = `
+                        <div class="welcome-content">
+                            <h2>Welcome to Self-Paced Training</h2>
+                            <div class="training-introduction">
+                                <div class="step active"><div class="step-icon">📚</div><p>Access structured learning modules at your own pace</p></div>
+                                <div class="step active"><div class="step-icon">🎯</div><p>Track your progress through comprehensive training materials</p></div>
+                                <div class="step active"><div class="step-icon">🚀</div><p>Complete training milestones on your schedule</p></div>
+                            </div>
+                            <button class="begin-training-btn">Start Training</button>
+                        </div>
+                    `;
+        
+                    document.body.appendChild(overlay);
+        
+                    const beginButton = overlay.querySelector('.begin-training-btn');
+                    if (beginButton) {
+                        beginButton.addEventListener('click', () => {
+                            overlay.remove();
+                            this.beginTrainingJourney();
+                        });
+                    }
+                }
+        
+                handleAICoachMode() {
+                    if (!this.isShowingAI) {
+                        this.isShowingAI = true;
+                        this.showAIWelcomeExperience()
+                            .then(() => { this.isShowingAI = false; })
+                            .catch(error => {
+                                this.isShowingAI = false;
+                                this.handleAIInitializationError('Failed to initialize AI experience');
+                            });
+                    }
+                }
+        
+                handleSelfPacedMode() {
+                    this.showSelfPacedWelcome();
+                }
+            }
+        
+            // ✅ Initialize training handler
+            const trainingHandler = new TrainingHandler();
+        
+            // ✅ Attach event listeners to mode selection buttons
+            const selfPacedButton = document.querySelector('#selfPacedMode');
+            const aiCoachButton = document.querySelector('#aiCoachMode');
+        
+            if (selfPacedButton) {
+                selfPacedButton.addEventListener('click', () => trainingHandler.handleSelfPacedMode());
+            }
+        
+            if (aiCoachButton) {
+                aiCoachButton.addEventListener('click', () => trainingHandler.handleAICoachMode());
+            }
+        
+            console.log("🎯 UI Initialization Complete");
+        });
+        
+    /** ==========================
+     *  🔹 Navigation Buttons (Home, Academy, About, Subscribe)
+     *  ========================== **/
+    document.querySelectorAll("nav a").forEach(button => {
+        button.addEventListener("click", function (event) {
+            event.preventDefault();
+            console.log(`✅ Navigating to: ${this.href}`);
+            window.location.href = this.href;
+        });
+    });
+
+    /** ==========================
+     *  🔹 Signup Modal Controls
+     *  ========================== **/
+    const signupModal = document.getElementById("signup_modal");
+    const openSignupModal = document.getElementById("openSignupModal");
+    const closeSignupModal = document.getElementById("closeSignupModal");
+
+    if (openSignupModal && signupModal) {
+        openSignupModal.addEventListener("click", function () {
+            signupModal.showModal();
+        });
+    } else {
+        console.warn("⚠️ 'Open Signup Modal' button not found.");
     }
 
-    renderSection(section) {
-        switch(section.type) {
-            case 'intro':
-                return `
-                    <div class="intro-section">
-                        <p>${section.content}</p>
-                    </div>
-                `;
-            case 'content':
-                return `
-                    <div class="content-section">
-                        <h3>${section.title}</h3>
-                        <p>${section.content}</p>
-                    </div>
-                `;
-            case 'interactive':
-                return `
-                    <div class="interactive-section">
-                        <h3>Quick Check</h3>
-                        <p>${section.question}</p>
-                        <div class="options">
-                            ${section.options.map((option, index) => `
-                                <button class="option-btn" data-index="${index}">${option}</button>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            case 'video_placeholder':
-                return `
-                    <div class="video-section">
-                        <h3>${section.description}</h3>
-                        <div class="video-placeholder">
-                            <p>${section.content}</p>
-                        </div>
-                    </div>
-                `;
-            case 'summary':
-                return `
-                    <div class="summary-section">
-                        <h3>Summary</h3>
-                        <p>${section.content}</p>
-                    </div>
-                `;
-            default:
-                return '<p>Section content not available</p>';
-        }
+    if (closeSignupModal && signupModal) {
+        closeSignupModal.addEventListener("click", function () {
+            signupModal.close();
+        });
     }
+    
+/** ==========================
+ *  🔹 Begin Training Button
+ *  ========================== **/
+const beginTrainingBtns = document.querySelectorAll(".begin-training-btn");
 
-    initializeLessonControls(lesson) {
-        let currentSectionIndex = 0;
-        const nextBtn = document.querySelector('.next-btn');
-        const prevBtn = document.querySelector('.prev-btn');
-        const progressBar = document.querySelector('.progress');
-
-        const updateButtons = () => {
-            prevBtn.disabled = currentSectionIndex === 0;
-            nextBtn.textContent = currentSectionIndex === lesson.sections.length - 1 ? 'Complete Lesson' : 'Next';
-        };
-
-        nextBtn.addEventListener('click', () => {
-            if (currentSectionIndex < lesson.sections.length - 1) {
-                currentSectionIndex++;
-                this.updateSection(lesson.sections[currentSectionIndex], currentSectionIndex, lesson.sections.length);
-                updateButtons();
+if (beginTrainingBtns.length > 0) {
+    beginTrainingBtns.forEach(button => {
+        button.addEventListener("click", function () {
+            console.log("🚀 Starting AI Training...");
+            if (typeof showAIWelcomeExperience === "function") {
+                showAIWelcomeExperience();
             } else {
-                this.completeLessonAndShowNext(lesson);
+                console.error("❌ Function 'showAIWelcomeExperience()' is not defined.");
+                alert("Training function is unavailable at the moment.");
             }
         });
+    });
+} else {
+    console.warn("⚠️ 'Begin Training' buttons not found!");
+}
+document.addEventListener('DOMContentLoaded', function() {
+    const ui = {
+        video: document.getElementById('heroVideo'),
+        menuToggle: document.getElementById('menuToggle'),
+        menuOverlay: document.getElementById('menuOverlay'),
+        closeMenu: document.getElementById('closeMenu')
+    };
 
-        prevBtn.addEventListener('click', () => {
-            if (currentSectionIndex > 0) {
-                currentSectionIndex--;
-                this.updateSection(lesson.sections[currentSectionIndex], currentSectionIndex, lesson.sections.length);
-                updateButtons();
-            }
+    // Menu Toggle
+    if (ui.menuToggle && ui.menuOverlay) {
+        ui.menuToggle.addEventListener('click', () => {
+            ui.menuOverlay.classList.remove('translate-x-full');
+            document.body.style.overflow = 'hidden';
+        });
+
+        ui.closeMenu?.addEventListener('click', () => {
+            ui.menuOverlay.classList.add('translate-x-full');
+            document.body.style.overflow = '';
         });
     }
 
-    updateSection(section, currentIndex, totalSections) {
-        const contentArea = document.querySelector('.lesson-content .section');
-        contentArea.innerHTML = this.renderSection(section);
-
-        const progress = ((currentIndex + 1) / totalSections) * 100;
-        document.querySelector('.progress').style.width = `${progress}%`;
-        document.querySelector('.lesson-info span:last-child').textContent = 
-            `Progress: ${currentIndex + 1}/${totalSections}`;
+    // Video Loading
+    if (ui.video) {
+        ui.video.src = '/videos/academy10.mp4';
+        ui.video.play().catch(console.error);
     }
+});
+/** ==========================
+ *  🔹 Subscribe Button
+ *  ========================== **/
+const subscribeBtn = document.getElementById("subscribe-btn");
+const subscribeInput = document.getElementById("subscribe-email");
+const subscribeMessage = document.getElementById("subscribe-message");
 
-    async completeLessonAndShowNext(lesson) {
-        const overlay = document.querySelector('.mode-overlay');
-        overlay.innerHTML = `
-            <div class="lesson-complete">
-                <h2>Congratulations!</h2>
-                <p>You've completed: ${lesson.title}</p>
-                <div class="completion-stats">
-                    <div class="stat">
-                        <span class="label">Time Spent</span>
-                        <span class="value">${lesson.duration}</span>
-                    </div>
-                    <div class="stat">
-                        <span class="label">Next Topic</span>
-                        <span class="value">${lesson.nextLesson}</span>
-                    </div>
-                </div>
-                <button class="next-lesson-btn">Continue to Next Lesson</button>
-            </div>
-        `;
+if (subscribeBtn && subscribeInput && subscribeMessage) {
+    subscribeBtn.addEventListener("click", function () {
+        const email = subscribeInput.value.trim();
 
-        const nextLessonBtn = overlay.querySelector('.next-lesson-btn');
-        nextLessonBtn.addEventListener('click', () => {
-            const nextLessonId = lesson.nextLessonId || 2;
-            this.startLesson(nextLessonId);
-        });
-    }
-
-    handleAIInitializationError(message) {
-        console.error('AI Initialization Error:', message);
-        const errorMessage = document.createElement('div');
-        errorMessage.className = 'ai-error-message';
-        errorMessage.innerHTML = `
-            <div class="error-content">
-                <h3>Error</h3>
-                <p>${message}</p>
-                <button class="retry-button">Retry</button>
-            </div>
-        `;
-        document.body.appendChild(errorMessage);
-
-        const retryButton = errorMessage.querySelector('.retry-button');
-        retryButton.addEventListener('click', () => {
-            errorMessage.remove();
-            this.showAIWelcomeExperience();
-        });
-    }
-
-    showSelfPacedWelcome() {
-        console.log('Showing self-paced welcome');
-        const overlay = document.createElement('div');
-        overlay.className = 'mode-overlay';
-
-        overlay.innerHTML = `
-            <div class="welcome-content">
-                <h2>Welcome to Self-Paced Training</h2>
-                <div class="training-introduction">
-                    <div class="step active">
-                        <div class="step-icon">📚</div>
-                        <p>Access structured learning modules at your own pace</p>
-                    </div>
-                    <div class="step active">
-                        <div class="step-icon">🎯</div>
-                        <p>Track your progress through comprehensive training materials</p>
-                    </div>
-                    <div class="step active">
-                        <div class="step-icon">🚀</div>
-                        <p>Complete training milestones on your schedule</p>
-                    </div>
-                </div>
-                <button class="begin-training-btn">Start Training</button>
-            </div>
-        `;
-
-        document.body.appendChild(overlay);
-
-        const beginButton = overlay.querySelector('.begin-training-btn');
-        if (beginButton) {
-            beginButton.addEventListener('click', () => {
-                overlay.remove();
-                this.beginTrainingJourney();
-            });
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            alert("❌ Please enter a valid email address.");
+            return;
         }
-    }
 
-    handleAICoachMode(selfPacedButton, aiCoachButton) {
-        if (!this.isShowingAI) {
-            this.isShowingAI = true;
-            this.showAIWelcomeExperience().then(() => {
-                this.isShowingAI = false;
-            }).catch(error => {
-                this.isShowingAI = false;
-                this.handleAIInitializationError('Failed to initialize AI experience');
-            });
-        }
-    }
+        console.log(`✅ Subscribed with email: ${email}`);
+        subscribeMessage.classList.remove("hidden");
+        subscribeMessage.textContent = `✅ Subscribed successfully!`;
+        subscribeInput.value = "";
 
-    handleSelfPacedMode(selfPacedButton, aiCoachButton) {
-        this.showSelfPacedWelcome();
-    }
+        // Simulate an API call (for future backend integration)
+        setTimeout(() => {
+            console.log("📨 Simulating subscription email confirmation...");
+        }, 1000);
+    });
+} else {
+    console.warn("⚠️ Subscription elements not found!");
 }
 
-// Initialize the UI Handler when the DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    const uiHandler = new UIHandler();
-});
+/** ==========================
+ *  🔹 Password Validation
+ *  ========================== **/
+const passwordInput = document.getElementById("password");
+const requirements = {
+    length: document.getElementById("length-check"),
+    uppercase: document.getElementById("uppercase-check"),
+    lowercase: document.getElementById("lowercase-check"),
+    number: document.getElementById("number-check"),
+    special: document.getElementById("special-check"),
+};
+
+if (passwordInput && Object.values(requirements).every(el => el)) {
+    passwordInput.addEventListener("input", function () {
+        const password = this.value;
+
+        const criteria = {
+            length: password.length >= 8,
+            uppercase: /[A-Z]/.test(password),
+            lowercase: /[a-z]/.test(password),
+            number: /[0-9]/.test(password),
+            special: /[!@#$%^&*]/.test(password),
+        };
+
+        // Update UI dynamically
+        for (const key in criteria) {
+            requirements[key].style.color = criteria[key] ? "lime" : "red";
+        }
+    });
+} else {
+    console.warn("⚠️ Password validation elements not found!");
+}
+
+/** ==========================
+ *  🔹 Signup Form Submission
+ *  ========================== **/
+const signupForm = document.getElementById("signup-form");
+
+if (signupForm) {
+    signupForm.addEventListener("submit", async function (event) {
+        event.preventDefault();
+        console.log("🚀 Submitting signup form...");
+
+        const formData = new FormData(signupForm);
+        const userData = {
+            username: formData.get("username").trim(),
+            email: formData.get("email").trim(),
+            password: formData.get("password").trim(),
+        };
+
+        if (!userData.username || !userData.email || !userData.password) {
+            alert("❌ All fields are required.");
+            return;
+        }
+
+        try {
+            const response = await fetch("/api/auth/signup", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(userData),
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                alert("✅ Signup Successful! Redirecting...");
+                window.location.href = "/welcome.html";
+            } else {
+                throw new Error(data.message || "Signup failed.");
+            }
+        } catch (error) {
+            console.error("❌ Signup failed:", error);
+            alert("Signup failed: " + error.message);
+        }
+    });
+} else {
+    console.warn("⚠️ Signup form not found!");
+}

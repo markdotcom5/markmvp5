@@ -5,6 +5,7 @@ const rateLimit = require('express-rate-limit'); // Rate limiter
 const TrainingSession = require('../models/TrainingSession'); // Mongoose model
 const AISpaceCoach = require('../services/AISpaceCoach'); // AI Assistant service
 const Joi = require('joi');
+const AIController = require('../controllers/aiController'); // or a dedicated TrainingController
 
 // Pagination Schema
 const paginationSchema = Joi.object({
@@ -34,6 +35,68 @@ const validateSessionInput = (req, res, next) => {
 
     next();
 };
+// Get Available Training Modules (Existing endpoint)
+router.get('/modules', authenticate, async (req, res) => {
+    try {
+        const modules = [
+            { id: 'physical-001', name: 'Physical Training', description: 'Improve your physical readiness.' },
+            { id: 'technical-001', name: 'Technical Training', description: 'Boost your technical skills.' },
+            { id: 'simulation-001', name: 'Space Simulation', description: 'Experience simulated space missions.' },
+            { id: 'team-001', name: 'Team Dynamics', description: 'Enhance teamwork and leadership skills.' },
+        ];
+
+        res.json({ success: true, modules });
+    } catch (error) {
+        console.error('Error fetching modules:', error.message);
+        res.status(500).json({ error: 'Failed to fetch training modules.' });
+    }
+});
+
+// Dedicated endpoint for Physical Training
+router.get('/modules/physical', async (req, res) => {
+    try {
+      const physicalData = {
+        id: 'physical-001',
+        title: 'Physical Training Module',
+        description: 'Prepare your body for space travel with focused physical training.',
+        objectives: ['Cardiovascular fitness', 'Strength training', 'Zero-G adaptation']
+      };
+      res.json({ success: true, data: physicalData });
+    } catch (err) {
+      console.error('Error fetching physical training data:', err);
+      res.status(500).json({ error: 'Failed to fetch physical training data.' });
+    }
+  });
+  
+
+// Dedicated endpoint for Technical Training
+router.get('/modules/technical', authenticate, async (req, res) => {
+  try {
+    const technicalData = {
+      id: 'technical-001',
+      title: 'Technical Training Module',
+      description: 'Develop essential technical skills for space operations.',
+      objectives: ['System operations', 'Emergency procedures', 'Navigation']
+    };
+    res.json({ success: true, data: technicalData });
+  } catch (err) {
+    console.error('Error fetching technical training data:', err);
+    res.status(500).json({ error: 'Failed to fetch technical training data.' });
+  }
+});
+
+// Dedicated endpoint for AI-Guided Training
+router.get('/modules/ai-guided', authenticate, async (req, res) => {
+  try {
+    // Use your aiGuidance service to get dynamic content.
+    // Ensure that your aiGuidance.getGuidanceData() method exists and returns data.
+    const aiData = await require('../services/aiGuidance').getGuidanceData();
+    res.json({ success: true, data: aiData });
+  } catch (err) {
+    console.error('Error fetching AI-guided training data:', err);
+    res.status(500).json({ error: 'Failed to fetch AI-guided training data.' });
+  }
+});
 
 // Route: Fetch Training Modules
 router.get('/modules', authenticate, async (req, res) => {
@@ -52,7 +115,25 @@ router.get('/modules', authenticate, async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch training modules.' });
     }
 });
-
+// Render Physical Training Module page
+router.get('/physical', async (req, res) => {
+    try {
+      // For MVP, you might simulate some training content here.
+      const trainingContent = {
+        module: 'physical-001',
+        title: 'Physical Training Module',
+        description: 'Prepare your body for space travel with focused physical training.',
+        objectives: ['Cardiovascular fitness', 'Strength training', 'Zero-G adaptation'],
+        // You can add more fields as needed.
+      };
+      // Render a view that displays this training content.
+      res.render('training-physical', { title: 'Physical Training', content: trainingContent });
+    } catch (error) {
+      console.error('Error rendering Physical Training module:', error);
+      res.status(500).send('Error rendering module.');
+    }
+  });
+  
 // Protected Route: Create a Training Session
 router.post('/sessions', authenticate, validateSessionInput, async (req, res) => {
     const { sessionType, dateTime, participants, points = 0 } = req.body;
@@ -162,8 +243,7 @@ router.patch('/sessions/:sessionId/complete', authenticate, sessionLimiter, asyn
         res.status(500).json({ error: 'Failed to complete session.' });
     }
 });
-
-// Start AI Assessment
+// AI Initialization Endpoint
 router.post('/assessment/start', authenticate, sessionLimiter, async (req, res) => {
     try {
         console.log('Starting new assessment session...');
@@ -177,7 +257,7 @@ router.post('/assessment/start', authenticate, sessionLimiter, async (req, res) 
                 enabled: true,
                 lastGuidance: 'Starting initial assessment'
             },
-            assessment: {  // Add this explicit assessment initialization
+            assessment: {  // Explicit initialization for assessment
                 type: 'initial',
                 responses: [],
                 startedAt: new Date(),
@@ -209,6 +289,44 @@ router.post('/assessment/start', authenticate, sessionLimiter, async (req, res) 
     }
 });
 
+  
+  // AI Guidance Endpoint
+  router.post("/ai-guidance", async (req, res) => {
+    try {
+      const { questionId, currentProgress } = req.body;
+      // Insert your AI guidance logic here.
+      // For now, just simulate a success response:
+      res.json({
+        success: true,
+        guidance: "Here is your guidance based on the question.",
+      });
+    } catch (error) {
+      console.error("Error in AI guidance:", error);
+      res.status(500).json({ error: "Failed to generate AI guidance", details: error.message });
+    }
+  });
+  
+  // Assessment Answer Submission Endpoint
+  router.post("/assessment/:sessionId/submit", async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      const { answer, questionIndex } = req.body;
+      if (!answer || typeof questionIndex === "undefined") {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+      // Insert logic to process the answer here.
+      // For now, simulate a success response:
+      res.json({
+        success: true,
+        sessionId,
+        message: "Answer submitted successfully",
+      });
+    } catch (error) {
+      console.error("Error submitting answer:", error);
+      res.status(500).json({ error: "Failed to submit answer", details: error.message });
+    }
+  });
+  
 // Submit Assessment Answer
 router.post('/assessment/:sessionId/submit', authenticate, sessionLimiter, async (req, res) => {
     try {
@@ -223,7 +341,7 @@ router.post('/assessment/:sessionId/submit', authenticate, sessionLimiter, async
             return res.status(404).json({ error: 'Assessment session not found' });
         }
 
-        // Record the response
+        // Record the response (ensure this method is defined in your model)
         session.submitAssessmentResponse(question, answer);
 
         // Get AI analysis of the answer
@@ -254,6 +372,7 @@ router.post('/assessment/:sessionId/submit', authenticate, sessionLimiter, async
     }
 });
 
+
 // Complete Assessment and Generate Training Plan
 router.post('/assessment/:sessionId/complete', authenticate, sessionLimiter, async (req, res) => {
     try {
@@ -267,10 +386,10 @@ router.post('/assessment/:sessionId/complete', authenticate, sessionLimiter, asy
             return res.status(404).json({ error: 'Assessment session not found' });
         }
 
-        // Generate final analysis and training plan
+        // Generate final analysis and training plan using all responses
         const finalAnalysis = await AISpaceCoach.generateTrainingPlan(session.assessment.responses);
         
-        // Update session with results
+        // Update session with results using a custom method for clean encapsulation
         session.completeAssessment(finalAnalysis.score, finalAnalysis.recommendations);
         session.status = 'completed';
         session.metrics = {
