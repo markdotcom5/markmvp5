@@ -2,6 +2,7 @@
 // 1. ENV & REQUIRED MODULES
 // ============================
 require("dotenv").config();
+console.log("✅ JWT_SECRET:", process.env.JWT_SECRET);
 
 const express = require("express");
 const cors = require("cors");
@@ -17,60 +18,41 @@ const compression = require("compression");
 const MongoStore = require("connect-mongo");
 const { authenticate } = require("./middleware/authenticate");
 
-// ✅ Initialize Express App First
+// ============================
+// 2. EXPRESS APP & HTTP SERVER
+// ============================
 const app = express();
-
-// ✅ Create HTTP Server Before WebSocket Setup
 const server = http.createServer(app);
 
-// ✅ Now that `server` exists, initialize WebSocket
+// ============================
+// 3. WEBSOCKET SETUP
+// ============================
 const { setupWebSocketServer } = require("./middleware/authenticate");
 const { wss, broadcastMessage } = setupWebSocketServer(server);
-
-// ✅ Import Custom Modules & Routers
-const stripeRouter = require("./routes/stripe");
-const stripeWebhook = require("./webhooks/stripe");
-const subscriptionRouter = require("./routes/subscription");
-const aiRoutes = require("./routes/aiRoutes").router;
-const leaderboardRoutes = require("./routes/leaderboard");
-const trainingRoutes = require("./routes/training");
-const dashboardRouter = require("./routes/dashboard");
-
-// ✅ Middleware
-app.use(compression());
-app.use(express.json({ strict: false }));
-app.use(express.urlencoded({ extended: true }));
-app.use(cors());
-app.use(cookieParser());
-
 console.log("✅ WebSocket Server Initialized");
 
-// ✅ Serve Static Files
-app.use(express.static(path.join(__dirname, "public")));
+// Set the global reference for other modules
+const wsHolder = require("./utils/wsHolder");
+wsHolder.wss = wss;
+wsHolder.broadcastMessage = broadcastMessage;
 
-// ✅ Define Routes
-app.use("/api/stripe", stripeRouter);
-app.use("/webhook/stripe", stripeWebhook);
-app.use("/api/subscription", subscriptionRouter);
-app.use("/api/ai", aiRoutes);
-app.use("/api/leaderboard", leaderboardRoutes);
-app.use("/api/training", trainingRoutes);
-app.use("/api/dashboard", dashboardRouter);
+// Now attach your connection handler
+wss.on("connection", (ws, req) => {
+  const { userId, role } = req.authData || {};
+  ws.userId = userId;
+  console.log(`New connection for user ${userId}`);
+  
+  ws.on("message", (message) => {
+    console.log(`📩 Message from ${userId}: ${message}`);
+  });
 
-const router = express.Router();
-
-router.get("/", authenticate, (req, res) => {
-  res.render("dashboard");
+  ws.on("close", () => {
+    console.log(`❌ Connection closed for user ${userId}`);
+  });
 });
-// Set EJS as the templating engine
-app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "views"));
-
-// Serve static files from the "public" directory
-app.use(express.static(path.join(__dirname, "public")));
 
 // ============================
-// 2. DATABASE & SERVER SETUP
+// 4. DATABASE CONNECTION SETUP
 // ============================
 mongoose.set("strictQuery", true);
 if (process.env.NODE_ENV === "development") {
@@ -102,19 +84,8 @@ const connectDB = async () => {
   }
 };
 
-const reconnectMongoDB = async () => {
-  console.log("🔄 Attempting to reconnect to MongoDB...");
-  try {
-    await mongoose.connect(process.env.MONGO_URI);
-    console.log("✅ MongoDB Reconnected Successfully!");
-  } catch (error) {
-    console.error("❌ MongoDB Reconnection Failed:", error);
-    setTimeout(reconnectMongoDB, 5000);
-  }
-};
-
 // ============================
-// 3. MIDDLEWARE SETUP
+// 5. GLOBAL MIDDLEWARE
 // ============================
 app.use(compression());
 app.use(express.json({ strict: false }));
@@ -122,6 +93,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use(cookieParser());
 
+// Session Setup with MongoStore
 app.use(
   session({
     secret: process.env.JWT_SECRET || "your_secret_key",
@@ -141,6 +113,7 @@ app.use(
   })
 );
 
+// Security with Helmet
 app.use(
   helmet({
     contentSecurityPolicy: false,
@@ -150,26 +123,114 @@ app.use(
 );
 
 // ============================
-// 4. ROUTES SETUP
+// 6. VIEW ENGINE & STATIC FILES
 // ============================
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
+app.use(express.static(path.join(__dirname, "public")));
 
-// Home route: Render index.ejs
-app.get("/", (req, res) => {
-  res.render("index");
-});
+// ============================
+// 7. API ROUTES MOUNTING
+// ============================
+const stripeRouter = require("./routes/stripe");
+const stripeWebhook = require("./webhooks/stripe");
+const subscriptionRouter = require("./routes/subscription");
+const aiRoutes = require("./routes/aiRoutes").router;
+const leaderboardRoutes = require("./routes/leaderboard");
+const trainingRoutes = require("./routes/training");
+const dashboardRouter = require("./routes/dashboard");
 
-// Mount API routers
-app.use("/api/dashboard", dashboardRouter);
-app.use("/api/ai", aiRoutes);
+app.use("/api/stripe", stripeRouter);
+app.use("/webhook/stripe", stripeWebhook);
+app.use("/api/subscription", subscriptionRouter);
+app.use(
+  "/api/ai",
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    message: { error: "AI service rate limit exceeded. Please try again later." },
+  }),
+  aiRoutes
+);
 app.use("/api/leaderboard", leaderboardRoutes);
 app.use("/api/training", trainingRoutes);
-app.use("/api/stripe", stripeRouter);
-app.use("/api/subscription", subscriptionRouter);
+app.use("/api/dashboard", dashboardRouter);
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Mount Dashboard router for view rendering (if needed separately)
-app.use("/dashboard", dashboardRouter);
+// Define routes (for example, /academy, /about, etc.)
+app.get('/academy', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'academy.html'));
+});
+app.get('/about', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'about.html'));
+});
+// Additional Routers via safeRequire (if any)
+const safeRequire = (modulePath) => {
+  try {
+    return require(modulePath);
+  } catch (error) {
+    console.error(`❌ Failed to load module: ${modulePath}`, error.message);
+    return null;
+  }
+};
 
-// Test Routes
+const additionalRouters = {
+  about: safeRequire("./routes/about"),
+  achievements: safeRequire("./routes/achievements"),
+  aiWebController: safeRequire("./routes/aiWebController"),
+  auth: safeRequire("./routes/auth"),
+  community: safeRequire("./routes/communityRoutes"),
+  insights: safeRequire("./routes/insights"),
+  main: safeRequire("./routes/main"),
+  modules: safeRequire("./routes/modules"),
+  payment: safeRequire("./routes/payment"),
+  signup: safeRequire("./routes/signup"),
+  testOpenAI: safeRequire("./routes/testOpenAI"),
+  user: safeRequire("./routes/user"),
+  video: safeRequire("./routes/video"),
+};
+
+for (const [name, router] of Object.entries(additionalRouters)) {
+  if (router && typeof router === "function") {
+    app.use(`/api/${name}`, router);
+    console.log(`✅ Registered route: /api/${name}`);
+  } else if (router) {
+    console.error(`❌ Error: Router for /api/${name} is invalid.`);
+  }
+}
+
+// ============================
+// 8. STATIC HTML ROUTES (Clean URLs)
+// ============================
+
+const staticPages = [
+  { route: "/welcome", file: "Welcome.html" },
+  { route: "/about", file: "about.html" },
+  { route: "/academy", file: "academy.html" },
+  { route: "/dashboard", file: "dashboard.html" },
+  { route: "/", file: "index.html" },
+  { route: "/leaderboard", file: "leaderboard.html" },
+  { route: "/login", file: "login.html" },
+  { route: "/merchandise", file: "merchandise.html" },
+  { route: "/password", file: "password.html" },
+  { route: "/profile", file: "profile.html" },
+  { route: "/signup", file: "signup.html" },
+  { route: "/signupold", file: "signupold.html" },
+  { route: "/subscribe", file: "subscribe.html" },
+  { route: "/test", file: "test.html" },
+  { route: "/training", file: "training.html" },
+  { route: "/why-sharedstars", file: "why-sharedstars.html" }
+];
+
+staticPages.forEach(page => {
+  app.get(page.route, (req, res) => {
+    res.sendFile(path.join(__dirname, "public", page.file));
+  });
+});
+
+// ============================
+// 9. TEST ROUTES
+// ============================
 const testRoutes = express.Router();
 
 testRoutes.post("/progress", (req, res) => {
@@ -218,61 +279,8 @@ testRoutes.post("/achievement", (req, res) => {
 
 app.use("/api/test", testRoutes);
 
-// Register additional routers using safeRequire
-const routers = {
-  about: safeRequire("./routes/about"),
-  achievements: safeRequire("./routes/achievements"),
-  ai: aiRoutes, // AI routes
-  aiWebController: safeRequire("./routes/aiWebController"),
-  auth: safeRequire("./routes/auth"),
-  community: safeRequire("./routes/communityRoutes"),
-  dashboard: safeRequire("./routes/dashboard"),
-  index: safeRequire("./routes/index"),
-  insights: safeRequire("./routes/insights"),
-  main: safeRequire("./routes/main"),
-  modules: safeRequire("./routes/modules"),
-  payment: safeRequire("./routes/payment"),
-  signup: safeRequire("./routes/signup"),
-  stripe: stripeRouter,
-  subscription: subscriptionRouter,
-  testOpenAI: safeRequire("./routes/testOpenAI"),
-  training: safeRequire("./routes/training"),
-  user: safeRequire("./routes/user"),
-  video: safeRequire("./routes/video"),
-};
-
-// Safe module loader to prevent crashing if a module is missing
-function safeRequire(modulePath) {
-  try {
-    return require(modulePath);
-  } catch (error) {
-    console.error(`❌ Failed to load module: ${modulePath}`, error.message);
-    return null;
-  }
-}
-
-// Register the routers
-Object.entries(routers).forEach(([name, router]) => {
-  console.log(`Registering route: /api/${name}, Type: ${typeof router}`);
-  if (typeof router === "function") {
-    app.use(`/api/${name}`, router);
-    console.log(`✅ Registered route: /api/${name}`);
-  } else {
-    console.error(
-      `❌ Error: Router for /api/${name} is invalid. Expected a function, got ${typeof router}`
-    );
-  }
-});
-
-// Stripe webhook (must come before body parsers that affect raw payloads)
-app.use(
-  "/webhook/stripe",
-  express.raw({ type: "application/json" }),
-  stripeWebhook
-);
-
 // ============================
-// 5. ERROR HANDLING
+// 10. ERROR HANDLING
 // ============================
 app.use((req, res) => {
   res.status(404).json({
@@ -299,44 +307,34 @@ app.use((err, req, res, next) => {
   });
   res.status(err.status || 500).json({
     error: "Server Error",
-    message:
-      process.env.NODE_ENV === "development"
-        ? err.message
-        : "An unexpected error occurred",
+    message: process.env.NODE_ENV === "development" ? err.message : "An unexpected error occurred",
   });
 });
 
 // ============================
-// 6. RATE LIMITING
-// ============================
+// 11. RATE LIMITING (Additional)
+// Set proxy trust (if behind a proxy)
+app.set('trust proxy', 1);
+
 const aiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
+  windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100,
-  message: { error: "AI service rate limit exceeded. Please try again later." },
+  keyGenerator: (req, res) => {
+    return req.ip || req.headers['x-forwarded-for'] || 'unknown';
+  },
+  message: { error: "AI service rate limit exceeded. Please try again later." }
 });
-
-const fsdLimiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: 30,
-  message: { error: "FSD service rate limit exceeded. Please try again later." },
-});
-
-// Apply rate limiting before defining routes
 app.use("/api/ai", aiLimiter);
-app.use("/api/ai/fsd", fsdLimiter);
 
-// ============================
-// 7. SERVER STARTUP
+// 12. SERVER STARTUP
 // ============================
 const startServer = async () => {
-  await connectDB(); // ✅ Ensures database connects before starting server
+  await connectDB(); // Connect to MongoDB first
 
   const PORT = process.env.PORT || 3000;
   server.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
   });
-
-  console.log("✅ WebSocket Server Initialized");
 };
 
 startServer();

@@ -6,6 +6,9 @@ const TrainingSession = require('../models/TrainingSession'); // Mongoose model
 const AISpaceCoach = require('../services/AISpaceCoach'); // AI Assistant service
 const Joi = require('joi');
 const AIController = require('../controllers/aiController'); // or a dedicated TrainingController
+const Module = require("../models/Module"); // ✅ Use the correct model name
+const mongoose = require("mongoose");
+const progressTracker = require('../services/ProgressTracker'); // Centralized tracker
 
 // Pagination Schema
 const paginationSchema = Joi.object({
@@ -52,21 +55,20 @@ router.get('/modules', authenticate, async (req, res) => {
     }
 });
 
-// Dedicated endpoint for Physical Training
-router.get('/modules/physical', async (req, res) => {
+// ✅ Get Physical Training Modules
+router.get("/modules/physical", authenticate, async (req, res) => {
     try {
-      const physicalData = {
-        id: 'physical-001',
-        title: 'Physical Training Module',
-        description: 'Prepare your body for space travel with focused physical training.',
-        objectives: ['Cardiovascular fitness', 'Strength training', 'Zero-G adaptation']
-      };
-      res.json({ success: true, data: physicalData });
-    } catch (err) {
-      console.error('Error fetching physical training data:', err);
-      res.status(500).json({ error: 'Failed to fetch physical training data.' });
+        const physicalModules = await Module.find({ category: "physical" });
+        if (!physicalModules || physicalModules.length === 0) {
+            return res.status(404).json({ error: "No physical modules found" });
+        }
+        res.json(physicalModules);
+    } catch (error) {
+        console.error("Error fetching physical modules:", error.message);
+        res.status(500).json({ error: "Internal Server Error" });
     }
-  });
+});
+
   
 
 // Dedicated endpoint for Technical Training
@@ -154,7 +156,15 @@ router.post('/sessions', authenticate, validateSessionInput, async (req, res) =>
         res.status(500).json({ error: 'Failed to create session.' });
     }
 });
-
+router.post('/training/progress', authenticate, async (req, res) => {
+    try {
+        const { progress } = req.body;
+        const result = await progressTracker.updateProgress(req.user._id, progress);
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 // Analyze Training Progress
 router.post('/progress', authenticate, async (req, res) => {
     const { trainingData } = req.body;
@@ -165,6 +175,35 @@ router.post('/progress', authenticate, async (req, res) => {
     } catch (error) {
         console.error('Error analyzing progress:', error.message);
         res.status(500).json({ success: false, error: 'Failed to analyze progress.' });
+    }
+});
+
+// ✅ Route to Start a Training Module
+// ✅ Route to Start a Training Module
+router.post("/modules/:moduleId/start", authenticate, async (req, res) => {
+    try {
+        let { moduleId } = req.params;
+        console.log(`🔍 Received request to start module: ${moduleId}`);
+
+        // ✅ Validate ObjectId
+        if (!mongoose.Types.ObjectId.isValid(moduleId)) {
+            console.error("🚨 Invalid moduleId format:", moduleId);
+            return res.status(400).json({ error: "Invalid moduleId format" });
+        }
+
+        // ✅ Fetch the module
+        const module = await Module.findById(moduleId);
+        if (!module) {
+            console.error("🚨 Module not found:", moduleId);
+            return res.status(404).json({ error: "Module not found" });
+        }
+
+        console.log("✅ Module found:", module);
+
+        res.json({ message: `Module ${moduleId} started successfully`, module });
+    } catch (error) {
+        console.error("🚨 Error starting module:", error);
+        res.status(500).json({ error: "Internal Server Error", details: error.message });
     }
 });
 

@@ -1,7 +1,7 @@
-const express = require('express');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const User = require('../models/User'); // Import User model
+const express = require("express");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const User = require("../models/User"); // Import User model
 const router = express.Router();
 
 // =======================
@@ -9,254 +9,174 @@ const router = express.Router();
 // =======================
 const authenticate = async (req, res, next) => {
     try {
-        const token = req.header('Authorization')?.replace('Bearer ', '');
+        const token = req.header("Authorization")?.replace("Bearer ", "");
         if (!token) {
-            return res.status(401).json({ error: 'Authentication required' });
+            return res.status(401).json({ error: "Authentication required" });
         }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const user = await User.findById(decoded.userId);
         if (!user) {
-            return res.status(404).json({ error: 'User not found' });
+            return res.status(404).json({ error: "User not found" });
         }
 
-        req.user = user; // Attach the user object to the request
+        req.user = user; // Attach user object to request
         next();
     } catch (error) {
-        if (error.name === 'TokenExpiredError') {
-            console.error('Token Expired:', error.message);
-            return res.status(401).json({
-                error: 'Token expired',
-                message: 'Your session has expired. Please log in again.',
-            });
-        }
-        console.error('Authentication failed:', error.message);
-        res.status(401).json({ error: 'Authentication failed' });
+        console.error("Authentication failed:", error.message);
+        return res.status(401).json({ error: "Authentication failed" });
     }
 };
-// 🔹 Signup Route (MongoDB)
+
+// =======================
+// Signup Route
+// =======================
 router.post("/signup", async (req, res) => {
     try {
-        const { username, email, password } = req.body;
+        const { username, email, password, spaceReadinessScore, division } = req.body;
 
-        // Check if user already exists
-        let user = await User.findOne({ email });
+        let user = await User.findOne({ email: email.trim().toLowerCase() });
         if (user) {
-            return res.status(400).json({ success: false, message: "User already exists" });
+            return res.status(400).json({ error: "User already exists" });
         }
 
         // Hash password
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
-
-        // Create new user
+        const hashedPassword = await bcrypt.hash(password, 12);
         user = new User({
             username,
-            email,
-            password: hashedPassword
+            email: email.trim().toLowerCase(),
+            password: hashedPassword,
+            spaceReadinessScore,
+            division
         });
 
         await user.save();
 
         // Generate JWT Token
-        const payload = { userId: user.id };
-        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "7d" });
+        const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 
-        res.json({ success: true, token, user });
+        res.status(201).json({ message: "User created", token, user: user.toObject() });
     } catch (error) {
-        console.error(error.message);
-        res.status(500).json({ success: false, message: "Server error" });
+        console.error("Signup Error:", error.message);
+        res.status(500).json({ error: "Server error" });
     }
 });
+
 // =======================
 // Login Route
 // =======================
-router.post('/login', async (req, res) => {
+router.post("/login", async (req, res) => {
     try {
-        const { email, password } = req.body;
+        console.log("🔍 Received login request:", req.body);
 
-        console.log('Looking for user with email:', email);
+        const email = req.body.email.trim().toLowerCase();
         const user = await User.findOne({ email });
-        
+
+        console.log("✅ Found User:", user ? "Yes" : "No");
+
         if (!user) {
-            return res.status(400).json({ error: 'Invalid email or password' });
+            console.error("🚨 User not found in database.");
+            return res.status(400).json({ error: "Invalid email or password" });
         }
 
-        const isMatch = await bcrypt.compare(password, user.password);
+        const isMatch = await bcrypt.compare(req.body.password, user.password);
+        console.log("🔍 Password Match Result:", isMatch);
+
         if (!isMatch) {
-            return res.status(400).json({ error: 'Invalid email or password' });
+            console.error("🚨 Password does NOT match.");
+            return res.status(400).json({ error: "Invalid email or password" });
         }
 
-        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+        const token = jwt.sign({ userId: user._id.toString() }, process.env.JWT_SECRET, { expiresIn: "7d" });
+
         res.json({
-            message: 'Login successful',
+            message: "Login successful",
             token,
-            user: { id: user._id, email: user.email, name: user.name },
+            user: {
+                id: user._id.toString(),
+                email: user.email,
+                name: user.username
+            }
         });
     } catch (error) {
-        console.error('Login Error:', error.message);
-        res.status(500).json({ error: 'An unexpected error occurred. Please try again.' });
+        console.error("🚨 Login Error:", error.message);
+        res.status(500).json({ error: "An unexpected error occurred. Please try again." });
     }
 });
 
 // =======================
 // Logout Route
 // =======================
-router.post('/logout', (req, res) => {
-    res.status(200).json({ message: 'Logout successful' }); // Placeholder for client-side logout
+router.post("/logout", (req, res) => {
+    res.status(200).json({ message: "Logout successful" });
 });
-router.post('/signup', async (req, res) => {
-    try {
-        const { email, password, username, spaceReadinessScore, division } = req.body;
-        const hashedPassword = await bcrypt.hash(password, 12);
-        
-        const newUser = new User({
-            email,
-            password: hashedPassword,
-            username,
-            spaceReadinessScore,
-            division
-        });
 
-        await newUser.save();
-        
-        const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-        res.status(201).json({ message: 'User created', token });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
 // =======================
 // Password Reset Route
 // =======================
-router.post('/reset-password', async (req, res) => {
+router.post("/reset-password", async (req, res) => {
     try {
         const { email, newPassword } = req.body;
-        console.log('Reset attempt for email:', email); // Debug log
+        console.log("Reset attempt for email:", email);
 
-        const user = await User.findOne({ email });
-        console.log('User found:', !!user); // Debug log
+        const user = await User.findOne({ email: email.trim().toLowerCase() });
+        console.log("User found:", !!user);
 
         if (!user) {
-            return res.status(404).json({ error: 'User not found' });
+            return res.status(404).json({ error: "User not found" });
         }
 
         const hashedPassword = await bcrypt.hash(newPassword, 12);
-        console.log('Password hashed successfully'); // Debug log
+        console.log("Password hashed successfully");
 
-        // Use findOneAndUpdate instead of save()
-        await User.findOneAndUpdate(
-            { email },
-            { password: hashedPassword },
-            { validateBeforeSave: false }
-        );
+        await User.updateOne({ email }, { $set: { password: hashedPassword } });
 
-        res.json({ message: 'Password reset successful' });
+        res.json({ message: "Password reset successful" });
     } catch (error) {
-        console.error('Detailed Reset Error:', error); // More detailed error
-        res.status(500).json({ 
-            error: 'Password reset failed',
-            details: error.message  // Adding error details
-        });
-    }
-});
-
-
-router.post('/join', async (req, res) => {
-    try {
-        const { username, email, password } = req.body;
-        
-        const hashedPassword = await bcrypt.hash(password, 12);
-        
-        const newUser = new User({
-            username,
-            email,
-            password: hashedPassword,
-            status: 'pending',
-            spaceReadinessScore: 0,
-            division: 'Cadet'
-        });
-
-        await newUser.save();
-        const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-        
-        res.status(201).json({ 
-            message: 'Welcome aboard!', 
-            token,
-            user: { 
-                id: newUser._id, 
-                username: newUser.username 
-            }
-        });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error("Detailed Reset Error:", error);
+        res.status(500).json({ error: "Password reset failed", details: error.message });
     }
 });
 
 // =======================
 // Admin Creation Route
 // =======================
-router.post('/create-admin', async (req, res) => {
+router.post("/create-admin", async (req, res) => {
     try {
         const { adminSecret } = req.body;
 
         if (adminSecret !== process.env.ADMIN_SECRET) {
-            return res.status(403).json({ error: 'Invalid admin secret' });
+            return res.status(403).json({ error: "Invalid admin secret" });
         }
 
-        const existingAdmin = await User.findOne({ email: 'admin@steltrek.com' });
+        const existingAdmin = await User.findOne({ email: "admin@steltrek.com" });
         if (existingAdmin) {
             return res.status(400).json({
-                error: 'Admin already exists',
-                message: 'Use the login route with this email to get an auth token',
+                error: "Admin already exists",
+                message: "Use the login route with this email to get an auth token",
             });
         }
 
         const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 12);
         const adminUser = new User({
-            email: 'admin@steltrek.com',
+            email: "admin@steltrek.com",
             password: hashedPassword,
-            roles: ['admin', 'user'],
+            roles: ["admin", "user"],
         });
 
         await adminUser.save();
 
-        const token = jwt.sign({ userId: adminUser._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+        const token = jwt.sign({ userId: adminUser._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+
         res.status(201).json({
-            message: 'Admin created successfully',
+            message: "Admin created successfully",
             token,
-            credentials: {
-                email: 'admin@steltrek.com',
-                password: process.env.ADMIN_PASSWORD, // For development; replace or mask in production
-            },
+            credentials: { email: "admin@steltrek.com" },
         });
     } catch (error) {
-        console.error('Admin Creation Error:', error.message);
-        res.status(500).json({ error: 'An unexpected error occurred. Please try again.' });
+        console.error("Admin Creation Error:", error.message);
+        res.status(500).json({ error: "An unexpected error occurred. Please try again." });
     }
-});
-
-// Test endpoints in your Express routes
-router.post('/api/test/progress', (req, res) => {
-    const { progress } = req.body;
-    wss.clients.forEach(client => {
-        client.send(JSON.stringify({
-            type: 'progress_update',
-            progress
-        }));
-    });
-    res.json({ success: true });
-});
-
-router.post('/api/test/achievement', (req, res) => {
-    const { achievement } = req.body;
-    wss.clients.forEach(client => {
-        client.send(JSON.stringify({
-            type: 'achievement_unlocked',
-            achievement
-        }));
-    });
-    res.json({ success: true });
 });
 
 module.exports = router;

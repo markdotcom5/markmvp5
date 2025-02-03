@@ -1,17 +1,21 @@
-// models/peerMatch.js
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const peerMatchSchema = new Schema({
-    user: {
+    user1: {
         type: Schema.Types.ObjectId,
-        ref: 'User',
+        ref: "User",
+        required: true
+    },
+    user2: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
         required: true
     },
     preferences: {
         trainingLevel: {
             type: String,
-            enum: ['beginner', 'intermediate', 'advanced', 'expert']
+            enum: ["beginner", "intermediate", "advanced", "expert"]
         },
         interests: [String],
         availability: [{
@@ -21,24 +25,30 @@ const peerMatchSchema = new Schema({
         languages: [String],
         certificationGoals: [{
             type: Schema.Types.ObjectId,
-            ref: 'Certification'
+            ref: "Certification"
         }],
         moduleInterests: [{
             type: Schema.Types.ObjectId,
-            ref: 'Module'
+            ref: "Module"
         }]
     },
+    status: {
+        type: String,
+        enum: ["active", "paused", "inactive", "matched"], // ✅ Added "matched"
+        default: "active"
+    },
+    
     matches: [{
         peer: {
             type: Schema.Types.ObjectId,
-            ref: 'User'
+            ref: "User"
         },
         compatibilityScore: Number,
         matchReason: [String],
         status: {
             type: String,
-            enum: ['pending', 'accepted', 'rejected'],
-            default: 'pending'
+            enum: ["pending", "accepted", "rejected"],
+            default: "pending"
         },
         sessionHistory: [{
             date: Date,
@@ -57,11 +67,6 @@ const peerMatchSchema = new Schema({
     lastActive: {
         type: Date,
         default: Date.now
-    },
-    status: {
-        type: String,
-        enum: ['active', 'paused', 'inactive'],
-        default: 'active'
     }
 }, {
     timestamps: true
@@ -69,9 +74,9 @@ const peerMatchSchema = new Schema({
 
 // Index for efficient peer matching
 peerMatchSchema.index({ 
-    'preferences.trainingLevel': 1,
-    'preferences.interests': 1,
-    'status': 1
+    "preferences.trainingLevel": 1,
+    "preferences.interests": 1,
+    "status": 1
 });
 
-module.exports = mongoose.model('PeerMatch', peerMatchSchema);
+module.exports = mongoose.model("PeerMatch", peerMatchSchema); // ✅ Corrected export

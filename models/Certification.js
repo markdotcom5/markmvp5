@@ -1,200 +1,73 @@
-// models/Certification.js
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
+const AIController = require("../controllers/AIController");
 
-const certificationSchema = new mongoose.Schema({
-    // Keep existing base fields
-    name: { 
-        type: String, 
-        required: true 
-    },
-    description: { 
-        type: String, 
-        required: false 
-    },
+const certificationSchema = new Schema(
+  {
+    userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    name: { type: String, required: true },
+    description: { type: String },
     level: { 
-        type: String, 
-        required: true,
-        enum: ['beginner', 'intermediate', 'advanced', 'expert']
+      type: String, 
+      enum: ["beginner", "intermediate", "advanced", "expert"], 
+      required: true
     },
-    userId: { 
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: 'User', 
-        required: true 
-    },
-
-    // Add new fields for enhanced functionality
-    type: {
-        type: String,
-        enum: ['individual', 'group', 'mission', 'specialization'],
-        default: 'individual'
-    },
-    requirements: [{
-        module: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Module'
-        },
-        minimumScore: Number,
-        completed: {
-            type: Boolean,
-            default: false
-        }
-    }],
+    dateEarned: { type: Date, default: Date.now },
+    // Optionally, if you plan to track progress for a certification, add a progress field.
     progress: {
-        currentScore: {
-            type: Number,
-            default: 0
-        },
-        completedModules: [{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Module'
-        }],
-        requiredModules: [{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Module'
-        }],
-        percentageComplete: {
-            type: Number,
-            default: 0
-        }
+      // This is optional. Remove if not needed.
+      percentageComplete: { type: Number, default: 0 }
     },
-    achievement: {
-        badge: String,
-        points: {
-            type: Number,
-            default: 0
-        },
-        unlocks: [{
-            type: String,
-            description: String
-        }]
-    },
-    validity: {
-        startDate: Date,
-        expiryDate: Date,
-        isActive: {
-            type: Boolean,
-            default: true
-        }
-    },
-    groupData: {
-        teamMembers: [{
-            userId: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'User'
-            },
-            role: String,
-            contributionScore: Number
-        }],
-        groupId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'StudyGroup'
-        }
-    },
-    celebrations: [{
-        type: {
-            type: String,
-            enum: ['milestone', 'completion', 'excellence'],
-        },
-        date: Date,
-        description: String,
-        participants: [{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
-        }]
-    }],
     aiMetrics: {
-        predictedCompletion: Date,
-        recommendedPath: [String],
-        strengthAreas: [String],
-        improvementAreas: [String],
-        nextMilestone: {
-            description: String,
-            estimatedDate: Date
-        }
+      predictedCompletion: Date,
+      recommendedPath: [String],
+      improvementAreas: [String]
     },
     status: {
-        type: String,
-        enum: ['in_progress', 'completed', 'expired', 'revoked'],
-        default: 'in_progress'
-    },
-    achievedAt: { 
-        type: Date, 
-        required: false 
+      type: String,
+      enum: ["in_progress", "completed", "expired", "revoked"],
+      default: "in_progress"
     }
-}, {
-    timestamps: true
-});
-
-// Methods for certification management
-certificationSchema.methods.updateProgress = async function(moduleId, score) {
-    try {
-        const module = await mongoose.model('Module').findById(moduleId);
-        if (!module) throw new Error('Module not found');
-
-        // Update completed modules
-        if (!this.progress.completedModules.includes(moduleId)) {
-            this.progress.completedModules.push(moduleId);
-        }
-
-        // Update overall progress
-        const totalModules = this.requirements.length;
-        const completedModules = this.progress.completedModules.length;
-        this.progress.percentageComplete = (completedModules / totalModules) * 100;
-
-        // Update current score
-        this.progress.currentScore = score;
-
-        // Check if certification is completed
-        if (this.progress.percentageComplete === 100 && score >= this.requirements.minimumScore) {
-            this.status = 'completed';
-            this.achievedAt = new Date();
-        }
-
-        await this.save();
-        return this.progress;
-    } catch (error) {
-        console.error('Error updating certification progress:', error);
-        throw error;
-    }
-};
+  },
+  { timestamps: true }
+);
 
 certificationSchema.methods.calculateAIMetrics = async function() {
-    try {
-        // Calculate predicted completion based on current progress
-        const remainingPercentage = 100 - this.progress.percentageComplete;
-        const daysPerPercent = (new Date() - this.createdAt) / this.progress.percentageComplete;
-        const predictedDays = remainingPercentage * daysPerPercent;
-        
-        this.aiMetrics.predictedCompletion = new Date(Date.now() + predictedDays);
-        await this.save();
-        
-        return this.aiMetrics;
-    } catch (error) {
-        console.error('Error calculating AI metrics:', error);
-        throw error;
-    }
+  let aiAnalysis;
+  try {
+    aiAnalysis = await AIController.analyzeCertificationProgress({ certification: this });
+  } catch (error) {
+    console.error("Error during AI analysis:", error);
+    aiAnalysis = null;
+  }
+
+  // If a progress field exists and percentageComplete is defined, use that logic.
+  if (this.progress && typeof this.progress.percentageComplete === "number" && this.progress.percentageComplete > 0) {
+    const remainingPercentage = 100 - this.progress.percentageComplete;
+    // Calculate average days per percentage point since creation.
+    const daysPerPercent = (new Date() - this.createdAt) / this.progress.percentageComplete;
+    const predictedDays = remainingPercentage * daysPerPercent;
+    this.aiMetrics.predictedCompletion = new Date(Date.now() + predictedDays);
+  } else if (aiAnalysis && aiAnalysis.metrics && typeof aiAnalysis.metrics.completionRate === "number") {
+    // Otherwise, if AI analysis is available, use its computed completion rate.
+    this.aiMetrics.predictedCompletion = new Date(Date.now() + (100 - aiAnalysis.metrics.completionRate) * 86400000);
+  } else {
+    // Fallback: set predictedCompletion to a default value (e.g., one week from now)
+    this.aiMetrics.predictedCompletion = new Date(Date.now() + 7 * 86400000);
+  }
+
+  // Save the updated certification
+  await this.save();
+
+  // Return the combined metrics
+  return {
+    predictedCompletion: this.aiMetrics.predictedCompletion,
+    // Use improvement areas from AI analysis if available, otherwise an empty array.
+    improvementAreas: (aiAnalysis && aiAnalysis.metrics && aiAnalysis.metrics.skillLevels) || []
+  };
 };
 
-certificationSchema.methods.addCelebration = async function(type, description) {
-    try {
-        this.celebrations.push({
-            type,
-            date: new Date(),
-            description,
-            participants: [this.userId]
-        });
-
-        if (this.groupData.teamMembers.length > 0) {
-            this.celebrations[this.celebrations.length - 1].participants = 
-                this.groupData.teamMembers.map(member => member.userId);
-        }
-
-        await this.save();
-        return this.celebrations[this.celebrations.length - 1];
-    } catch (error) {
-        console.error('Error adding celebration:', error);
-        throw error;
-    }
-};
-
-module.exports = mongoose.model('Certification', certificationSchema);
+// Prevent OverwriteModelError by checking if the model already exists
+module.exports = mongoose.models.Certification
+  ? mongoose.models.Certification
+  : mongoose.model("Certification", certificationSchema);

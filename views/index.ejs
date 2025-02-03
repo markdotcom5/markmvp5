@@ -1,157 +1,83 @@
 <!DOCTYPE html>
 <html lang="en">
   <%- include('partials/head', { title: 'SharedStars Home' }) %>
-  <body>
-    <!-- Video Backdrop -->
-    <video autoplay muted loop playsinline class="w-full h-full object-cover">
-      <source src="/videos/academy10.mp4" type="video/mp4">
-      Your browser does not support the video tag.
-  </video>  
+  <body class="bg-black">
+    <!-- Header (Make sure your partial includes the language buttons and top navigation) -->
+    <%- include('partials/header') %>
 
-    <!-- Hero Overlay -->
-    <section class="hero-overlay flex flex-col items-center justify-center h-screen bg-white/90">
-      <div class="hero-content text-center">
-        <h1 class="text-4xl font-bold mb-6">Welcome to SharedStars</h1>
-        <p class="mb-8">Experience the future of space training with AI-guided coaching.</p>
-        <div class="flex gap-4 mb-6">
-          <a href="/signup" class="btn btn-primary">Sign Up</a>
-          <a href="/subscribe" class="btn btn-secondary">Subscribe</a>
-          <button id="initAI" class="btn btn-tertiary">Start AI</button>
-        </div>
-        <div class="language-selector">
-          <button class="language-option" data-lang="en">🇺🇸 English</button>
-          <button class="language-option" data-lang="zh">🇨🇳 中文</button>
-          <button class="language-option" data-lang="ko">🇰🇷 한국어</button>
-          <button class="language-option" data-lang="es">🇪🇸 Español</button>
+    <!-- Hero Section -->
+    <section class="hero-section min-h-screen flex items-center justify-center relative">
+      <div class="video-container">
+        <video id="heroVideo" class="video-background" autoplay muted loop playsinline>
+          <!-- Using absolute path for video -->
+          <source src="/videos/academy10.mp4" type="video/mp4">
+        </video>
+      </div>
+
+      <!-- Hero Content -->
+      <div class="hero-content text-center text-white max-w-4xl px-4">
+        <h1 class="text-6xl font-bold mb-4" data-i18n="heroTitle">From Earth to Space in 36 Months</h1>
+        <p class="text-xl mb-8" data-i18n="subtitle">Like Tesla's FSD for Space Training: Intelligent, Adaptive, Revolutionary</p>
+
+        <!-- Training Mode Selection -->
+        <div class="training-modes grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Self-Paced Mode -->
+          <div class="mode-card bg-black/30 backdrop-blur p-6 rounded-xl border border-blue-500/20">
+            <h3 class="text-2xl font-bold mb-3">Self-Paced Training</h3>
+            <p class="mb-4">Learn at your own pace with structured modules</p>
+            <button class="training-mode-btn" data-mode="self-paced">Start Journey</button>
+          </div>
+
+          <!-- AI-Guided Mode -->
+          <div class="mode-card bg-black/30 backdrop-blur p-6 rounded-xl border border-purple-500/20">
+            <h3 class="text-2xl font-bold mb-3">AI-Guided Path</h3>
+            <p class="mb-4">Accelerated learning with FSD-style adaptive training</p>
+            <button class="training-mode-btn" data-mode="ai-guided">Launch AI Training</button>
+          </div>
         </div>
       </div>
     </section>
-<!-- Compelling CTA Section (FOMO) -->
-<section class="fomo-section bg-gradient-to-r from-blue-900 to-purple-900 text-white py-12">
-  <div class="container mx-auto text-center px-4">
-    <h2 class="text-4xl font-extrabold mb-4">Don't Miss Out!</h2>
-    <p class="text-xl mb-6">
-      Join SharedStars today and unlock exclusive AI-powered training modules, personalized coaching, and a rewarding achievement system.
-      Secure your spot among the elite space professionals—spaces are limited!
-    </p>
-    <div class="flex justify-center gap-6 mb-4">
-      <a href="/signup" class="btn btn-primary text-lg px-6 py-3">Sign Up Now</a>
-      <a href="/subscribe" class="btn btn-secondary text-lg px-6 py-3">Subscribe Today</a>
-    </div>
-    <!-- Optionally add a countdown or limited offer message -->
-    <p class="mt-2 text-sm italic">Early access members receive exclusive benefits and priority support. Act now!</p>
-  </div>
-</section>
 
-    <!-- Main Content Area -->
-    <main class="container mx-auto py-8">
-      <p class="text-center mb-8">This is the main content area.</p>
-
-      <!-- FOMO / Compelling CTA Section -->
-      <section class="fomo-section bg-gradient-to-r from-blue-900 to-purple-900 text-white py-12">
-        <div class="container mx-auto text-center px-4">
-          <h2 class="text-4xl font-extrabold mb-4">Don't Miss Out!</h2>
-          <p class="text-xl mb-6">
-            Join SharedStars today and unlock exclusive AI-powered training modules, personalized coaching, and a rewarding achievement system.
-            Secure your spot among the elite space professionals—spaces are limited!
-          </p>
-          <div class="flex justify-center gap-6 mb-4">
-            <a href="/signup" class="btn btn-primary text-lg px-6 py-3">Sign Up Now</a>
-            <a href="/subscribe" class="btn btn-secondary text-lg px-6 py-3">Subscribe Today</a>
-          </div>
-          <p class="mt-2 text-sm italic">Early access members receive exclusive benefits and priority support. Act now!</p>
+    <!-- Training Dashboard (hidden by default) -->
+    <section id="training-dashboard" class="py-16 bg-gray-900 hidden">
+      <div class="container mx-auto px-4">
+        <div class="progress-tracker mb-8">
+          <div class="progress-bar"></div>
+          <div id="progressDisplay">Progress: 0%</div>
         </div>
-        <!-- Training Experience Trigger (e.g., a button) -->
-<button id="startAITraining">Start AI Training</button>
+        <div class="current-module bg-black/30 p-6 rounded-xl">
+          <h3 class="text-2xl font-bold text-white mb-4">Current Module</h3>
+          <div id="moduleContent"></div>
+        </div>
+      </div>
+    </section>
 
-<!-- Assessment container where the training questions or plans will be shown -->
-<div class="assessment-container"></div>
-
-<!-- Mode toggle options (if applicable) -->
-<div class="mode-toggle">
-    <button class="toggle-option ai">AI Mode</button>
-    <button class="toggle-option manual">Manual Mode</button>
-</div>
-
-      </section>
-    </main>
-
+    <!-- Footer -->
     <%- include('partials/footer') %>
 
-    <!-- Inline Script for Interactivity -->
-    <script>
-      document.addEventListener('DOMContentLoaded', () => {
-      
-        // Utility function to fetch module data from an API endpoint and update a given element's innerHTML.
-        async function fetchModule(url, elementId) {
-          try {
-            const response = await fetch(url, {
-              // Uncomment and add the authorization header if needed:
-              // headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
-            });
-            const json = await response.json();
-            if (json.success && json.data) {
-              const data = json.data;
-              document.getElementById(elementId).innerHTML = `
-                <h3 class="text-2xl font-semibold">${data.title}</h3>
-                <p>${data.description}</p>
-                ${data.objectives ? `<ul class="list-disc pl-5">${data.objectives.map(obj => `<li>${obj}</li>`).join('')}</ul>` : ''}
-              `;
-            } else {
-              document.getElementById(elementId).innerHTML = '<p>Error loading module data.</p>';
-            }
-          } catch (error) {
-            console.error('Error fetching module data:', error);
-            document.getElementById(elementId).innerHTML = '<p>Error fetching module data.</p>';
-          }
-        }
-      
-        // Load each module's data into its corresponding section.
-        fetchModule('/api/training/modules/physical', 'physical-content');
-        fetchModule('/api/training/modules/technical', 'technical-content');
-        fetchModule('/api/training/modules/ai-guided', 'ai-guided-content');
-      
-        // Existing code for mobile menu, language selection, and AI initialization...
-        // (If you haven't modified those sections, they remain as is.)
-      
-        // Mobile Menu Toggle Logic
-        const menuToggle = document.getElementById('menuToggle');
-        const menuOverlay = document.getElementById('menuOverlay');
-        const closeMenu = document.getElementById('closeMenu');
-        if (menuToggle && menuOverlay && closeMenu) {
-          menuToggle.addEventListener('click', () => {
-            menuOverlay.classList.toggle('translate-x-full');
-          });
-          closeMenu.addEventListener('click', () => {
-            menuOverlay.classList.add('translate-x-full');
-          });
-        }
-      
-        // Language selection logic
-        document.querySelectorAll('.language-option').forEach(button => {
-          button.addEventListener('click', (e) => {
-            const lang = e.currentTarget.getAttribute('data-lang');
-            localStorage.setItem('preferredLanguage', lang);
-            console.log('Language switched to:', lang);
-            // TODO: Implement dynamic language update functionality if needed.
-          });
-        });
-      
-        // AI Initialization button logic
-        const initAI = document.getElementById('initAI');
-        if (initAI) {
-          initAI.addEventListener('click', () => {
-            console.log("AI Initialization triggered");
-            // TODO: Call your AI initialization endpoint or function.
-          });
-        }
-      
-      });
-      </script>
-      <!-- At the bottom of your index.ejs before the closing </body> tag -->
-<script src="/js/modules/training/index.js" type="module"></script>
-<script src="/js/main.js" type="module"></script>
+    <!-- Training Module Scripts -->
+    <script type="module">
+      import { initializeTrainingModules } from '/js/modules/training/index.js';
 
+      document.addEventListener('DOMContentLoaded', () => {
+        // Initialize training modules with your configuration
+        initializeTrainingModules({
+          modules: ['physical', 'technical', 'simulation'],
+          endpoints: {
+            physical: '/api/training/modules/physical',
+            technical: '/api/training/modules/technical',
+            simulation: '/api/training/modules/simulation'
+          }
+        });
+
+        // Set the language attribute based on saved preference
+        const currentLang = localStorage.getItem('preferredLanguage') || 'en';
+        document.documentElement.setAttribute('lang', currentLang);
+      });
+    </script>
+
+    <!-- Load Core Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script type="module" src="/js/modules/core/index.js"></script>
   </body>
 </html>
-

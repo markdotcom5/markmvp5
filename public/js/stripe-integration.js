@@ -1,96 +1,120 @@
-// public/js/stripe-integration.js
+// /js/stripe-integration.js
 
-// Initialize Stripe using the publishable key from the environment
-const stripe = Stripe(process.env.STRIPE_API_KEY || 'placeholder_key'); // Use environment variable
+// Initialize Stripe using your publishable key (from your environment or replace with your key)
+const stripe = Stripe(process.env.STRIPE_API_KEY || 'placeholder_key');
 
 // Initialize Stripe Elements
 const elements = stripe.elements();
 const card = elements.create('card', {
-    style: {
-        base: {
-            color: '#FFFFFF',
-            fontFamily: '"Inter", sans-serif',
-            fontSize: '16px',
-            '::placeholder': {
-                color: '#6B7280', // Placeholder text color
-            },
-        },
+  style: {
+    base: {
+      color: '#FFFFFF',
+      fontFamily: '"Inter", sans-serif',
+      fontSize: '16px',
+      '::placeholder': {
+        color: '#6B7280', // Placeholder text color
+      },
     },
+  },
 });
 
-// Mount the card input field
+// Mount the card input field into the DOM element with id "card-element"
 card.mount('#card-element');
 
-// Handle card input validation and errors
+// Handle card input validation and display errors if any
 card.on('change', ({ error }) => {
-    const displayError = document.getElementById('card-errors');
-    if (error) {
-        displayError.textContent = error.message; // Display error message
-    } else {
-        displayError.textContent = ''; // Clear error message
-    }
+  const displayError = document.getElementById('card-errors');
+  if (error) {
+    displayError.textContent = error.message;
+  } else {
+    displayError.textContent = '';
+  }
 });
 
-// Event listeners for subscription logic remain unchanged
+/**
+ * Function to update the personalized countdown timeline.
+ * This function should update the countdown based on the plan type.
+ * (You may customize the implementation as needed.)
+ */
+function updatePersonalCountdown(planType) {
+  // Example: update some DOM elements based on plan type
+  console.log(`Updating personalized countdown for plan: ${planType}`);
+  // You might fetch new timing values from your backend API,
+  // then update the innerText of elements with IDs like "personalYears", "personalMonths", etc.
+  // For now, we simulate by setting some dummy values:
+  document.getElementById('personalYears').textContent = "2022";
+  document.getElementById('personalMonths').textContent = "6";
+  document.getElementById('personalWeeks').textContent = "2";
+  document.getElementById('personalDays').textContent = "14";
+  document.getElementById('personalHours').textContent = "12";
+  document.getElementById('personalMinutes').textContent = "30";
+}
 
-// Add event listeners to plan selection buttons
+/**
+ * Async event listener for plan selection buttons.
+ * When a plan button is clicked, it creates a payment method and then attempts to create and confirm a subscription.
+ */
 document.querySelectorAll('[data-plan]').forEach(button => {
-    button.addEventListener('click', async (e) => {
-        e.preventDefault();
+  button.addEventListener('click', async (e) => {
+    e.preventDefault();
 
-        const planType = button.getAttribute('data-plan');
-        const loading = document.getElementById('payment-processing'); // Spinner element
-        const cardErrors = document.getElementById('card-errors');
+    const planType = button.getAttribute('data-plan');
+    const loadingElement = document.getElementById('payment-processing'); // Spinner element
+    const cardErrors = document.getElementById('card-errors');
 
-        try {
-            // Show loading spinner and disable the button
-            loading.classList.remove('hidden');
-            button.disabled = true;
+    try {
+      // Show loading spinner and disable the button
+      loadingElement.classList.remove('hidden');
+      button.disabled = true;
 
-            // Create a payment method using the card input
-            const { paymentMethod, error: paymentError } = await stripe.createPaymentMethod({
-                type: 'card',
-                card,
-            });
+      // Create a payment method using the card input
+      const { paymentMethod, error: paymentError } = await stripe.createPaymentMethod({
+        type: 'card',
+        card: card,
+      });
+      if (paymentError) {
+        throw paymentError;
+      }
 
-            if (paymentError) throw paymentError; // Handle payment method creation errors
+      // Send the payment method and selected plan type to your backend to create the subscription
+      const response = await fetch('/api/subscription/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          paymentMethodId: paymentMethod.id,
+          plan: planType,
+        }),
+      });
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.error || 'Failed to create subscription. Please try again.');
+      }
+      const { clientSecret } = await response.json();
 
-            // Send payment method and plan to the server
-            const response = await fetch('/api/subscription/create', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    paymentMethodId: paymentMethod.id,
-                    plan: planType,
-                }),
-            });
+      // Confirm the payment with the client secret from your backend
+      const { error: confirmationError } = await stripe.confirmCardPayment(clientSecret);
+      if (confirmationError) {
+        throw confirmationError;
+      }
 
-            if (!response.ok) throw new Error('Failed to create subscription. Please try again.');
+      // Update personalized countdown timeline
+      updatePersonalCountdown(planType);
 
-            const { clientSecret } = await response.json();
-
-            // Confirm the payment
-            const { error: confirmationError } = await stripe.confirmCardPayment(clientSecret);
-
-            if (confirmationError) throw confirmationError; // Handle payment confirmation errors
-
-            // Update the personalized countdown timeline
-            updatePersonalCountdown(planType);
-
-            // Show success modal
-            const successModal = document.getElementById('success-modal');
-            if (successModal) {
-                successModal.showModal(); // Ensure the modal exists before calling
-            }
-
-        } catch (error) {
-            // Display any errors to the user
-            cardErrors.textContent = error.message || 'An error occurred. Please try again.';
-            console.error('Subscription Error:', error);
-        } finally {
-            // Hide loading spinner and re-enable the button
-            loading.classList.add('hidden');
-            button.disabled = false;
-        }
-    });
+      // Show success modal (ensure the modal element exists in your DOM)
+      const successModal = document.getElementById('success-modal');
+      if (successModal && typeof successModal.showModal === 'function') {
+        successModal.showModal();
+      } else {
+        console.log('Subscription successful, but no success modal found.');
+      }
+    } catch (error) {
+      // Display error to the user
+      cardErrors.textContent = error.message || 'An error occurred. Please try again.';
+      console.error('Subscription Error:', error);
+    } finally {
+      // Hide the loading spinner and re-enable the button
+      loadingElement.classList.add('hidden');
+      button.disabled = false;
+    }
+  });
 });

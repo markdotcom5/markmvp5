@@ -120,11 +120,19 @@ const WebSocketManager = {
 
     connect() {
         try {
-            this.socket = new WebSocket(CONFIG.WEBSOCKET_URL);
+            const token = localStorage.getItem("authToken"); // ✅ Retrieve token from storage
+            if (!token) {
+                console.error("❌ WebSocket connection failed: No authentication token.");
+                return;
+            }
+
+            const WS_URL = (window.location.protocol === "https:" ? "wss://" : "ws://") + window.location.host + "/ws?token=" + token;
+            this.socket = new WebSocket(WS_URL);
+
             this.setupEventHandlers();
-            console.log('🔗 WebSocket connection initialized');
+            console.log("🔗 WebSocket connection initialized:", WS_URL);
         } catch (error) {
-            console.error('❌ WebSocket connection error:', error);
+            console.error("❌ WebSocket connection error:", error);
             this.handleDisconnect();
         }
     },
@@ -133,8 +141,8 @@ const WebSocketManager = {
         if (!this.socket) return;
 
         this.socket.onopen = () => {
-            console.log('✅ WebSocket connected');
-            this.retryAttempts = 0;
+            console.log("✅ WebSocket connected successfully.");
+            this.retryAttempts = 0; // ✅ Reset retry counter on successful connection
         };
 
         this.socket.onmessage = (event) => {
@@ -142,13 +150,17 @@ const WebSocketManager = {
                 const data = JSON.parse(event.data);
                 this.handleMessage(data);
             } catch (error) {
-                console.error('❌ Error handling message:', error);
+                console.error("❌ Error handling WebSocket message:", error);
             }
         };
 
-        this.socket.onclose = () => this.handleDisconnect();
+        this.socket.onclose = (event) => {
+            console.warn("⚠️ WebSocket closed. Code:", event.code, "Reason:", event.reason);
+            this.handleDisconnect();
+        };
+
         this.socket.onerror = (error) => {
-            console.error('❌ WebSocket error:', error);
+            console.error("❌ WebSocket error:", error);
             this.handleDisconnect();
         };
     },
@@ -164,10 +176,15 @@ const WebSocketManager = {
             console.warn(`⚠️ WebSocket disconnected. Reconnecting in ${delay / 1000} seconds...`);
             setTimeout(() => this.connect(), delay);
         } else {
-            console.error("❌ Max WebSocket reconnection attempts reached.");
+            console.error("❌ Max WebSocket reconnection attempts reached. No further retries.");
         }
     }
 };
+
+// ✅ Initialize WebSocket when the page loads
+document.addEventListener("DOMContentLoaded", () => {
+    WebSocketManager.connect();
+});
 
 // ✅ Initialize when the DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
@@ -600,13 +617,13 @@ function debounce(fn, delay) {
     };
 }
 function handlePageChange(direction) {
-  }
-      if (direction === 'prev' && state.currentPage > 1) {
+    if (direction === 'prev' && state.currentPage > 1) {
         state.currentPage--;
     } else if (direction === 'next' && state.currentPage < state.totalPages) {
         state.currentPage++;
     }
     refreshLeaderboard();
+}
 
 function showError(message) {
     const notification = document.createElement('div');

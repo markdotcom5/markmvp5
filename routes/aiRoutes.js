@@ -7,13 +7,16 @@ const AIGuidanceSystem = require('../services/AIGuidanceSystem');
 const AISpaceCoach = require('../services/AISpaceCoach');
 const aiGuidance = require('../services/aiGuidance');
 const aiAssistant = require('../services/aiAssistant');
-const { authenticate } = require('../middleware/authenticate'); // ✅ Ensuring correct destructuring
+const { authenticate } = require('../middleware/authenticate');
 const Leaderboard = require('../models/Leaderboard');
 const User = require('../models/User');
 const TrainingSession = require('../models/TrainingSession');
-const Session = require('../models/Session'); // ✅ Ensuring Session model is included
+const Session = require('../models/Session');
 const validateRequest = require('../middleware/validateRequest');
 const aiController = require('../controllers/aiController');
+
+// Map to hold WebSocket clients
+const clients = new Map();
 
 // Helper function for module details
 async function getModuleDetails(moduleId) {
@@ -34,14 +37,12 @@ async function getModuleDetails(moduleId) {
     }
   };
 
-  return modules[moduleId] ?? null; // ✅ More explicit handling for invalid module IDs
+  return modules[moduleId] ?? null;
 }
 
 /* -------------------------------
    Training & Assessment Endpoints
 ---------------------------------*/
-
-// Start Assessment
 
 router.post('/training/start-assessment', 
   authenticate, 
@@ -85,47 +86,40 @@ router.post('/training/start-assessment',
     }
 });
 
-
 router.post('/training/submit-answer', authenticate, async (req, res) => {
-  console.log("Request body:", req.body); // Debug log to inspect the incoming body
+  console.log("Request body:", req.body);
 
   try {
     const { sessionId, question, answer } = req.body;
 
-    // Ensure sessionId is provided
     if (!sessionId) {
       return res.status(400).json({ error: 'Session ID is required' });
     }
 
-    // Fetch the session from database
     const session = await Session.findById(sessionId);
     if (!session) {
       return res.status(404).json({ error: 'Session not found' });
     }
 
-    // Ensure assessment structure exists
     if (!session.assessment) {
       session.assessment = { responses: [] };
     }
-
-    // Ensure responses array exists
     if (!session.assessment.responses) {
       session.assessment.responses = [];
     }
 
-    // Add response to the session
     session.assessment.responses.push({
       question: question.toString(),
       answer: answer,
       timestamp: new Date(),
     });
 
-    await session.save(); // ✅ Ensure this is inside the async function
+    await session.save();
 
     res.json({
       success: true,
       progress: (session.assessment.responses.length / 5) * 100,
-      nextQuestionIndex: session.assessment.responses.length + 1, // Adjust based on your logic
+      nextQuestionIndex: session.assessment.responses.length + 1
     });
 
   } catch (err) {
@@ -138,7 +132,6 @@ router.post('/training/submit-answer', authenticate, async (req, res) => {
   }
 });
 
-// Complete Assessment Route
 router.post('/training/assessment/:sessionId/complete', authenticate, async (req, res) => {
   try {
     const session = await TrainingSession.findOne({
@@ -151,7 +144,6 @@ router.post('/training/assessment/:sessionId/complete', authenticate, async (req
       return res.status(404).json({ error: 'Assessment session not found' });
     }
   
-    // Generate final analysis and training plan
     const finalAnalysis = {
       score: calculateAssessmentScore(session.assessment.responses),
       metrics: {
@@ -166,7 +158,6 @@ router.post('/training/assessment/:sessionId/complete', authenticate, async (req
       }
     };
     
-    // Update session with results
     session.status = 'completed';
     session.assessment.completedAt = new Date();
     session.assessment.score = finalAnalysis.score;
@@ -208,12 +199,27 @@ router.post('/training/assessment/:sessionId/complete', authenticate, async (req
     handleError(res, error, 'Failed to complete assessment');
   }
 });
+
 /* -------------------------------
    AI & Guidance Endpoints
 ---------------------------------*/
 
+// New endpoint: GET /api/ai/greeting
+router.get('/greeting', async (req, res) => {
+  try {
+    // Use your AI controller's generateGreeting method.
+    // If your method sends the response directly, you might simply call:
+    await aiController.generateGreeting(req, res);
+    // Alternatively, if it returns a greeting string, you can do:
+    // const greeting = await aiController.generateGreeting(req, res);
+    // res.json({ greeting });
+  } catch (error) {
+    console.error("Error generating greeting:", error);
+    res.status(500).json({ greeting: "Welcome back, Commander. Let's resume our Mission!" });
+  }
+});
+
 // Render AI Guidance Page
-// (Remove duplicate, keep only one definition)
 router.get('/guidance', async (req, res) => {
   try {
     const guidanceData = await aiGuidance.getGuidanceData();
@@ -238,16 +244,27 @@ router.get('/ai-coaching', async (req, res) => {
 // Generate Training Content for a Module
 router.get('/training-content/:module', authenticate, async (req, res) => {
   try {
-    // This method is expected to send the response directly.
     await aiController.generateTrainingContent(req, res);
   } catch (error) {
     console.error('Error generating training content:', error);
     res.status(500).json({ error: 'Failed to generate training content' });
   }
 });
-  
-// Alternatively, if you prefer to render a view for training content, use this route:
-// (Note: Ensure you don’t have duplicate routes for the same path.)
+router.get('/ai-guidance', async (req, res) => {
+  try {
+    // For example, generate guidance data or simply forward to the coaching route
+    const guidanceData = await AISpaceCoach.generateCoachingSuggestions({
+      userId: req.user?._id,
+      currentProgress: req.query.currentProgress || 0,
+      context: req.query.context || ""
+    });
+    res.json({ success: true, guidance: guidanceData });
+  } catch (error) {
+    handleError(res, error, 'Failed to generate AI guidance');
+  }
+});
+
+// Alternative: Render Training Content view
 router.get('/training-content/view/:module', async (req, res) => {
   try {
     const contentResponse = await aiController.generateTrainingContent(req, res);
@@ -266,8 +283,6 @@ router.get('/training-content/view/:module', async (req, res) => {
 /* -------------------------------
    Module Endpoints for Training
 ---------------------------------*/
-
-// Dedicated endpoints for individual modules
 router.get('/modules/physical', authenticate, async (req, res) => {
   try {
     const physicalData = {
@@ -303,7 +318,6 @@ router.get('/modules/ai-guided', authenticate, async (req, res) => {
   }
 });
   
-// Get Available Training Modules (all modules in one endpoint)
 router.get('/training/modules', authenticate, async (req, res) => {
   try {
     const modules = [
@@ -346,7 +360,6 @@ router.get('/training/modules', authenticate, async (req, res) => {
   }
 });
   
-// Start Training Module
 router.post('/training/modules/:moduleId/start', authenticate, async (req, res) => {
   try {
     const { moduleId } = req.params;
@@ -378,7 +391,6 @@ router.post('/training/modules/:moduleId/start', authenticate, async (req, res) 
   }
 });
   
-// Progress Update Route for Training Modules
 router.post('/training/modules/:moduleId/progress', authenticate, async (req, res) => {
   try {
     const { progress, completedTasks } = req.body;
@@ -405,7 +417,6 @@ router.post('/training/modules/:moduleId/progress', authenticate, async (req, re
       return res.status(404).json({ error: 'Active session not found' });
     }
   
-    // Update points and ranking
     session.ranking.points = session.calculatePoints();
     await session.save();
     await TrainingSession.updateGlobalRanks();
@@ -436,13 +447,11 @@ router.post('/initialize', authenticate, async (req, res) => {
     const { mode } = req.body;
     console.log('Initializing AI for user:', req.user._id, 'Mode:', mode);
   
-    // Initialize AI systems
     const initResult = await AISpaceCoach.selectAIMode({
       userId: req.user._id,
       preferredMode: mode || 'full_guidance'
     });
   
-    // Create or update AI session
     const session = await TrainingSession.findOneAndUpdate(
       { userId: req.user._id, status: 'in-progress' },
       {
@@ -455,7 +464,6 @@ router.post('/initialize', authenticate, async (req, res) => {
       { new: true, upsert: true }
     );
   
-    // Notify connected client via WebSocket
     const ws = clients.get(req.user._id);
     if (ws) {
       ws.send(JSON.stringify({
@@ -479,7 +487,6 @@ router.post('/ai-guidance', authenticate, async (req, res) => {
   try {
     const { questionId, currentProgress, context } = req.body;
     
-    // Get personalized guidance
     const guidance = await AISpaceCoach.generateCoachingSuggestions({
       userId: req.user._id,
       questionId,
@@ -487,7 +494,6 @@ router.post('/ai-guidance', authenticate, async (req, res) => {
       context
     });
   
-    // Record AI interaction
     await TrainingSession.findOneAndUpdate(
       { userId: req.user._id, status: 'in-progress' },
       {
@@ -521,10 +527,8 @@ router.post('/launch', aiController.launchAIGuidedTraining);
 /* -------------------------------
    WebSocket Setup
 ---------------------------------*/
-const wss = new WebSocket.Server({ noServer: true });
-const clients = new Map();
-  
-wss.on('connection', (ws, req) => {
+const wsServer = new WebSocket.Server({ noServer: true });
+wsServer.on('connection', (ws, req) => {
   const userId = req.userId;
   clients.set(userId, ws);
   
@@ -543,117 +547,118 @@ wss.on('connection', (ws, req) => {
     ServiceIntegrator.handleConnectionError(userId, error);
   });
 });
- // Enhanced error handling helper
- function handleError(res, error, message = 'An error occurred') {
-    console.error(`${message}:`, {
-        error: error.message,
-        stack: error.stack,
-        timestamp: new Date().toISOString(),
-        additionalInfo: error.additionalInfo || {}
-    });
-    res.status(500).json({
-        error: message,
-        message: error.message,
-        timestamp: new Date().toISOString()
-    });
+
+// -------------------------------
+// Enhanced error handling helper
+// -------------------------------
+function handleError(res, error, message = 'An error occurred') {
+  console.error(`${message}:`, {
+    error: error.message,
+    stack: error.stack,
+    timestamp: new Date().toISOString(),
+    additionalInfo: error.additionalInfo || {}
+  });
+  res.status(500).json({
+    error: message,
+    message: error.message,
+    timestamp: new Date().toISOString()
+  });
 }
 
-
+// -------------------------------
 // Helper functions for assessment analysis
+// -------------------------------
 function calculateAssessmentScore(responses) {
-    return 85; // Placeholder
+  return 85; // Placeholder
 }
 
 function calculatePhysicalScore(responses) {
-    return 80; // Placeholder
+  return 80; // Placeholder
 }
 
 function calculateMentalScore(responses) {
-    return 85; // Placeholder
+  return 85; // Placeholder
 }
 
 function calculateTechnicalScore(responses) {
-    return 90; // Placeholder
+  return 90; // Placeholder
 }
 
 function generateSuggestedModules(responses) {
-    return ['Advanced Navigation', 'Space Physics', 'EVA Training']; // Placeholder
+  return ['Advanced Navigation', 'Space Physics', 'EVA Training']; // Placeholder
 }
 
 function identifyFocusAreas(responses) {
-    return ['Zero Gravity Adaptation', 'Emergency Procedures']; // Placeholder
+  return ['Zero Gravity Adaptation', 'Emergency Procedures']; // Placeholder
 }
 
 function generateNextSteps(responses) {
-    return ['Complete Basic Training', 'Start Simulator Sessions']; // Placeholder
+  return ['Complete Basic Training', 'Start Simulator Sessions']; // Placeholder
 }
 
 function getAssessmentStatus(score) {
-    if (score >= 90) return 'Excellent';
-    if (score >= 80) return 'Good';
-    if (score >= 70) return 'Satisfactory';
-    return 'Needs Improvement';
+  if (score >= 90) return 'Excellent';
+  if (score >= 80) return 'Good';
+  if (score >= 70) return 'Satisfactory';
+  return 'Needs Improvement';
 }
 
 function calculateCompletionTime(session) {
-    if (!session.assessment.startedAt) {
-        return null;
-    }
-    const start = new Date(session.assessment.startedAt);
-    const end = new Date(session.assessment.completedAt || new Date());
-    return Math.round((end - start) / 1000); // Duration in seconds
+  if (!session.assessment.startedAt) {
+    return null;
+  }
+  const start = new Date(session.assessment.startedAt);
+  const end = new Date(session.assessment.completedAt || new Date());
+  return Math.round((end - start) / 1000);
 }
 
 function identifyStrengths(responses) {
-    return ['Technical Knowledge', 'Problem Solving']; // Placeholder
+  return ['Technical Knowledge', 'Problem Solving']; // Placeholder
 }
 
 function identifyWeaknesses(responses) {
-    return ['Physical Endurance', 'Emergency Response']; // Placeholder
+  return ['Physical Endurance', 'Emergency Response']; // Placeholder
 }
 
 function generateTrainingTimeline(analysis) {
-    return {
-        immediate: 'Begin Basic Training',
-        week1: 'Complete Physical Assessment',
-        month1: 'Start Advanced Modules'
-    };
+  return {
+    immediate: 'Begin Basic Training',
+    week1: 'Complete Physical Assessment',
+    month1: 'Start Advanced Modules'
+  };
 }
 
 function generateCertificateUrl(sessionId) {
-    return `/api/certificates/assessment/${sessionId}`;
+  return `/api/certificates/assessment/${sessionId}`;
 }
 
 async function calculateUserProgress(userId) {
-    // Placeholder implementation
-    return { progress: 50 }; 
+  // Placeholder implementation
+  return { progress: 50 };
 }
 
 /* -------------------------------
    Final Combined Export
 ---------------------------------*/
 module.exports = {
-    router,
-    upgradeConnection: (server) => {
-        server.on('upgrade', async (request, socket, head) => {
-            try {
-                const userId = await authenticateWebSocket(request);
-                if (!userId) {
-                    socket.destroy();
-                    return;
-                }
-                request.userId = userId;
-                wss.handleUpgrade(request, socket, head, (ws) => {
-                    wss.emit('connection', ws, request);
-                });
-            } catch (error) {
-                console.error('WebSocket upgrade error:', error);
-                socket.destroy();
-            }
+  router,
+  upgradeConnection: (server) => {
+    server.on('upgrade', async (request, socket, head) => {
+      try {
+        const userId = await authenticateWebSocket(request);
+        if (!userId) {
+          socket.destroy();
+          return;
+        }
+        request.userId = userId;
+        wsServer.handleUpgrade(request, socket, head, (ws) => {
+          wsServer.emit('connection', ws, request);
         });
-    },
-    wss
-};
-module.exports = {
-    router: router
+      } catch (error) {
+        console.error('WebSocket upgrade error:', error);
+        socket.destroy();
+      }
+    });
+  },
+  wss: wsServer
 };

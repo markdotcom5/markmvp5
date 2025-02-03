@@ -4,30 +4,82 @@ const mongoose = require('mongoose');
 const { authenticate } = require('../middleware/auth');
 const Leaderboard = require('../models/Leaderboard');
 const User = require('../models/User');
+const AISpaceCoach = require('../services/AISpaceCoach');
 
-// State Rankings
+// Main leaderboard page render with AI insights
+router.get('/', authenticate, async (req, res) => {
+    try {
+        const [globalStats, userStats, aiReadiness] = await Promise.all([
+            Leaderboard.aggregate([
+                { $group: {
+                    _id: null,
+                    totalUsers: { $sum: 1 },
+                    totalCredits: { $sum: '$score' },
+                    averageLevel: { $avg: '$level' }
+                }}
+            ]),
+            req.user ? Leaderboard.findOne({ userId: req.user._id }) : null,
+            // Get AI space readiness assessment
+            AISpaceCoach.calculateSpaceReadiness({
+                trainingHistory: req.user?.trainingHistory || [],
+                assessmentScores: req.user?.assessmentScores || []
+            })
+        ]);
+
+        res.render('leaderboard', {
+            title: 'SharedStars Leaderboard',
+            user: req.user,
+            stats: {
+                activeCadets: globalStats[0]?.totalUsers || 0,
+                totalCredits: Math.floor(globalStats[0]?.totalCredits || 0),
+                activeMissions: await User.countDocuments({ 'missions.active': true }),
+                successRate: '94%',
+                spaceReadiness: aiReadiness
+            }
+        });
+
+        // Track user engagement with AI Coach
+        if (req.user) {
+            await AISpaceCoach.trackProgress(req.user._id, {
+                type: 'LEADERBOARD_VIEW',
+                timestamp: new Date()
+            });
+        }
+    } catch (error) {
+        console.error('Error rendering leaderboard:', error);
+        res.status(500).render('error', { error: 'Failed to load leaderboard' });
+    }
+});
+
+// Your existing state rankings with AI insights
 router.get('/state/:stateCode', authenticate, async (req, res) => {
     try {
         const { stateCode } = req.params;
         const page = Math.max(1, parseInt(req.query.page, 10) || 1);
         const limit = Math.min(Math.max(1, parseInt(req.query.limit, 10) || 10), 50);
 
-        // Validate state code
         if (!stateCode || stateCode.length !== 2) {
-            return res.status(400).json({ error: 'Invalid or missing state code. It must be a two-character code.' });
+            return res.status(400).json({ error: 'Invalid state code' });
         }
 
-        // Fetch state rankings
-        const stateRankings = await Leaderboard.find({ 
-            state: stateCode.toUpperCase(),
-            category: 'state',
-        })
-        .sort({ score: -1 })
-        .populate('userId', 'username avatar level')
-        .skip((page - 1) * limit)
-        .limit(limit);
+        const [stateRankings, aiSuggestions] = await Promise.all([
+            Leaderboard.find({ 
+                state: stateCode.toUpperCase(),
+                category: 'state',
+            })
+            .sort({ score: -1 })
+            .populate('userId', 'username avatar level')
+            .skip((page - 1) * limit)
+            .limit(limit),
 
-        // Total count for pagination
+            // Get AI coaching insights for state performance
+            req.user ? AISpaceCoach.generateCoachingSuggestions({
+                userId: req.user._id,
+                stateCode: stateCode,
+                rankingContext: 'state'
+            }) : null
+        ]);
+
         const totalCount = await Leaderboard.countDocuments({ 
             state: stateCode.toUpperCase(), 
             category: 'state' 
@@ -35,52 +87,66 @@ router.get('/state/:stateCode', authenticate, async (req, res) => {
 
         res.json({
             rankings: stateRankings,
+            aiInsights: aiSuggestions,
             pagination: {
                 currentPage: page,
                 totalPages: Math.ceil(totalCount / limit),
                 totalEntries: totalCount,
                 entriesPerPage: limit,
-            },
+            }
         });
     } catch (error) {
-        console.error(`Error fetching state leaderboard for ${stateCode}:`, error.message);
-        res.status(500).json({ error: 'Failed to fetch state leaderboard.' });
+        console.error(`State leaderboard error:`, error);
+        res.status(500).json({ error: 'Failed to fetch state rankings' });
     }
 });
 
-// Local Rankings
+// Your existing local rankings with AI performance analysis
 router.get('/local', authenticate, async (req, res) => {
     try {
         const { latitude, longitude, radius = 50 } = req.query;
 
         if (!latitude || !longitude) {
-            return res.status(400).json({ error: 'Latitude and longitude are required for local rankings.' });
+            return res.status(400).json({ error: 'Location required' });
         }
 
-        const parsedLatitude = parseFloat(latitude);
-        const parsedLongitude = parseFloat(longitude);
+        const parsedLat = parseFloat(latitude);
+        const parsedLng = parseFloat(longitude);
 
-        if (isNaN(parsedLatitude) || isNaN(parsedLongitude)) {
-            return res.status(400).json({ error: 'Invalid latitude or longitude format. Must be valid numbers.' });
+        if (isNaN(parsedLat) || isNaN(parsedLng)) {
+            return res.status(400).json({ error: 'Invalid coordinates' });
         }
 
-        // Find users within the specified radius
-        const users = await User.find({
-            location: {
-                $near: {
-                    $geometry: { type: 'Point', coordinates: [parsedLongitude, parsedLatitude] },
-                    $maxDistance: radius * 1000, // Convert radius to meters
+        const [users, aiAnalysis] = await Promise.all([
+            User.find({
+                location: {
+                    $near: {
+                        $geometry: { 
+                            type: 'Point', 
+                            coordinates: [parsedLng, parsedLat] 
+                        },
+                        $maxDistance: radius * 1000,
+                    },
                 },
-            },
-        }).select('_id');
+            }).select('_id'),
+
+            // Get AI analysis of local competition
+            req.user ? AISpaceCoach.generateCoachingSuggestions({
+                userId: req.user._id,
+                location: { latitude: parsedLat, longitude: parsedLng },
+                rankingContext: 'local'
+            }) : null
+        ]);
 
         if (!users.length) {
-            return res.json({ rankings: [], message: 'No users found within the specified radius.' });
+            return res.json({ 
+                rankings: [], 
+                message: 'No users in range',
+                aiInsights: aiAnalysis
+            });
         }
 
         const userIds = users.map(user => user._id);
-
-        // Fetch leaderboard rankings for local users
         const rankings = await Leaderboard.find({
             userId: { $in: userIds },
             category: 'global',
@@ -89,14 +155,17 @@ router.get('/local', authenticate, async (req, res) => {
         .populate('userId', 'username avatar level')
         .limit(100);
 
-        res.json({ rankings });
+        res.json({ 
+            rankings,
+            aiInsights: aiAnalysis 
+        });
     } catch (error) {
-        console.error('Error fetching local rankings:', error.message);
-        res.status(500).json({ error: 'Failed to fetch local rankings.' });
+        console.error('Local rankings error:', error);
+        res.status(500).json({ error: 'Failed to fetch local rankings' });
     }
 });
 
-// Global Rankings
+// Your existing global rankings with enhanced AI features
 router.get('/global', authenticate, async (req, res) => {
     try {
         const page = Math.max(1, parseInt(req.query.page, 10) || 1);
@@ -105,65 +174,143 @@ router.get('/global', authenticate, async (req, res) => {
         const timeRange = req.query.timeRange || 'allTime';
         const search = req.query.search?.trim();
 
-        // Base query
         let query = { category: filter };
 
-        // Time range filtering
         if (timeRange !== 'allTime') {
-            const ranges = { today: 1, thisWeek: 7, thisMonth: 30 };
+            const ranges = { 
+                today: 1, 
+                thisWeek: 7, 
+                thisMonth: 30 
+            };
             const days = ranges[timeRange] || 0;
             if (days) {
-                query.lastUpdated = { $gte: new Date(Date.now() - days * 24 * 60 * 60 * 1000) };
+                query.lastUpdated = { 
+                    $gte: new Date(Date.now() - days * 24 * 60 * 60 * 1000) 
+                };
             }
         }
 
-        // Search functionality
         if (search) {
-            const userIds = await User.find({ username: { $regex: search, $options: 'i' } }).distinct('_id');
+            const userIds = await User.find({ 
+                username: { $regex: search, $options: 'i' } 
+            }).distinct('_id');
             query.userId = { $in: userIds };
         }
 
-        // Fetch rankings and count documents
-        const [rankings, totalCount] = await Promise.all([
+        const [rankings, totalCount, aiAnalysis] = await Promise.all([
             Leaderboard.aggregate([
                 { $match: query },
                 { $sort: { score: -1 } },
-                { $lookup: { from: 'users', localField: 'userId', foreignField: '_id', as: 'user' } },
+                { $lookup: { 
+                    from: 'users', 
+                    localField: 'userId', 
+                    foreignField: '_id', 
+                    as: 'user' 
+                }},
                 { $unwind: '$user' },
                 { $skip: (page - 1) * limit },
-                { $limit: limit },
+                { $limit: limit }
             ]),
             Leaderboard.countDocuments(query),
+            // Get AI insights on global rankings
+            req.user ? AISpaceCoach.generateCoachingSuggestions({
+                userId: req.user._id,
+                rankingContext: 'global',
+                timeRange: timeRange
+            }) : null
         ]);
+
+        // Track this view with AI coach
+        if (req.user) {
+            await AISpaceCoach.trackProgress(req.user._id, {
+                type: 'GLOBAL_RANKINGS_VIEW',
+                timeRange: timeRange,
+                filter: filter
+            });
+        }
 
         res.json({
             rankings,
+            aiInsights: aiAnalysis,
             pagination: {
                 currentPage: page,
                 totalPages: Math.ceil(totalCount / limit),
                 totalEntries: totalCount,
-                entriesPerPage: limit,
-            },
+                entriesPerPage: limit
+            }
         });
     } catch (error) {
-        console.error(`Error fetching global rankings:`, error.message);
-        res.status(500).json({ error: 'Failed to fetch global rankings.' });
+        console.error('Global rankings error:', error);
+        res.status(500).json({ error: 'Failed to fetch global rankings' });
     }
 });
-// Quick Stats
-router.get('/user-stats', async (req, res) => {
-    try {
-        const stats = {
-            activeUsers: 120,
-            totalCredits: 985432,
-            totalAchievements: 230,
-            averageLevel: 32
-        };
 
-        res.json(stats);
+// Track achievements and progress
+router.post('/track-progress', authenticate, async (req, res) => {
+    try {
+        const progress = await AISpaceCoach.trackProgress(req.user._id, req.body);
+        
+        const [achievements, suggestions] = await Promise.all([
+            AISpaceCoach.checkAchievements(req.user._id),
+            AISpaceCoach.generateCoachingSuggestions({
+                userId: req.user._id,
+                recentProgress: progress
+            })
+        ]);
+
+        res.json({
+            success: true,
+            progress,
+            achievements,
+            suggestions
+        });
     } catch (error) {
-        console.error('Error fetching quick stats:', error.message);
-        res.status(500).json({ error: 'Failed to fetch quick stats' });
+        console.error('Progress tracking error:', error);
+        res.status(500).json({ error: 'Error tracking progress' });
+    }
+});
+
+// Quick Stats with AI insights
+router.get('/stats', authenticate, async (req, res) => {
+    try {
+        const [stats, aiAnalysis] = await Promise.all([
+            Leaderboard.aggregate([
+                {
+                    $group: {
+                        _id: null,
+                        totalUsers: { $sum: 1 },
+                        totalCredits: { $sum: '$score' },
+                        activeUsers: { 
+                            $sum: { 
+                                $cond: [
+                                    { $gt: ['$lastActivity', new Date(Date.now() - 24 * 60 * 60 * 1000)] },
+                                    1,
+                                    0
+                                ]
+                            }
+                        },
+                        averageScore: { $avg: '$score' }
+                    }
+                }
+            ]),
+            req.user ? AISpaceCoach.calculateSpaceReadiness({
+                userId: req.user._id,
+                context: 'stats'
+            }) : null
+        ]);
+
+        res.json({
+            stats: stats[0] || {
+                totalUsers: 0,
+                totalCredits: 0,
+                activeUsers: 0,
+                averageScore: 0
+            },
+            aiInsights: aiAnalysis
+        });
+    } catch (error) {
+        console.error('Stats error:', error);
+        res.status(500).json({ error: 'Failed to fetch stats' });
     }
 });
 

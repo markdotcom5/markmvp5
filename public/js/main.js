@@ -1,12 +1,15 @@
 // In js/main.js
+import '/js/languageSelection.js';
 import { initAPI } from './modules/core/dashboard.js';
 import { initAuth } from './modules/auth/signup.js';
+import '/js/languageSelection.js'; // This will run the language system
 
 document.addEventListener('DOMContentLoaded', () => {
-  initAPI();
+    initAPI();
   initAuth();
   // other initialization code...
 });
+
 // js/main.js
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Initializing UI Handler');
@@ -161,9 +164,12 @@ document.addEventListener('DOMContentLoaded', function() {
         socket.onclose = () => console.warn("⚠️ WebSocket Disconnected!");
     
 
-async beginTrainingJourney() {
-    console.log('🚀 Beginning training journey...');
-    const overlay = document.querySelector('.mode-overlay');
+        async function beginTrainingJourney() {
+            console.log('🚀 Beginning training journey...');
+            const overlay = document.querySelector('.mode-overlay');
+            // ... rest of your code ...
+        }
+        
 
     overlay.innerHTML = `
         <div class="training-interface">
